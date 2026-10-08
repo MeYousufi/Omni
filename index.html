@@ -167,7 +167,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <div id="lockScreen" hidden>
   <h1>OMNI</h1>
   <div class="muted" style="letter-spacing:.1em">SHARE ONLY WHAT YOU CHOOSE</div>
-  <p id="lockMsg" class="muted" style="margin-top:26px">Set a 4-digit PIN</p>
+  <p id="lockMsg" class="muted" style="margin-top:26px">Set a 6-digit PIN</p>
   <div class="dots" id="dots"></div>
   <div class="pinpad" id="pinpad"></div>
   <button class="forgot" id="forgotBtn" hidden>Forgot PIN? Reset everything</button>
@@ -223,7 +223,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     </div>
   </div>
   <p class="muted" id="flipHint" style="text-align:center;font-size:13px;margin:6px 0 0">👆 Tap the card to flip it</p>
-  <div class="muted" style="text-align:center;margin-top:8px">Tap the card to flip it</div>
 
   <div class="picwrap">
     <div id="picShow"></div>
@@ -261,8 +260,9 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <div class="muted">Uncheck anything they should not get.</div>
     <div id="fields"></div>
     <h3 class="sec">Preview</h3>
-    <pre id="preview">Nothing selected.</pre>
+    <pre id="preview" aria-live="polite"></pre>
     <div id="qr"></div>
+    <p class="muted" id="nfcNote" hidden style="text-align:center"></p>
     <button id="shareBtn" style="width:100%;padding:15px;font-size:17px">Share…</button>
     <button id="moreShareBtn" class="gray small" style="width:100%;margin-top:8px" aria-expanded="false">More ways to share ▾</button>
     <div id="moreShare" hidden style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
@@ -414,7 +414,7 @@ function pinMsg(t){$("lockMsg").textContent=t;}
 })();
 async function pinDone(){
   const locked=pinLockedLeft();
-  if(locked>0){pinMsg("Too many tries — wait "+locked+"s");pinBuf="";renderDots();setTimeout(()=>{if(pinLockedLeft()<=0)pinMsg(hasVault()||hasLegacy()?"Enter your PIN":"Set a 4-digit PIN");},locked*1000);return;}
+  if(locked>0){pinMsg("Too many tries — wait "+locked+"s");pinBuf="";renderDots();setTimeout(()=>{if(pinLockedLeft()<=0)pinMsg(hasVault()||hasLegacy()?"Enter your PIN":"Set a 6-digit PIN");},locked*1000);return;}
   const pin=pinBuf;pinBuf="";renderDots();
   try{
     if(!hasVault()&&!hasLegacy()){
@@ -780,6 +780,12 @@ function readFields(){
   ["label","name","org","title","phones","emails","urls","address","notes"].forEach(k=>p[k]=$("f_"+k).value.trim());
   p.color=$("f_color").value;
   if(!p.label)p.label=p.name||"Untitled";
+  // auto-detect primary contact method if not set (for safe share defaults)
+  if(!p.primary){
+    if(lines(p.phones).length)p.primary="phones";
+    else if(lines(p.emails).length)p.primary="emails";
+    else if(lines(p.urls).length)p.primary="urls";
+  }
 }
 $("saveBtn2").onclick=()=>{readFields();saveAll();fillDetail();haptic(10);toast("Saved on this device ✓");};
 $("dupBtn").onclick=()=>{
@@ -864,6 +870,7 @@ function buildShare(){
   if(p.notes)bits.push(`<label class="chk"><input type="checkbox" value="notes"><span>Notes<br><span class="muted">${esc(p.notes.slice(0,40))}</span></span></label>`);
   $("fields").innerHTML=bits.join("");
   document.querySelectorAll("#fields input").forEach(el=>el.onchange=preview);
+  $("qr").style.display="none";$("qr").innerHTML="";$("nfcNote").hidden=true;$("qrDlBtn").hidden=true;
   preview();
 }
 function preview(){
@@ -910,8 +917,17 @@ $("linkBtn").onclick=async()=>{
   $("qrDlBtn").hidden=false;
   // NFC status: browsers can't write NFC tags directly (iOS especially)
   const nfcOK="NDEFReader" in window;
-  if(copied)toast(nfcOK?"Link copied — tap an NFC sticker to write it":"Link copied — iPhone can't write NFC from the browser. Use an NFC writer app, or show the QR below.");
-  else prompt("Copy this OMNI link",url);
+  const nn=$("nfcNote");
+  if(nfcOK){
+    nn.hidden=true;
+    if(copied)toast("Link copied — tap an NFC sticker to write it");
+  }else{
+    // No NFC: jump straight to QR with a clear explanation
+    nn.hidden=false;
+    nn.innerHTML=`📵 This device can't write NFC tags from the browser.<br>Your link is copied — use an NFC writer app, or have them scan the QR code below.`;
+    if(copied)toast("Link copied — QR code ready below");
+  }
+  if(!copied)prompt("Copy this OMNI link",url);
 };
 $("qrDlBtn").onclick=()=>{
   const img=document.querySelector("#qr img"),cv=document.querySelector("#qr canvas");
