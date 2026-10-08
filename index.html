@@ -189,21 +189,40 @@ h3.sec{margin:18px 0 4px;font-size:15px}
   <div class="brand"><h1>Dashboard</h1></div>
   <div class="muted" style="letter-spacing:.08em;font-size:11px">HOW YOUR APP IS DOING</div>
   <div class="box">
-    <div class="statrow"><span>📱 App opens</span><b id="st_opens">0</b></div>
-    <div class="statrow"><span>📇 Cards created</span><b id="st_cards">0</b></div>
-    <div class="statrow"><span>📤 Total shares</span><b id="st_shares">0</b></div>
-    <div class="statrow sub"><span>— via Share</span><b id="st_share">0</b></div>
-    <div class="statrow sub"><span>— via Save .vcf</span><b id="st_vcf">0</b></div>
-    <div class="statrow sub"><span>— via NFC / QR link</span><b id="st_nfc">0</b></div>
+    <h3 class="sec" style="margin-top:0">🌍 All users</h3>
+    <div class="statrow"><span>📱 App opens</span><b id="c_opens">…</b></div>
+    <div class="statrow"><span>📇 Cards created</span><b id="c_cards">…</b></div>
+    <div class="statrow"><span>📤 Total shares</span><b id="c_shares">…</b></div>
+    <div class="statrow sub"><span>— via Share</span><b id="c_share">…</b></div>
+    <div class="statrow sub"><span>— via Save .vcf</span><b id="c_vcf">…</b></div>
+    <div class="statrow sub"><span>— via NFC / QR link</span><b id="c_nfc">…</b></div>
   </div>
-  <p class="muted">Stats are counted on this device. A shared cloud dashboard for all users is coming next.</p>
+  <div class="box">
+    <h3 class="sec" style="margin-top:0">📈 Opens — last 7 days</h3>
+    <div id="dailyBars"></div>
+  </div>
+  <div class="box">
+    <h3 class="sec" style="margin-top:0">📱 This device</h3>
+    <div class="statrow"><span>App opens</span><b id="st_opens">0</b></div>
+    <div class="statrow"><span>Cards created</span><b id="st_cards">0</b></div>
+    <div class="statrow"><span>Total shares</span><b id="st_shares">0</b></div>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 const PUBLIC_URL="https://omni.sara-eventstudio.com/";
+const STATS_URL="https://omni-stats.mny2199wellness.workers.dev";
+const OWNER_KEY="omni-owner-9f3k7x2m";
 const esc=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+
+/* ---------- cloud analytics ---------- */
+function ping(ev){
+  try{
+    fetch(STATS_URL+"/api/ping",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event:ev}),keepalive:true}).catch(()=>{});
+  }catch(e){}
+}
 
 /* ---------- PIN lock ---------- */
 const hashPin=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return h.toString(36);};
@@ -264,19 +283,41 @@ function stat(k){
     s[k]=(s[k]||0)+1;
     localStorage.setItem("omni_stats",JSON.stringify(s));
   }catch(e){}
+  ping(k);
 }
 function getStats(){try{return JSON.parse(localStorage.getItem("omni_stats")||"{}");}catch(e){return{};}}
 
 /* ---------- dashboard ---------- */
-$("dashBtn").onclick=()=>{
+$("dashBtn").onclick=async()=>{
   const s=getStats();
   $("st_opens").textContent=s.opens||0;
   $("st_cards").textContent=s.cards||0;
   $("st_shares").textContent=(s.share||0)+(s.vcf||0)+(s.nfc||0);
-  $("st_share").textContent=s.share||0;
-  $("st_vcf").textContent=s.vcf||0;
-  $("st_nfc").textContent=s.nfc||0;
   $("homeScreen").hidden=true;$("dashScreen").hidden=false;window.scrollTo(0,0);
+  // cloud stats
+  ["c_opens","c_cards","c_shares","c_share","c_vcf","c_nfc"].forEach(id=>$(id).textContent="…");
+  $("dailyBars").innerHTML=`<p class="muted">Loading…</p>`;
+  try{
+    const r=await fetch(STATS_URL+"/api/stats?key="+encodeURIComponent(OWNER_KEY));
+    if(!r.ok)throw 0;
+    const c=await r.json();
+    $("c_opens").textContent=c.opens||0;
+    $("c_cards").textContent=c.cards||0;
+    $("c_shares").textContent=(c.share||0)+(c.vcf||0)+(c.nfc||0);
+    $("c_share").textContent=c.share||0;
+    $("c_vcf").textContent=c.vcf||0;
+    $("c_nfc").textContent=c.nfc||0;
+    const max=Math.max(1,...c.daily.map(d=>d.opens));
+    $("dailyBars").innerHTML=c.daily.map(d=>{
+      const h=Math.round((d.opens/max)*90)+4;
+      const lbl=new Date(d.day+"T12:00:00").toLocaleDateString(undefined,{weekday:"narrow"});
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:30px;height:${h}px;border-radius:6px;background:linear-gradient(180deg,#6ea8ff,#8b5cf6)"></div><span class="muted" style="font-size:11px">${lbl}</span><span style="font-size:12px">${d.opens}</span></div>`;
+    }).join("");
+    $("dailyBars").style.cssText="display:flex;justify-content:space-around;align-items:flex-end;margin-top:8px";
+  }catch(e){
+    $("dailyBars").innerHTML=`<p class="muted">Couldn't reach cloud stats — check your connection.</p>`;
+    ["c_opens","c_cards","c_shares","c_share","c_vcf","c_nfc"].forEach(id=>$(id).textContent="–");
+  }
 };
 $("dashBack").onclick=()=>{$("dashScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
 
