@@ -31,14 +31,17 @@ button:active{transform:scale(.97)}
 button.gray{background:#232838;box-shadow:none;border:1px solid var(--line)}
 button.danger{background:linear-gradient(135deg,#7a2b2e,#5a2326);box-shadow:none}
 button.small{padding:8px 12px;font-size:13px}
-label.chk{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}
+label.chk{display:flex;gap:12px;align-items:center;padding:11px 4px;border-bottom:1px solid var(--line);border-radius:8px}
 label.chk:last-child{border-bottom:0}
+label.chk input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);flex-shrink:0}
+label.chk span{line-height:1.45}
 .muted{color:var(--muted);font-size:13px}
 pre{white-space:pre-wrap;font:inherit;margin:0}
 #qr{background:#fff;padding:10px;border-radius:12px;width:fit-content;margin-top:12px;display:none;box-shadow:0 0 24px rgba(79,140,255,.25)}
 /* lock screen */
 #lockScreen{min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
 #lockScreen[hidden]{display:none}
+#welcomeScreen[hidden]{display:none}
 #lockScreen h1{font-size:46px;letter-spacing:.2em;margin:0 0 8px;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow))}
 .dots{display:flex;gap:14px;margin:22px 0}
 .dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--muted);transition:all .15s}
@@ -87,6 +90,9 @@ h3.sec{margin:18px 0 4px;font-size:15px}
 .rowbtns{display:flex;flex-wrap:wrap;gap:0}
 .colorrow{display:flex;align-items:center;gap:10px;margin-top:8px}
 .colorrow input{width:60px;margin:0}
+.vhint{font-size:12px;color:#e08080;min-height:0;margin:-2px 0 4px}
+.vhint:empty{display:none}
+input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,.12)}
 /* dashboard */
 .statrow{display:flex;justify-content:space-between;align-items:center;padding:12px 4px;border-bottom:1px solid var(--line);font-size:16px}
 .statrow:last-child{border-bottom:0}
@@ -103,6 +109,20 @@ h3.sec{margin:18px 0 4px;font-size:15px}
 </head>
 <body>
 
+<!-- WELCOME (first run) -->
+<div id="welcomeScreen" hidden>
+  <div class="wrap" style="min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+    <h1 style="font-size:46px;letter-spacing:.2em;margin:0 0 8px;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow))">OMNI</h1>
+    <div class="muted" style="letter-spacing:.1em;margin-bottom:24px">SHARE ONLY WHAT YOU CHOOSE</div>
+    <div class="box" style="text-align:left;max-width:340px">
+      <p>📇 <b>Create cards</b> for yourself or your business</p>
+      <p>🔐 <b>Lock them</b> behind your PIN — encrypted on this device</p>
+      <p>👆 <b>Share</b> via tap, QR, or straight to contacts</p>
+    </div>
+    <button id="welcomeGo" style="margin-top:12px;padding:14px 40px;font-size:17px">Get started</button>
+  </div>
+</div>
+
 <!-- LOCK -->
 <div id="lockScreen">
   <h1>OMNI</h1>
@@ -115,22 +135,27 @@ h3.sec{margin:18px 0 4px;font-size:15px}
 
 <!-- HOME -->
 <div class="wrap" id="homeScreen" hidden>
-  <div class="brand"><h1>OMNI</h1><div><button class="iconbtn small" id="dashBtn">📊</button><button class="iconbtn small" id="backupBtn">Backup</button><button class="iconbtn" id="lockBtn">Lock</button></div></div>
+  <div class="brand"><h1>OMNI</h1><div><button class="iconbtn small" id="dashBtn" aria-label="Open dashboard">📊</button><button class="iconbtn small" id="backupBtn" aria-label="Back up cards">Backup</button><button class="iconbtn" id="lockBtn" aria-label="Lock app">Lock</button></div></div>
   <div class="muted" style="letter-spacing:.08em;font-size:11px">SHARE ONLY WHAT YOU CHOOSE</div>
+  <div id="backupNudge" class="box" hidden style="border-color:#7a5a2b;background:linear-gradient(160deg,#1d1812,#14110c)">
+    <span>💾 It's been a while since your last backup.</span><br>
+    <button class="small" id="nudgeBackup" style="margin-top:8px">Back up now</button>
+    <button class="small gray" id="nudgeDismiss">Later</button>
+  </div>
   <div class="searchrow"><input id="searchBox" placeholder="Search cards..."></div>
   <div id="cardGrid" class="grid"></div>
   <div id="emptyMsg" class="empty" hidden>No cards yet.<br>Tap + to create your first.</div>
   <input type="file" id="importInput" accept="application/json" hidden>
-  <button class="fab" id="fabPlus">+</button>
+  <button class="fab" id="fabPlus" aria-label="Create new card">+</button>
 </div>
 
 <!-- DETAIL -->
 <div class="wrap" id="detailScreen" hidden>
-  <div class="backrow"><button class="iconbtn" id="backBtn">← Back</button></div>
+  <div class="backrow"><button class="iconbtn" id="backBtn" aria-label="Back to cards">← Back</button></div>
   <div class="brand"><h1 id="detailTitle">Card</h1></div>
 
   <!-- Showcase flip card -->
-  <div class="flipwrap" id="flipCard">
+  <div class="flipwrap" id="flipCard" role="button" tabindex="0" aria-label="Contact card. Activate to flip.">
     <div class="flipinner" id="flipInner">
       <div class="flipfront" id="flipFront"></div>
       <div class="flipback" id="flipBack"></div>
@@ -150,8 +175,11 @@ h3.sec{margin:18px 0 4px;font-size:15px}
     <input id="f_org" placeholder="Business">
     <input id="f_title" placeholder="Title">
     <textarea id="f_phones" placeholder="Phones, one per line"></textarea>
+    <div class="vhint" id="v_phones"></div>
     <textarea id="f_emails" placeholder="Emails, one per line"></textarea>
+    <div class="vhint" id="v_emails"></div>
     <textarea id="f_urls" placeholder="Websites, one per line"></textarea>
+    <div class="vhint" id="v_urls"></div>
     <div class="colorrow"><span class="muted">Card color</span><input type="color" id="f_color" value="#4f8cff"></div>
     <div class="rowbtns">
       <button id="saveBtn">Save card</button>
@@ -207,6 +235,16 @@ h3.sec{margin:18px 0 4px;font-size:15px}
     <div class="statrow"><span>Cards created</span><b id="st_cards">0</b></div>
     <div class="statrow"><span>Total shares</span><b id="st_shares">0</b></div>
   </div>
+  <div class="box">
+    <h3 class="sec" style="margin-top:0">🔐 Change PIN</h3>
+    <div id="chpinForm" hidden>
+      <input id="chpin1" type="password" inputmode="numeric" maxlength="4" placeholder="New 4-digit PIN" aria-label="New PIN">
+      <input id="chpin2" type="password" inputmode="numeric" maxlength="4" placeholder="Confirm new PIN" aria-label="Confirm new PIN">
+      <div><button class="small" id="chpinSave">Save new PIN</button><button class="small gray" id="chpinCancel">Cancel</button></div>
+      <p class="muted" id="chpinMsg"></p>
+    </div>
+    <button class="small gray" id="chpinBtn">Change PIN</button>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -224,6 +262,46 @@ function ping(ev){
   }catch(e){}
 }
 
+/* ---------- encrypted vault (AES-GCM, PIN-derived key) ---------- */
+let sessionPin=null; // PIN kept in memory only, never in storage
+const te=new TextEncoder(), td=new TextDecoder();
+const b64=a=>btoa(String.fromCharCode(...new Uint8Array(a)));
+const ub64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function deriveKey(pin,salt){
+  const km=await crypto.subtle.importKey("raw",te.encode("OMNI:"+pin),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:120000,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
+}
+async function vaultEncrypt(pin,obj){
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await deriveKey(pin,salt);
+  const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,te.encode(JSON.stringify(obj)));
+  localStorage.setItem("omni_vault",b64(salt)+"."+b64(iv)+"."+b64(ct));
+}
+async function vaultDecrypt(pin){
+  const parts=(localStorage.getItem("omni_vault")||"").split(".");
+  if(parts.length!==3)throw new Error("no vault");
+  const key=await deriveKey(pin,ub64(parts[0]));
+  const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:ub64(parts[1])},key,ub64(parts[2]));
+  return JSON.parse(td.decode(pt));
+}
+const hasVault=()=>!!localStorage.getItem("omni_vault");
+const hasLegacy=()=>!!localStorage.getItem("omni_profiles");
+
+/* ---------- PIN lockout ---------- */
+function pinFailState(){try{return JSON.parse(localStorage.getItem("omni_pinfail")||'{"n":0,"lockUntil":0}');}catch(e){return{n:0,lockUntil:0};}}
+function pinFailRecord(){
+  const f=pinFailState();f.n++;
+  if(f.n>=5){f.lockUntil=Date.now()+30000;f.n=0;}
+  localStorage.setItem("omni_pinfail",JSON.stringify(f));
+  return f;
+}
+function pinFailReset(){localStorage.removeItem("omni_pinfail");}
+function pinLockedLeft(){
+  const f=pinFailState();
+  return f.lockUntil>Date.now()?Math.ceil((f.lockUntil-Date.now())/1000):0;
+}
+
 /* ---------- PIN lock ---------- */
 const hashPin=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return h.toString(36);};
 let pinBuf="",pinTmp=null;
@@ -234,6 +312,7 @@ function pinMsg(t){$("lockMsg").textContent=t;}
   keys.forEach(k=>{
     const b=document.createElement("button");b.textContent=k;
     if(!k)b.style.visibility="hidden";
+    else b.setAttribute("aria-label",k==="⌫"?"Delete digit":"Digit "+k);
     b.onclick=()=>{
       if(k==="⌫"){pinBuf=pinBuf.slice(0,-1);renderDots();return;}
       if(pinBuf.length>=4)return;
@@ -243,16 +322,36 @@ function pinMsg(t){$("lockMsg").textContent=t;}
     $("pinpad").appendChild(b);
   });
 })();
-function pinDone(){
-  const stored=localStorage.getItem("omni_pin");
-  const h=hashPin(pinBuf);
-  if(!stored){
-    if(pinTmp===null){pinTmp=h;pinBuf="";renderDots();pinMsg("Confirm your PIN");}
-    else if(pinTmp===h){localStorage.setItem("omni_pin",h);unlock();}
-    else{pinTmp=null;pinBuf="";renderDots();pinMsg("Didn't match — try again");}
-  }else{
-    if(h===stored)unlock();
-    else{pinBuf="";renderDots();pinMsg("Wrong PIN — try again");}
+async function pinDone(){
+  const locked=pinLockedLeft();
+  if(locked>0){pinMsg("Too many tries — wait "+locked+"s");pinBuf="";renderDots();setTimeout(()=>{if(pinLockedLeft()<=0)pinMsg(hasVault()||hasLegacy()?"Enter your PIN":"Set a 4-digit PIN");},locked*1000);return;}
+  const pin=pinBuf;pinBuf="";renderDots();
+  try{
+    if(!hasVault()&&!hasLegacy()){
+      // first-time setup
+      if(pinTmp===null){pinTmp=pin;pinMsg("Confirm your PIN");return;}
+      if(pinTmp!==pin){pinTmp=null;pinMsg("Didn't match — try again");return;}
+      profiles=[];sessionPin=pin;
+      await vaultEncrypt(pin,profiles);
+      pinFailReset();unlock();return;
+    }
+    if(hasVault()){
+      profiles=await vaultDecrypt(pin);
+      sessionPin=pin;pinFailReset();unlock();return;
+    }
+    // legacy plaintext migration: verify against old hash, then encrypt
+    const stored=localStorage.getItem("omni_pin");
+    if(stored&&hashPin(pin)===stored){
+      profiles=JSON.parse(localStorage.getItem("omni_profiles")||"[]");
+      sessionPin=pin;
+      await vaultEncrypt(pin,profiles);
+      localStorage.removeItem("omni_profiles");localStorage.removeItem("omni_pin");
+      pinFailReset();unlock();return;
+    }
+    throw new Error("bad pin");
+  }catch(e){
+    const f=pinFailRecord();
+    pinMsg(f.lockUntil>Date.now()?"Too many tries — wait 30s":"Wrong PIN — try again");
   }
 }
 function unlock(){
@@ -261,18 +360,25 @@ function unlock(){
   stat("opens");
   renderCards();
 }
+$("welcomeGo").onclick=()=>{
+  localStorage.setItem("omni_welcomed","1");
+  $("welcomeScreen").hidden=true;$("lockScreen").hidden=false;
+  pinMsg("Set a 4-digit PIN");
+};
 function doLock(){
-  pinBuf="";pinTmp=null;renderDots();
-  const has=!!localStorage.getItem("omni_pin");
+  pinBuf="";pinTmp=null;sessionPin=null;profiles=[];curId=null;renderDots();
+  const has=hasVault()||hasLegacy();
   pinMsg(has?"Enter your PIN":"Set a 4-digit PIN");
   $("forgotBtn").hidden=!has;
-  $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("lockScreen").hidden=false;
+  const locked=pinLockedLeft();
+  if(locked>0)pinMsg("Too many tries — wait "+locked+"s");
+  $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("welcomeScreen").hidden=true;$("lockScreen").hidden=false;
 }
 $("lockBtn").onclick=doLock;
 $("forgotBtn").onclick=()=>{
   if(confirm("Forgot your PIN? This erases ALL cards and lets you set a new PIN. This cannot be undone.")){
-    localStorage.removeItem("omni_pin");localStorage.removeItem("omni_profiles");
-    profiles=[];pinTmp=null;pinBuf="";renderDots();doLock();
+    localStorage.removeItem("omni_vault");localStorage.removeItem("omni_profiles");localStorage.removeItem("omni_pin");
+    profiles=[];sessionPin=null;pinTmp=null;pinBuf="";renderDots();doLock();
   }
 };
 
@@ -321,6 +427,21 @@ $("dashBtn").onclick=async()=>{
 };
 $("dashBack").onclick=()=>{$("dashScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
 
+/* change PIN */
+$("chpinBtn").onclick=()=>{$("chpinForm").hidden=false;$("chpinBtn").hidden=true;$("chpin1").value="";$("chpin2").value="";$("chpinMsg").textContent="";};
+$("chpinCancel").onclick=()=>{$("chpinForm").hidden=true;$("chpinBtn").hidden=false;};
+$("chpinSave").onclick=async()=>{
+  const a=$("chpin1").value.trim(),b=$("chpin2").value.trim();
+  if(!/^\d{4}$/.test(a)){$("chpinMsg").textContent="PIN must be 4 digits.";return;}
+  if(a!==b){$("chpinMsg").textContent="PINs don't match.";return;}
+  if(!sessionPin){$("chpinMsg").textContent="Session expired — lock and unlock first.";return;}
+  sessionPin=a;
+  await vaultEncrypt(a,profiles);
+  $("chpinMsg").textContent="PIN changed ✓";
+  $("chpin1").value="";$("chpin2").value="";
+  setTimeout(()=>{$("chpinForm").hidden=true;$("chpinBtn").hidden=false;},1200);
+};
+
 /* ---------- picture reposition ---------- */
 let reposDrag=null;
 $("reposBtn").onclick=()=>{
@@ -351,10 +472,28 @@ $("reposDone").onclick=()=>{
 };
 $("reposCancel").onclick=()=>{$("reposOverlay").hidden=true;};
 
+/* ---------- inline validation ---------- */
+function validateFields(){
+  const emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const badE=lines($("f_emails").value).filter(e=>!emailRe.test(e));
+  const badP=lines($("f_phones").value).filter(p=>(p.replace(/\D/g,"").length)<7);
+  const badU=lines($("f_urls").value).filter(u=>!/^([\w-]+\.)+[a-z]{2,}(\/\S*)?$/i.test(u.replace(/^https?:\/\//i,"")));
+  const set=(id,hint,bad,msg)=>{
+    $(id).textContent=bad.length?msg:"";
+    $(id.replace("v_","f_")).classList.toggle("bad",bad.length>0);
+  };
+  set("v_emails",0,badE,badE.length?"Check: "+badE.slice(0,2).join(", "):"");
+  set("v_phones",0,badP,badP.length?"Phone looks short: "+badP.slice(0,2).join(", "):"");
+  set("v_urls",0,badU,badU.length?"Check: "+badU.slice(0,2).join(", "):"");
+}
+["f_emails","f_phones","f_urls"].forEach(id=>$(id).addEventListener("input",validateFields));
+
 /* ---------- profiles ---------- */
-let profiles=JSON.parse(localStorage.getItem("omni_profiles")||"[]");
+let profiles=[];
 let curId=null, searchQ="";
-const saveAll=()=>localStorage.setItem("omni_profiles",JSON.stringify(profiles));
+async function saveAll(){
+  if(sessionPin)await vaultEncrypt(sessionPin,profiles);
+}
 const lines=s=>(s||"").split("\n").map(x=>x.trim()).filter(Boolean);
 const getP=()=>profiles.find(p=>p.id===curId);
 const initials=n=>(n||"?").trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
@@ -364,8 +503,13 @@ function renderCards(){
   const q=searchQ.toLowerCase();
   const list=profiles.filter(p=>!q||(p.label+" "+p.name+" "+p.org).toLowerCase().includes(q));
   $("emptyMsg").hidden=list.length>0;
+  // backup nudge: show if cards exist and no backup in 30 days
+  const lastB=parseInt(localStorage.getItem("omni_last_backup")||"0");
+  $("backupNudge").hidden=!(profiles.length>0&&(Date.now()-lastB)>30*86400000);
   list.forEach(p=>{
     const d=document.createElement("div");d.className="pcard";
+    d.setAttribute("role","button");d.setAttribute("tabindex","0");
+    d.setAttribute("aria-label","Open card "+(p.label||"Untitled"));
     const pos=p.picPos||"50% 50%";
     d.innerHTML=(p.pic?`<img src="${p.pic}" style="object-position:${pos}" alt="">`:`<div class="initials">${initials(p.name||p.label)}</div>`)+
       `<div style="height:3px;background:linear-gradient(90deg,${p.color||"#4f8cff"},#8b5cf6)"></div>`+
@@ -374,6 +518,8 @@ function renderCards(){
     g.appendChild(d);
   });
 }
+$("nudgeBackup").onclick=()=>{$("backupBtn").click();};
+$("nudgeDismiss").onclick=()=>{$("backupNudge").hidden=true;};
 $("searchBox").oninput=e=>{searchQ=e.target.value;renderCards();};
 
 $("fabPlus").onclick=()=>{
@@ -388,6 +534,7 @@ function openDetail(id){
 $("backBtn").onclick=()=>{$("detailScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
 
 $("flipCard").onclick=()=>$("flipCard").classList.toggle("flipped");
+$("flipCard").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("flipCard").classList.toggle("flipped");}};
 function renderFlip(){
   const p=getP();if(!p)return;
   $("flipCard").classList.remove("flipped");
@@ -397,7 +544,7 @@ function renderFlip(){
     `<h2>${esc(p.label||"OMNI")}</h2><div class="fsub">DIGITAL SECURITY CARD</div>`+
     `<div class="ftag">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div>`;
   let back="";
-  if(p.org||p.title)back+=`<div class="flabel">${esc(p.org||"")}${p.org&&p.title?" · ":""}${esc(p.title||"")}</div>`;
+  if(p.title)back+=`<div class="flabel">${esc(p.title)}</div>`;
   lines(p.phones).forEach(v=>back+=`<a href="tel:${esc(v.replace(/\s/g,""))}">📞 ${esc(v)}</a>`);
   lines(p.emails).forEach(v=>back+=`<a href="mailto:${esc(v)}">✉️ ${esc(v)}</a>`);
   lines(p.urls).forEach(v=>{const u=/^https?:/i.test(v)?v:"https://"+v;back+=`<a href="${esc(u)}" target="_blank" rel="noopener">🌐 ${esc(v)}</a>`;});
@@ -457,7 +604,8 @@ $("delBtn").onclick=()=>{
 
 /* ---------- backup ---------- */
 $("backupBtn").onclick=()=>{
-  const data=JSON.stringify({v:1,pin:localStorage.getItem("omni_pin"),profiles});
+  const data=JSON.stringify({v:2,exported:new Date().toISOString(),profiles});
+  localStorage.setItem("omni_last_backup",Date.now().toString());
   const a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));
   a.download="omni-backup.json";document.body.appendChild(a);a.click();
@@ -539,7 +687,15 @@ $("shareBtn").onclick=async()=>{
 };
 $("linkBtn").onclick=async()=>{
   stat("nfc");
-  const url=PUBLIC_URL+"#c="+btoa(unescape(encodeURIComponent(JSON.stringify(chosen()))));
+  const data=chosen();
+  let url=null;
+  // Try short cloud link first (fits on any NFC sticker)
+  try{
+    const r=await fetch(STATS_URL+"/api/card",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({d:data})});
+    if(r.ok){const j=await r.json();if(j.id)url=PUBLIC_URL+"#s="+j.id;}
+  }catch(e){}
+  // Fallback: full data in URL (works offline, but long)
+  if(!url)url=PUBLIC_URL+"#c="+btoa(unescape(encodeURIComponent(JSON.stringify(data))));
   let copied=false;
   try{await navigator.clipboard.writeText(url);copied=true;}catch(e){}
   $("qr").style.display="block";$("qr").innerHTML="";
@@ -557,19 +713,43 @@ $("qrDlBtn").onclick=()=>{
   document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),800);
 };
 
-/* ---------- recipient view (#c= hash) ---------- */
-function renderRecipient(){
+/* ---------- recipient view (#s= short link or #c= full data) ---------- */
+function showContact(d){
+  const href=URL.createObjectURL(new Blob([vcard(d)],{type:"text/vcard"}));
+  document.body.innerHTML=`<div style="max-width:480px;margin:0 auto;padding:22px 16px;font-family:-apple-system,sans-serif;background:#090a0d;color:#f5f6f8;min-height:100vh"><h1 style="letter-spacing:.14em;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">OMNI</h1><div style="background:#14161c;border:1px solid #262a33;border-radius:18px;padding:16px"><h2 style="margin:0 0 8px">${esc(d.name||"Contact")}</h2><pre style="white-space:pre-wrap;font:inherit;margin:0">${esc([d.title,d.org,...(d.phones||[]),...(d.emails||[]),...(d.urls||[])].filter(Boolean).join("\n"))}</pre><p><a href="${href}" download="OMNI.vcf" style="color:#9ec1ff">Save to Contacts</a></p></div><p style="text-align:center;margin-top:24px"><a href="${PUBLIC_URL}" style="color:#9aa1ad">Get your own OMNI card →</a></p></div>`;
+}
+async function renderRecipient(){
+  if(location.hash.startsWith("#s=")){
+    const id=location.hash.slice(3).replace(/[^A-Za-z0-9]/g,"").slice(0,16);
+    document.body.innerHTML=`<div style="max-width:480px;margin:0 auto;padding:60px 16px;font-family:-apple-system,sans-serif;background:#090a0d;color:#9aa1ad;min-height:100vh;text-align:center">Loading contact…</div>`;
+    try{
+      const r=await fetch(STATS_URL+"/api/card/"+id);
+      if(!r.ok)throw 0;
+      showContact(await r.json());
+    }catch(e){
+      document.body.innerHTML=`<div style="max-width:480px;margin:0 auto;padding:60px 16px;font-family:-apple-system,sans-serif;background:#090a0d;color:#f5f6f8;min-height:100vh;text-align:center"><h1>OMNI</h1><p class="muted">This link didn't work — it may have expired.</p></div>`;
+    }
+    return;
+  }
   if(!location.hash.startsWith("#c="))return;
   try{
     const d=JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(3)))));
-    const href=URL.createObjectURL(new Blob([vcard(d)],{type:"text/vcard"}));
-    document.body.innerHTML=`<div style="max-width:480px;margin:0 auto;padding:22px 16px;font-family:-apple-system,sans-serif;background:#090a0d;color:#f5f6f8;min-height:100vh"><h1 style="letter-spacing:.14em">OMNI</h1><div style="background:#14161c;border:1px solid #262a33;border-radius:18px;padding:16px"><h2 style="margin:0 0 8px">${esc(d.name||"Contact")}</h2><pre style="white-space:pre-wrap;font:inherit;margin:0">${esc([d.title,d.org,...(d.phones||[]),...(d.emails||[]),...(d.urls||[])].filter(Boolean).join("\n"))}</pre><p><a href="${href}" download="OMNI.vcf" style="color:#9ec1ff">Save to Contacts</a></p></div></div>`;
+    showContact(d);
   }catch(e){}
 }
 renderRecipient();
 window.addEventListener("hashchange",renderRecipient);
-if(localStorage.getItem("omni_pin"))pinMsg("Enter your PIN");
-$("forgotBtn").hidden=!localStorage.getItem("omni_pin");
+/* init */
+(function init(){
+  const welcomed=localStorage.getItem("omni_welcomed");
+  const has=hasVault()||hasLegacy();
+  if(!welcomed&&!has){
+    $("welcomeScreen").hidden=false;
+  }else{
+    if(has)pinMsg("Enter your PIN");
+    $("forgotBtn").hidden=!has;
+  }
+})();
 
 /* ---------- PWA ---------- */
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}
