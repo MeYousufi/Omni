@@ -1,1 +1,19 @@
-Y29uc3QgVj0ib21uaS12NSI7CnNlbGYuYWRkRXZlbnRMaXN0ZW5lcigiaW5zdGFsbCIsZT0+e3NlbGYuc2tpcFdhaXRpbmcoKTt9KTsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJhY3RpdmF0ZSIsZT0+ewogIGUud2FpdFVudGlsKGNhY2hlcy5rZXlzKCkudGhlbihrcz0+UHJvbWlzZS5hbGwoa3MuZmlsdGVyKGs9PmshPT1WKS5tYXAoaz0+Y2FjaGVzLmRlbGV0ZShrKSkpKS50aGVuKCgpPT5zZWxmLmNsaWVudHMuY2xhaW0oKSkpOwp9KTsKc2VsZi5hZGRFdmVudExpc3RlbmVyKCJmZXRjaCIsZT0+ewogIGNvbnN0IHU9bmV3IFVSTChlLnJlcXVlc3QudXJsKTsKICAvLyBIVE1MIHBhZ2VzOiBuZXR3b3JrIGZpcnN0LCBieXBhc3MgSFRUUCBjYWNoZSBzbyB1cGRhdGVzIGFsd2F5cyBjb21lIHRocm91Z2gKICBpZihlLnJlcXVlc3QubW9kZT09PSJuYXZpZ2F0ZSJ8fHUucGF0aG5hbWUuZW5kc1dpdGgoIi5odG1sIil8fHUucGF0aG5hbWU9PT0iLyJ8fCF1LnBhdGhuYW1lLmluY2x1ZGVzKCIuIikpewogICAgZS5yZXNwb25kV2l0aChmZXRjaChuZXcgUmVxdWVzdChlLnJlcXVlc3Qse2NhY2hlOiJyZWxvYWQifSkpLnRoZW4ocj0+ewogICAgICBjb25zdCBjPXIuY2xvbmUoKTtjYWNoZXMub3BlbihWKS50aGVuKGNhY2hlPT5jYWNoZS5wdXQoZS5yZXF1ZXN0LGMpKTtyZXR1cm4gcjsKICAgIH0pLmNhdGNoKCgpPT5jYWNoZXMubWF0Y2goZS5yZXF1ZXN0KSkpOwogICAgcmV0dXJuOwogIH0KICAvLyBldmVyeXRoaW5nIGVsc2U6IGNhY2hlIGZpcnN0CiAgZS5yZXNwb25kV2l0aChjYWNoZXMubWF0Y2goZS5yZXF1ZXN0KS50aGVuKGhpdD0+aGl0fHxmZXRjaChlLnJlcXVlc3QpLnRoZW4ocj0+ewogICAgY29uc3QgYz1yLmNsb25lKCk7Y2FjaGVzLm9wZW4oVikudGhlbihjYWNoZT0+Y2FjaGUucHV0KGUucmVxdWVzdCxjKSk7cmV0dXJuIHI7CiAgfSkpKTsKfSk7Cg==
+const V="omni-v6";
+self.addEventListener("install",e=>{self.skipWaiting();});
+self.addEventListener("activate",e=>{
+  e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
+});
+self.addEventListener("fetch",e=>{
+  const u=new URL(e.request.url);
+  // HTML pages: network first, bypass HTTP cache so updates always come through
+  if(e.request.mode==="navigate"||u.pathname.endsWith(".html")||u.pathname==="/"||!u.pathname.includes(".")){
+    e.respondWith(fetch(new Request(e.request,{cache:"reload"})).then(r=>{
+      const c=r.clone();caches.open(V).then(cache=>cache.put(e.request,c));return r;
+    }).catch(()=>caches.match(e.request)));
+    return;
+  }
+  // everything else: cache first
+  e.respondWith(caches.match(e.request).then(hit=>hit||fetch(e.request).then(r=>{
+    const c=r.clone();caches.open(V).then(cache=>cache.put(e.request,c));return r;
+  })));
+});
