@@ -10,139 +10,294 @@
 :root{--bg:#090a0d;--card:#14161c;--line:#262a33;--text:#f5f6f8;--muted:#9aa1ad;--accent:#4f8cff}
 *{box-sizing:border-box}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
-.wrap{max-width:480px;margin:0 auto;padding:22px 16px 48px}
-.brand{display:flex;align-items:baseline;justify-content:space-between}
-.brand h1{margin:0;font-size:28px;letter-spacing:.14em;font-weight:700}
-.brand span{color:var(--muted);font-size:12px;letter-spacing:.08em}
+.wrap{max-width:480px;margin:0 auto;padding:22px 16px 96px}
+.brand{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.brand h1{margin:0;font-size:24px;letter-spacing:.14em;font-weight:700}
+.brand span{color:var(--muted);font-size:11px;letter-spacing:.08em}
+.iconbtn{background:#2a2f3a;border:0;border-radius:10px;color:var(--text);padding:8px 12px;font-size:14px;margin:0}
 select,input,textarea{width:100%;margin:6px 0;padding:12px;border-radius:12px;border:1px solid var(--line);background:#101218;color:var(--text);font:inherit}
-textarea{min-height:68px}
+textarea{min-height:56px}
 .box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin:14px 0}
-button{border:0;border-radius:12px;padding:12px 14px;background:var(--accent);color:#fff;font-weight:650;margin:6px 6px 0 0}
+button{border:0;border-radius:12px;padding:12px 14px;background:var(--accent);color:#fff;font-weight:650;margin:6px 6px 0 0;font:inherit}
 button.gray{background:#2a2f3a}
-label{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}
-label:last-child{border-bottom:0}
+button.danger{background:#5a2326}
+label.chk{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}
+label.chk:last-child{border-bottom:0}
 .muted{color:var(--muted);font-size:13px}
 pre{white-space:pre-wrap;font:inherit;margin:0}
 #qr{background:#fff;padding:10px;border-radius:12px;width:fit-content;margin-top:12px;display:none}
+/* lock screen */
+#lockScreen{min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
+#lockScreen h1{font-size:42px;letter-spacing:.2em;margin:0 0 8px}
+.dots{display:flex;gap:14px;margin:22px 0}
+.dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--muted)}
+.dot.on{background:var(--accent);border-color:var(--accent)}
+.pinpad{display:grid;grid-template-columns:repeat(3,84px);gap:12px;justify-content:center}
+.pinpad button{width:84px;height:84px;border-radius:50%;font-size:26px;background:#1a1e26;color:var(--text);margin:0;padding:0}
+.pinpad button:active{background:#2a2f3a}
+/* cards */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;text-align:center;padding:0 0 12px;cursor:pointer}
+.pcard img{width:100%;height:120px;object-fit:cover;display:block;background:#1a1e26}
+.pcard .initials{width:100%;height:120px;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:700;color:var(--muted);background:#1a1e26}
+.pcard .plabel{font-weight:700;margin-top:10px;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard .pname{color:var(--muted);font-size:13px;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.empty{color:var(--muted);text-align:center;margin:60px 0}
+.fab{position:fixed;bottom:24px;right:24px;width:64px;height:64px;border-radius:50%;font-size:32px;line-height:1;background:var(--accent);color:#fff;margin:0;padding:0;box-shadow:0 4px 16px rgba(0,0,0,.5)}
+/* detail */
+.backrow{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.picwrap{text-align:center;margin:8px 0}
+.picwrap img{width:110px;height:110px;border-radius:50%;object-fit:cover;border:2px solid var(--line);background:#1a1e26}
+.picwrap .ph{width:110px;height:110px;border-radius:50%;background:#1a1e26;display:inline-flex;align-items:center;justify-content:center;font-size:38px;color:var(--muted);border:2px dashed var(--line)}
+.picwrap .chg{display:block;margin:8px auto 0;background:#2a2f3a;font-size:13px;padding:8px 14px}
+h3.sec{margin:18px 0 4px;font-size:15px}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="brand"><h1>OMNI</h1><span>SHARE ONLY WHAT YOU CHOOSE</span></div>
-  <div class="box">
-    <select id="pick"></select>
-    <button id="add" class="gray">New profile</button>
+
+<!-- LOCK -->
+<div id="lockScreen">
+  <h1>OMNI</h1>
+  <div class="muted" style="letter-spacing:.1em">SHARE ONLY WHAT YOU CHOOSE</div>
+  <p id="lockMsg" class="muted" style="margin-top:26px">Set a 4-digit PIN</p>
+  <div class="dots" id="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  <div class="pinpad" id="pinpad"></div>
+</div>
+
+<!-- HOME -->
+<div class="wrap" id="homeScreen" hidden>
+  <div class="brand"><h1>OMNI</h1><button class="iconbtn" id="lockBtn">Lock</button></div>
+  <div class="muted" style="letter-spacing:.08em;font-size:11px">SHARE ONLY WHAT YOU CHOOSE</div>
+  <div id="cardGrid" class="grid"></div>
+  <div id="emptyMsg" class="empty" hidden>No cards yet.<br>Tap + to create your first.</div>
+  <button class="fab" id="fabPlus">+</button>
+</div>
+
+<!-- DETAIL -->
+<div class="wrap" id="detailScreen" hidden>
+  <div class="backrow"><button class="iconbtn" id="backBtn">← Back</button></div>
+  <div class="brand"><h1 id="detailTitle">Card</h1></div>
+  <div class="picwrap">
+    <div id="picShow"></div>
+    <input type="file" id="picInput" accept="image/*" hidden>
+    <button class="chg" id="picBtn">Choose picture</button>
   </div>
   <div class="box">
-    <input id="label" placeholder="Profile name, e.g. Studio">
-    <input id="name" placeholder="Name">
-    <input id="org" placeholder="Business">
-    <input id="title" placeholder="Title">
-    <textarea id="phones" placeholder="Phones, one per line"></textarea>
-    <textarea id="emails" placeholder="Emails, one per line"></textarea>
-    <textarea id="urls" placeholder="Websites, one per line"></textarea>
-    <button id="save">Save profile</button>
-    <button id="del" class="gray">Delete</button>
+    <input id="f_label" placeholder="Card name, e.g. Studio">
+    <input id="f_name" placeholder="Name">
+    <input id="f_org" placeholder="Business">
+    <input id="f_title" placeholder="Title">
+    <textarea id="f_phones" placeholder="Phones, one per line"></textarea>
+    <textarea id="f_emails" placeholder="Emails, one per line"></textarea>
+    <textarea id="f_urls" placeholder="Websites, one per line"></textarea>
+    <button id="saveBtn">Save card</button>
+    <button id="delBtn" class="danger">Delete</button>
   </div>
-  <div class="box">
-    <b>Send this person</b>
+  <div class="box" id="shareBox" hidden>
+    <h3 class="sec" style="margin-top:0">Share this card</h3>
     <div class="muted">Uncheck anything they should not get.</div>
     <div id="fields"></div>
-  </div>
-  <div class="box">
+    <h3 class="sec">Preview</h3>
     <pre id="preview">Nothing selected.</pre>
     <div id="qr"></div>
     <div>
-      <button id="share">Share</button>
-      <button id="vcf" class="gray">Save .vcf</button>
-      <button id="link" class="gray">NFC / QR link</button>
+      <button id="shareBtn">Share</button>
+      <button id="vcfBtn" class="gray">Save .vcf</button>
+      <button id="linkBtn" class="gray">NFC / QR link</button>
     </div>
-    <p class="muted">Share uses AirDrop, Messages, and Mail. NFC / QR link is what you write onto a tap sticker. For the iPhone “phones are close” prompt, keep your main contact in Contacts and leave NameDrop on.</p>
+    <p class="muted">Share uses AirDrop, Messages, and Mail. NFC / QR link is what you write onto a tap sticker.</p>
   </div>
 </div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 const $=id=>document.getElementById(id);
-let profiles=JSON.parse(localStorage.getItem("omni")||"[]"), cur=0;
-const blank=()=>({label:"New profile",name:"",org:"",title:"",phones:"",emails:"",urls:""});
-if(!profiles.length) profiles=[blank()];
-const saveAll=()=>localStorage.setItem("omni",JSON.stringify(profiles));
-const lines=s=>(s||"").split("\n").map(x=>x.trim()).filter(Boolean);
-function fill(){
-  const p=profiles[cur];
-  ["label","name","org","title","phones","emails","urls"].forEach(k=>$(k).value=p[k]||"");
-  $("pick").innerHTML=profiles.map((p,i)=>`<option value="${i}" ${i==cur?"selected":""}>${p.label||"Untitled"}</option>`).join("");
-  const bits=[];
-  if(p.org) bits.push(`<label><input type="checkbox" value="org" checked><span>Business<br><span class="muted">${p.org}</span></span></label>`);
-  if(p.title) bits.push(`<label><input type="checkbox" value="title" checked><span>Title<br><span class="muted">${p.title}</span></span></label>`);
-  lines(p.phones).forEach((v,i)=>bits.push(`<label><input type="checkbox" value="phone:${i}" checked><span>Phone<br><span class="muted">${v}</span></span></label>`));
-  lines(p.emails).forEach((v,i)=>bits.push(`<label><input type="checkbox" value="email:${i}" checked><span>Email<br><span class="muted">${v}</span></span></label>`));
-  lines(p.urls).forEach((v,i)=>bits.push(`<label><input type="checkbox" value="url:${i}" checked><span>Website<br><span class="muted">${v}</span></span></label>`));
-  $("fields").innerHTML=bits.join("")||`<div class="muted">Add details, then save.</div>`;
-  document.querySelectorAll("#fields input").forEach(el=>el.onchange=preview);
-  preview();
+const PUBLIC_URL="https://meyousufi.github.io/Omni/";
+
+/* ---------- PIN lock ---------- */
+const hashPin=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return h.toString(36);};
+let pinBuf="",pinTmp=null;
+function renderDots(){[...$("dots").children].forEach((d,i)=>d.classList.toggle("on",i<pinBuf.length));}
+function pinMsg(t){$("lockMsg").textContent=t;}
+(function buildPad(){
+  const keys=["1","2","3","4","5","6","7","8","9","","0","⌫"];
+  keys.forEach(k=>{
+    const b=document.createElement("button");b.textContent=k;
+    if(!k)b.style.visibility="hidden";
+    b.onclick=()=>{
+      if(k==="⌫"){pinBuf=pinBuf.slice(0,-1);renderDots();return;}
+      if(pinBuf.length>=4)return;
+      pinBuf+=k;renderDots();
+      if(pinBuf.length===4)setTimeout(pinDone,160);
+    };
+    $("pinpad").appendChild(b);
+  });
+})();
+function pinDone(){
+  const stored=localStorage.getItem("omni_pin");
+  const h=hashPin(pinBuf);
+  if(!stored){
+    if(pinTmp===null){pinTmp=h;pinBuf="";renderDots();pinMsg("Confirm your PIN");}
+    else if(pinTmp===h){localStorage.setItem("omni_pin",h);unlock();}
+    else{pinTmp=null;pinBuf="";renderDots();pinMsg("Didn't match — try again");}
+  }else{
+    if(h===stored)unlock();
+    else{pinBuf="";renderDots();pinMsg("Wrong PIN — try again");}
+  }
+  if(stored||pinTmp!==h&&pinTmp!==null){/* noop */}
+  if(!stored&&pinTmp===null&&pinBuf===""){}
 }
+function unlock(){
+  $("lockScreen").hidden=true;
+  $("homeScreen").hidden=false;
+  renderCards();
+}
+$("lockBtn").onclick=()=>{pinBuf="";pinTmp=null;renderDots();pinMsg(localStorage.getItem("omni_pin")?"Enter your PIN":"Set a 4-digit PIN");$("homeScreen").hidden=true;$("detailScreen").hidden=true;$("lockScreen").hidden=false;};
+
+/* ---------- profiles ---------- */
+let profiles=JSON.parse(localStorage.getItem("omni_profiles")||"[]");
+let curId=null;
+const saveAll=()=>localStorage.setItem("omni_profiles",JSON.stringify(profiles));
+const lines=s=>(s||"").split("\n").map(x=>x.trim()).filter(Boolean);
+const getP=()=>profiles.find(p=>p.id===curId);
+const initials=n=>(n||"?").trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
+
+function renderCards(){
+  const g=$("cardGrid");g.innerHTML="";
+  $("emptyMsg").hidden=profiles.length>0;
+  profiles.forEach(p=>{
+    const d=document.createElement("div");d.className="pcard";
+    d.innerHTML=(p.pic?`<img src="${p.pic}" alt="">`:`<div class="initials">${initials(p.name||p.label)}</div>`)+
+      `<div class="plabel">${esc(p.label||"Untitled")}</div><div class="pname">${esc(p.name||"")}</div>`;
+    d.onclick=()=>openDetail(p.id);
+    g.appendChild(d);
+  });
+}
+const esc=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+
+$("fabPlus").onclick=()=>{
+  const p={id:Date.now(),label:"",name:"",org:"",title:"",phones:"",emails:"",urls:"",pic:""};
+  profiles.push(p);curId=p.id;openDetail(p.id,true);
+};
+function openDetail(id,isNew){
+  curId=id;
+  $("homeScreen").hidden=true;$("detailScreen").hidden=false;
+  fillDetail();window.scrollTo(0,0);
+}
+$("backBtn").onclick=()=>{$("detailScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
+
+function fillDetail(){
+  const p=getP();if(!p)return;
+  $("detailTitle").textContent=p.label||"New card";
+  ["label","name","org","title","phones","emails","urls"].forEach(k=>$("f_"+k).value=p[k]||"");
+  renderPic();
+  buildShare();
+}
+function renderPic(){
+  const p=getP();
+  $("picShow").innerHTML=p&&p.pic?`<img src="${p.pic}" alt="">`:`<div class="ph">${initials(p?p.name:"?")}</div>`;
+}
+$("picBtn").onclick=()=>$("picInput").click();
+$("picInput").onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement("canvas");
+      const s=220/Math.max(img.width,img.height);
+      c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+      getP().pic=c.toDataURL("image/jpeg",0.8);
+      renderPic();
+    };
+    img.src=r.result;
+  };
+  r.readAsDataURL(f);
+  e.target.value="";
+};
+$("saveBtn").onclick=()=>{
+  const p=getP();if(!p)return;
+  ["label","name","org","title","phones","emails","urls"].forEach(k=>p[k]=$("f_"+k).value.trim());
+  if(!p.label)p.label=p.name||"Untitled";
+  saveAll();fillDetail();
+};
+$("delBtn").onclick=()=>{
+  if(!confirm("Delete this card?"))return;
+  profiles=profiles.filter(p=>p.id!==curId);saveAll();
+  $("detailScreen").hidden=true;$("homeScreen").hidden=false;renderCards();
+};
+
+/* ---------- share ---------- */
 function chosen(){
-  const p=profiles[cur], on=[...document.querySelectorAll("#fields input:checked")].map(el=>el.value);
-  return {name:p.name,org:on.includes("org")?p.org:"",title:on.includes("title")?p.title:"",
+  const p=getP();if(!p)return{name:"",phones:[],emails:[],urls:[]};
+  const on=[...document.querySelectorAll("#fields input:checked")].map(el=>el.value);
+  return{name:p.name,org:on.includes("org")?p.org:"",title:on.includes("title")?p.title:"",
     phones:lines(p.phones).filter((_,i)=>on.includes("phone:"+i)),
     emails:lines(p.emails).filter((_,i)=>on.includes("email:"+i)),
     urls:lines(p.urls).filter((_,i)=>on.includes("url:"+i))};
 }
 function vcard(d){
-  const e=s=>(s||"").replace(/\\/g,"\\\\").replace(/\n/g,"\\n").replace(/,/g,"\\,");
+  const e=s=>String(s||"").replace(/\\/g,"\\\\").replace(/\n/g,"\\n").replace(/,/g,"\\,");
   let c="BEGIN:VCARD\nVERSION:3.0\nFN:"+e(d.name||d.org||"OMNI")+"\n";
-  if(d.org) c+="ORG:"+e(d.org)+"\n";
-  if(d.title) c+="TITLE:"+e(d.title)+"\n";
+  if(d.org)c+="ORG:"+e(d.org)+"\n";
+  if(d.title)c+="TITLE:"+e(d.title)+"\n";
   (d.phones||[]).forEach(p=>c+="TEL;TYPE=CELL:"+p+"\n");
   (d.emails||[]).forEach(x=>c+="EMAIL:"+x+"\n");
   (d.urls||[]).forEach(u=>c+="URL:"+u+"\n");
   return c+"END:VCARD";
 }
+function buildShare(){
+  const p=getP();if(!p)return;
+  const has=p.name||p.org||p.title||lines(p.phones).length||lines(p.emails).length||lines(p.urls).length;
+  $("shareBox").hidden=!has;
+  if(!has)return;
+  const bits=[];
+  if(p.org)bits.push(`<label class="chk"><input type="checkbox" value="org" checked><span>Business<br><span class="muted">${esc(p.org)}</span></span></label>`);
+  if(p.title)bits.push(`<label class="chk"><input type="checkbox" value="title" checked><span>Title<br><span class="muted">${esc(p.title)}</span></span></label>`);
+  lines(p.phones).forEach((v,i)=>bits.push(`<label class="chk"><input type="checkbox" value="phone:${i}" checked><span>Phone<br><span class="muted">${esc(v)}</span></span></label>`));
+  lines(p.emails).forEach((v,i)=>bits.push(`<label class="chk"><input type="checkbox" value="email:${i}" checked><span>Email<br><span class="muted">${esc(v)}</span></span></label>`));
+  lines(p.urls).forEach((v,i)=>bits.push(`<label class="chk"><input type="checkbox" value="url:${i}" checked><span>Website<br><span class="muted">${esc(v)}</span></span></label>`));
+  $("fields").innerHTML=bits.join("");
+  document.querySelectorAll("#fields input").forEach(el=>el.onchange=preview);
+  preview();
+}
 function preview(){
   const d=chosen();
   $("preview").textContent=[d.name,d.title,d.org,...d.phones,...d.emails,...d.urls].filter(Boolean).join("\n")||"Nothing selected.";
 }
-$("save").onclick=()=>{const p=profiles[cur];["label","name","org","title","phones","emails","urls"].forEach(k=>p[k]=$(k).value.trim());saveAll();fill();};
-$("add").onclick=()=>{profiles.push(blank());cur=profiles.length-1;saveAll();fill();};
-$("del").onclick=()=>{if(profiles.length===1)profiles=[blank()];else profiles.splice(cur,1);cur=0;saveAll();fill();};
-$("pick").onchange=e=>{cur=+e.target.value;fill();};
-$("share").onclick=async()=>{
-  const blob=new Blob([vcard(chosen())],{type:"text/vcard"});
-  const file=new File([blob],"OMNI.vcf",{type:"text/vcard"});
-  try{
-    if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:"OMNI"}); return; }
-  }catch(e){}
-  try{
-    if(navigator.share){ await navigator.share({title:"OMNI",text:$("preview").textContent}); return; }
-  }catch(e){}
-  downloadVcf();
-};
 function downloadVcf(){
   const a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([vcard(chosen())],{type:"text/vcard"}));
-  a.download="OMNI.vcf";
-  document.body.appendChild(a); a.click();
+  a.download="OMNI.vcf";document.body.appendChild(a);a.click();
   setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},800);
 }
-$("vcf").onclick=downloadVcf;
-$("link").onclick=async()=>{
-  const url="https://meyousufi.github.io/Omni/#c="+btoa(unescape(encodeURIComponent(JSON.stringify(chosen()))));
+$("vcfBtn").onclick=downloadVcf;
+$("shareBtn").onclick=async()=>{
+  const file=new File([vcard(chosen())],"OMNI.vcf",{type:"text/vcard"});
+  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"OMNI"});return;}}catch(e){}
+  try{if(navigator.share){await navigator.share({title:"OMNI",text:$("preview").textContent});return;}}catch(e){}
+  downloadVcf();
+};
+$("linkBtn").onclick=async()=>{
+  const url=PUBLIC_URL+"#c="+btoa(unescape(encodeURIComponent(JSON.stringify(chosen()))));
   let copied=false;
-  try{ await navigator.clipboard.writeText(url); copied=true; }catch(e){}
-  $("qr").style.display="block"; $("qr").innerHTML="";
-  if(typeof QRCode!=="undefined"){ new QRCode($("qr"),{text:url,width:168,height:168}); }
-  else{ $("qr").innerHTML="<p style='color:#000;padding:10px'>QR needs internet the first time it loads.</p>"; }
-  if(copied) alert("OMNI link copied. Write it to an NFC sticker.");
+  try{await navigator.clipboard.writeText(url);copied=true;}catch(e){}
+  $("qr").style.display="block";$("qr").innerHTML="";
+  if(typeof QRCode!=="undefined")new QRCode($("qr"),{text:url,width:168,height:168});
+  else $("qr").innerHTML="<p style='color:#000;padding:10px'>QR needs internet on first load.</p>";
+  if(copied)alert("OMNI link copied — write it to your NFC sticker.");
   else prompt("Copy this OMNI link",url);
 };
+
+/* ---------- recipient view (#c= hash) ---------- */
 if(location.hash.startsWith("#c=")){
   try{
     const d=JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(3)))));
     const href=URL.createObjectURL(new Blob([vcard(d)],{type:"text/vcard"}));
-    document.body.innerHTML=`<div class="wrap"><div class="brand"><h1>OMNI</h1></div><div class="box"><h2 style="margin:0 0 8px">${d.name||"Contact"}</h2><pre>${[d.title,d.org,...(d.phones||[]),...(d.emails||[]),...(d.urls||[])].filter(Boolean).join("\n")}</pre><p><a href="${href}" download="OMNI.vcf" style="color:#9ec1ff">Save to Contacts</a></p></div></div>`;
-  }catch(e){fill();}
-}else fill();
+    document.body.innerHTML=`<div style="max-width:480px;margin:0 auto;padding:22px 16px;font-family:-apple-system,sans-serif;background:#090a0d;color:#f5f6f8;min-height:100vh"><h1 style="letter-spacing:.14em">OMNI</h1><div style="background:#14161c;border:1px solid #262a33;border-radius:18px;padding:16px"><h2 style="margin:0 0 8px">${esc(d.name||"Contact")}</h2><pre style="white-space:pre-wrap;font:inherit;margin:0">${esc([d.title,d.org,...(d.phones||[]),...(d.emails||[]),...(d.urls||[])].filter(Boolean).join("\n"))}</pre><p><a href="${href}" download="OMNI.vcf" style="color:#9ec1ff">Save to Contacts</a></p></div></div>`;
+  }catch(e){}
+}
 </script>
 </body>
 </html>
