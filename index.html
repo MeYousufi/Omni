@@ -398,20 +398,32 @@ function buildDots(){
 function renderDots(){[...$("dots").children].forEach((d,i)=>d.classList.toggle("on",i<pinBuf.length));}
 function pinMsg(t){$("lockMsg").textContent=t;}
 (function buildPad(){
-  const keys=["1","2","3","4","5","6","7","8","9","","0","⌫"];
+  const keys=["1","2","3","4","5","6","7","8","9","GO","0","⌫"];
   keys.forEach(k=>{
     const b=document.createElement("button");b.textContent=k;
-    if(!k)b.style.visibility="hidden";
-    else b.setAttribute("aria-label",k==="⌫"?"Delete digit":"Digit "+k);
-    b.onclick=()=>{
-      if(k==="⌫"){pinBuf=pinBuf.slice(0,-1);renderDots();return;}
-      if(pinBuf.length>=pinLen())return;
-      pinBuf+=k;renderDots();
-      if(pinBuf.length===pinLen())setTimeout(pinDone,160);
-    };
+    if(k==="GO"){
+      b.setAttribute("aria-label","Submit PIN");
+      b.style.background="linear-gradient(135deg,#2d5a2d,#3a7a3a)";
+      b.onclick=()=>{if(pinBuf.length>=4)pinDone();};
+    }else{
+      b.setAttribute("aria-label",k==="⌫"?"Delete digit":"Digit "+k);
+      b.onclick=()=>{
+        if(k==="⌫"){pinBuf=pinBuf.slice(0,-1);renderDots();updateGo();return;}
+        const max=Math.max(pinLen(),6);
+        if(pinBuf.length>=max)return;
+        pinBuf+=k;renderDots();updateGo();
+        // auto-submit at expected length for new setups; existing users tap GO
+        if(!hasVault()&&!hasLegacy()&&pinBuf.length===pinLen())setTimeout(pinDone,160);
+      };
+    }
     $("pinpad").appendChild(b);
   });
 })();
+function updateGo(){
+  // highlight GO when 4+ digits entered and vault exists (unknown length)
+  const go=[...$("pinpad").children].find(b=>b.textContent==="GO");
+  if(go)go.style.opacity=(hasVault()||hasLegacy())&&pinBuf.length>=4?"1":"0.35";
+}
 async function pinDone(){
   const locked=pinLockedLeft();
   if(locked>0){pinMsg("Too many tries — wait "+locked+"s");pinBuf="";renderDots();setTimeout(()=>{if(pinLockedLeft()<=0)pinMsg(hasVault()||hasLegacy()?"Enter your PIN":"Set a 6-digit PIN");},locked*1000);return;}
@@ -436,7 +448,10 @@ async function pinDone(){
     }
     if(hasVault()){
       profiles=await vaultDecrypt(pin);
-      sessionPin=pin;pinFailReset();haptic(15);unlock();return;
+      sessionPin=pin;pinFailReset();haptic(15);
+      // remember working PIN length for this device
+      if(!localStorage.getItem("omni_pinlen"))localStorage.setItem("omni_pinlen",String(pin.length));
+      unlock();return;
     }
     // legacy plaintext migration: verify against old hash, then encrypt
     const stored=localStorage.getItem("omni_pin");
@@ -484,7 +499,7 @@ $("quickSave").onclick=()=>{
   pinMsg("Set a "+pinLen()+"-digit PIN to protect your card");
 };
 function doLock(){
-  pinBuf="";pinTmp=null;sessionPin=null;profiles=[];curId=null;buildDots();
+  pinBuf="";pinTmp=null;sessionPin=null;profiles=[];curId=null;buildDots();updateGo();
   const has=hasVault()||hasLegacy();
   pinMsg(has?"Enter your PIN":"Set a 6-digit PIN");
   $("forgotBtn").hidden=!has;
@@ -976,6 +991,7 @@ window.addEventListener("hashchange",renderRecipient);
     if(has)pinMsg("Enter your PIN");
     $("forgotBtn").hidden=!has;
   }
+  updateGo();
 })();
 
 /* ---------- PWA ---------- */
