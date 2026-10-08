@@ -106,6 +106,8 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .modal ul{margin:8px 0;padding-left:20px;color:var(--text)}
 .modal ul li{margin:4px 0}
 .modal input{margin:8px 0}
+#toast{position:fixed;bottom:calc(96px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(16px);background:#1c2130;border:1px solid var(--line);color:var(--text);padding:12px 22px;border-radius:14px;font-size:15px;opacity:0;transition:opacity .25s,transform .25s;z-index:200;pointer-events:none;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .stickybar button{flex:1;margin:0;padding:14px;font-size:16px}
 /* dashboard */
 .statrow{display:flex;justify-content:space-between;align-items:center;padding:12px 4px;border-bottom:1px solid var(--line);font-size:16px}
@@ -134,6 +136,30 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <p>👆 <b>Share</b> via tap, QR, or straight to contacts</p>
     </div>
     <button id="welcomeGo" style="margin-top:12px;padding:14px 40px;font-size:17px">Get started</button>
+  </div>
+</div>
+
+<!-- QUICK CREATE (first card, 3 steps) -->
+<div id="quickScreen" hidden>
+  <div class="wrap" style="min-height:90vh;display:flex;flex-direction:column;justify-content:center">
+    <h1>Your first card</h1>
+    <p class="muted">Just the essentials — you can add a photo, color, and more later.</p>
+    <div class="box">
+      <input id="q_name" placeholder="Your name" autocomplete="name" aria-label="Your name">
+      <input id="q_contact" placeholder="Phone or email" autocomplete="off" aria-label="Phone or email">
+      <div class="vhint" id="q_hint"></div>
+    </div>
+    <button id="quickSave" style="width:100%;padding:15px;font-size:17px">Create my card →</button>
+  </div>
+</div>
+
+<!-- BACKUP PROMPT (after first save) -->
+<div id="backupPrompt" class="modal" hidden role="dialog" aria-label="Back up your card">
+  <div class="box">
+    <h3 class="sec" style="margin-top:0">Back up your card?</h3>
+    <p>Right now your card only lives on this phone, behind your PIN. If you ever reset without a backup, it's gone for good.</p>
+    <button id="bpNow" style="width:100%">Back up now</button>
+    <button id="bpLater" class="gray" style="width:100%;margin-top:8px">Remind me later</button>
   </div>
 </div>
 
@@ -171,8 +197,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <!-- HOME -->
 <div class="wrap" id="homeScreen" hidden>
   <div class="brand"><h1>OMNI</h1><div><button class="iconbtn small" id="dashBtn" aria-label="Open dashboard">📊</button><button class="iconbtn small" id="backupBtn" aria-label="Back up cards">Backup</button><button class="iconbtn" id="lockBtn" aria-label="Lock app">Lock</button></div></div>
-  <div class="muted" style="letter-spacing:.08em;font-size:11px">SHARE ONLY WHAT YOU CHOOSE</div>
-  <div id="offlineBar" class="box" hidden style="border-color:#7a5a2b;text-align:center;padding:10px">📴 Offline — showing your saved cards</div>
+  <div id="offlineBar" class="box" hidden style="border-color:#7a5a2b;text-align:center;padding:10px">📴 Offline — you can view and share saved cards.<br><span class="muted">Backup and cloud stats need internet.</span></div>
   <div id="backupNudge" class="box" hidden style="border-color:#7a5a2b;background:linear-gradient(160deg,#1d1812,#14110c)">
     <span id="backupNudgeText">💾 Back up your cards to keep them safe.</span><br>
     <button class="small" id="nudgeBackup" style="margin-top:8px">Back up now</button>
@@ -180,7 +205,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   </div>
   <div class="searchrow"><input id="searchBox" placeholder="Search cards..."></div>
   <div id="cardGrid" class="grid"></div>
-  <div id="emptyMsg" class="empty" hidden>No cards yet.<br>Tap + to create your first.</div>
+  <div id="emptyMsg" class="empty" hidden><button id="emptyCreate" style="background:none;border:0;color:inherit;font:inherit;padding:20px;box-shadow:none">No cards yet.<br><span style="color:#9ec1ff;text-decoration:underline">Tap here to create your first →</span></button></div>
   <input type="file" id="importInput" accept="application/json" hidden>
   <button class="fab" id="fabPlus" aria-label="Create new card">+</button>
 </div>
@@ -197,6 +222,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <div class="flipback" id="flipBack"></div>
     </div>
   </div>
+  <p class="muted" id="flipHint" style="text-align:center;font-size:13px;margin:6px 0 0">👆 Tap the card to flip it</p>
   <div class="muted" style="text-align:center;margin-top:8px">Tap the card to flip it</div>
 
   <div class="picwrap">
@@ -216,6 +242,8 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <div class="vhint" id="v_emails"></div>
     <textarea id="f_urls" placeholder="Websites, one per line"></textarea>
     <div class="vhint" id="v_urls"></div>
+    <textarea id="f_address" placeholder="Address"></textarea>
+    <textarea id="f_notes" placeholder="Notes (not shared by default)"></textarea>
     <div class="colorrow"><span class="muted">Card color</span><input type="color" id="f_color" value="#4f8cff"></div>
     <div class="rowbtns">
       <button id="dupBtn" class="gray">Duplicate</button>
@@ -249,8 +277,9 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <!-- REPOSITION OVERLAY -->
 <div id="reposOverlay" hidden>
   <div id="reposCircle"><img id="reposImg" alt=""></div>
-  <p>Drag to position your picture</p>
-  <div><button id="reposDone">Done</button><button id="reposCancel" class="gray">Cancel</button></div>
+  <p>Drag to position your picture inside the circle</p>
+  <button id="reposDone" style="width:min(320px,80vw)">Done</button>
+  <button id="reposCancel" style="background:none;border:0;box-shadow:none;color:var(--muted);text-decoration:underline;margin-top:16px">Cancel</button>
 </div>
 
 <!-- DASHBOARD -->
@@ -394,12 +423,20 @@ async function pinDone(){
       if(pinTmp===null){pinTmp=pin;pinMsg("Confirm your PIN");return;}
       if(pinTmp!==pin){pinTmp=null;pinMsg("Didn't match — try again");return;}
       profiles=[];sessionPin=pin;
+      if(pendingCard){profiles.push(pendingCard);stat("cards");}
       await vaultEncrypt(pin,profiles);
-      pinFailReset();unlock();return;
+      pinFailReset();haptic(15);
+      if(onboarding){
+        onboarding=false;pendingCard=null;
+        $("lockScreen").hidden=true;
+        $("backupPrompt").hidden=false;
+        return;
+      }
+      unlock();return;
     }
     if(hasVault()){
       profiles=await vaultDecrypt(pin);
-      sessionPin=pin;pinFailReset();unlock();return;
+      sessionPin=pin;pinFailReset();haptic(15);unlock();return;
     }
     // legacy plaintext migration: verify against old hash, then encrypt
     const stored=localStorage.getItem("omni_pin");
@@ -424,8 +461,27 @@ function unlock(){
 }
 $("welcomeGo").onclick=()=>{
   localStorage.setItem("omni_welcomed","1");
-  $("welcomeScreen").hidden=true;$("lockScreen").hidden=false;
-  pinMsg("Set a 6-digit PIN");
+  $("welcomeScreen").hidden=true;$("quickScreen").hidden=false;
+  $("q_name").focus();
+};
+/* quick create: name + one contact method */
+let onboarding=false, pendingCard=null;
+function validContact(v){
+  v=v.trim();
+  if(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v))return{type:"emails",val:v};
+  if(v.replace(/\D/g,"").length>=7)return{type:"phones",val:v};
+  return null;
+}
+$("quickSave").onclick=()=>{
+  const name=$("q_name").value.trim();
+  const c=validContact($("q_contact").value);
+  if(!name){$("q_hint").textContent="Please enter your name.";$("q_name").classList.add("bad");return;}
+  if(!c){$("q_hint").textContent="Enter a valid phone number or email.";$("q_contact").classList.add("bad");return;}
+  $("q_hint").textContent="";$("q_name").classList.remove("bad");$("q_contact").classList.remove("bad");
+  pendingCard={id:"c"+Date.now(),label:"My Card",name:name,org:"",title:"",phones:c.type==="phones"?c.val:"",emails:c.type==="emails"?c.val:"",urls:"",address:"",notes:"",pic:"",picPos:"50% 50%",color:"#4f8cff",primary:c.type};
+  onboarding=true;
+  $("quickScreen").hidden=true;$("lockScreen").hidden=false;
+  pinMsg("Set a "+pinLen()+"-digit PIN to protect your card");
 };
 function doLock(){
   pinBuf="";pinTmp=null;sessionPin=null;profiles=[];curId=null;buildDots();
@@ -518,6 +574,18 @@ $("dashBtn").onclick=async()=>{
 };
 $("dashBack").onclick=()=>{$("dashScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
 
+/* backup prompt after onboarding */
+$("bpNow").onclick=async()=>{
+  $("backupPrompt").hidden=true;
+  unlock();
+  $("backupBtn").click();
+};
+$("bpLater").onclick=()=>{
+  localStorage.setItem("omni_last_backup","0"); // ensure nudge shows
+  $("backupPrompt").hidden=true;
+  unlock();
+};
+
 /* change PIN */
 $("pin4chk").checked=pinLen()===4;
 $("pin4chk").onchange=e=>{
@@ -590,6 +658,15 @@ function validateFields(){
 }
 ["f_emails","f_phones","f_urls"].forEach(id=>$(id).addEventListener("input",validateFields));
 
+/* ---------- haptics + toast ---------- */
+function haptic(ms){try{if(navigator.vibrate)navigator.vibrate(ms||10);}catch(e){}}
+function toast(msg){
+  let t=document.getElementById("toast");
+  if(!t){t=document.createElement("div");t.id="toast";t.setAttribute("role","status");document.body.appendChild(t);}
+  t.textContent=msg;t.classList.add("show");
+  clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2200);
+}
+
 /* ---------- profiles ---------- */
 let profiles=[];
 let curId=null, searchQ="";
@@ -625,6 +702,7 @@ function renderCards(){
 }
 $("nudgeBackup").onclick=()=>{$("backupBtn").click();};
 $("nudgeDismiss").onclick=()=>{$("backupNudge").hidden=true;};
+$("emptyCreate").onclick=()=>$("fabPlus").click();
 $("searchBox").oninput=e=>{searchQ=e.target.value;renderCards();};
 
 $("fabPlus").onclick=()=>{
@@ -638,8 +716,17 @@ function openDetail(id){
 }
 $("backBtn").onclick=()=>{$("detailScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
 
-$("flipCard").onclick=()=>$("flipCard").classList.toggle("flipped");
-$("flipCard").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();$("flipCard").classList.toggle("flipped");}};
+function doFlip(){
+  $("flipCard").classList.toggle("flipped");
+  if(!localStorage.getItem("omni_flipped")){
+    localStorage.setItem("omni_flipped","1");
+    $("flipHint").innerHTML=`<span style="font-size:18px" aria-hidden="true">⟳</span>`;
+  }
+}
+$("flipCard").onclick=doFlip;
+$("flipCard").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();doFlip();}};
+// show flip icon instead of hint if already flipped before
+if(localStorage.getItem("omni_flipped"))$("flipHint").innerHTML=`<span style="font-size:18px" aria-hidden="true">⟳</span>`;
 function renderFlip(){
   const p=getP();if(!p)return;
   $("flipCard").classList.remove("flipped");
@@ -658,7 +745,7 @@ function renderFlip(){
 function fillDetail(){
   const p=getP();if(!p)return;
   $("detailTitle").textContent=p.label||"New card";
-  ["label","name","org","title","phones","emails","urls"].forEach(k=>$("f_"+k).value=p[k]||"");
+  ["label","name","org","title","phones","emails","urls","address","notes"].forEach(k=>$("f_"+k).value=p[k]||"");
   $("f_color").value=p.color||"#4f8cff";
   renderPic();
   renderFlip();
@@ -690,11 +777,11 @@ $("picInput").onchange=e=>{
 };
 function readFields(){
   const p=getP();if(!p)return;
-  ["label","name","org","title","phones","emails","urls"].forEach(k=>p[k]=$("f_"+k).value.trim());
+  ["label","name","org","title","phones","emails","urls","address","notes"].forEach(k=>p[k]=$("f_"+k).value.trim());
   p.color=$("f_color").value;
   if(!p.label)p.label=p.name||"Untitled";
 }
-$("saveBtn2").onclick=()=>{readFields();saveAll();fillDetail();};
+$("saveBtn2").onclick=()=>{readFields();saveAll();fillDetail();haptic(10);toast("Saved on this device ✓");};
 $("dupBtn").onclick=()=>{
   readFields();
   const p=getP();if(!p)return;
@@ -739,7 +826,8 @@ function chosen(){
   return{name:p.name,org:on.includes("org")?p.org:"",title:on.includes("title")?p.title:"",
     phones:lines(p.phones).filter((_,i)=>on.includes("phone:"+i)),
     emails:lines(p.emails).filter((_,i)=>on.includes("email:"+i)),
-    urls:lines(p.urls).filter((_,i)=>on.includes("url:"+i))};
+    urls:lines(p.urls).filter((_,i)=>on.includes("url:"+i)),
+    address:on.includes("address")?p.address:"",notes:on.includes("notes")?p.notes:""};
 }
 function vcard(d,pic){
   const e=s=>String(s||"").replace(/\\/g,"\\\\").replace(/\n/g,"\\n").replace(/,/g,"\\,");
@@ -754,27 +842,34 @@ function vcard(d,pic){
   (d.phones||[]).forEach(p=>c+="TEL;TYPE=CELL:"+p+"\n");
   (d.emails||[]).forEach(x=>c+="EMAIL:"+x+"\n");
   (d.urls||[]).forEach(u=>c+="URL:"+u+"\n");
+  if(d.address)c+="ADR:;;"+e(d.address)+";;;;\n";
+  if(d.notes)c+="NOTE:"+e(d.notes)+"\n";
   return c+"END:VCARD";
 }
 const curPic=()=>{const p=getP();return p?p.pic:"";};
 function buildShare(){
   const p=getP();if(!p)return;
-  const has=p.name||p.org||p.title||lines(p.phones).length||lines(p.emails).length||lines(p.urls).length;
+  const has=p.name||p.org||p.title||lines(p.phones).length||lines(p.emails).length||lines(p.urls).length||p.address||p.notes;
   $("shareBox").hidden=!has;
   if(!has)return;
+  // safe defaults: name always on; only the primary contact method on; rest off
+  const prim=p.primary||(lines(p.phones).length?"phones":lines(p.emails).length?"emails":lines(p.urls).length?"urls":"");
   const bits=[];
-  if(p.org)bits.push(`<label class="chk"><input type="checkbox" value="org" checked><span>Business<br><span class="muted">${esc(p.org)}</span></span></label>`);
-  if(p.title)bits.push(`<label class="chk"><input type="checkbox" value="title" checked><span>Title<br><span class="muted">${esc(p.title)}</span></span></label>`);
-  lines(p.phones).forEach((v,i)=>bits.push(`<label class="chk"><input type="checkbox" value="phone:${i}" checked><span>Phone<br><span class="muted">${esc(v)}</span></span></label>`));
-  lines(p.emails).forEach((v,i)=>bits.push(`<label class="chk"><input type="checkbox" value="email:${i}" checked><span>Email<br><span class="muted">${esc(v)}</span></span></label>`));
-  lines(p.urls).forEach((v,i)=>bits.push(`<label class="chk"><input type="checkbox" value="url:${i}" checked><span>Website<br><span class="muted">${esc(v)}</span></span></label>`));
+  if(p.org)bits.push(`<label class="chk"><input type="checkbox" value="org"><span>Business<br><span class="muted">${esc(p.org)}</span></span></label>`);
+  if(p.title)bits.push(`<label class="chk"><input type="checkbox" value="title"><span>Title<br><span class="muted">${esc(p.title)}</span></span></label>`);
+  lines(p.phones).forEach((v,i)=>bits.push(`<label class="chk"><input type="checkbox" value="phone:${i}"${prim==="phones"&&i===0?" checked":""}><span>Phone<br><span class="muted">${esc(v)}</span></span></label>`));
+  lines(p.emails).forEach((v,i)=>bits.push(`<label class="chk"><input type="checkbox" value="email:${i}"${prim==="emails"&&i===0?" checked":""}><span>Email<br><span class="muted">${esc(v)}</span></span></label>`));
+  lines(p.urls).forEach((v,i)=>bits.push(`<label class="chk"><input type="checkbox" value="url:${i}"><span>Website<br><span class="muted">${esc(v)}</span></span></label>`));
+  if(p.address)bits.push(`<label class="chk"><input type="checkbox" value="address"><span>Address<br><span class="muted">${esc(p.address)}</span></span></label>`);
+  if(p.notes)bits.push(`<label class="chk"><input type="checkbox" value="notes"><span>Notes<br><span class="muted">${esc(p.notes.slice(0,40))}</span></span></label>`);
   $("fields").innerHTML=bits.join("");
   document.querySelectorAll("#fields input").forEach(el=>el.onchange=preview);
   preview();
 }
 function preview(){
   const d=chosen();
-  $("preview").textContent=[d.name,d.title,d.org,...d.phones,...d.emails,...d.urls].filter(Boolean).join("\n")||"Nothing selected.";
+  const txt=[d.name,d.title,d.org,...d.phones,...d.emails,...d.urls,d.address,d.notes].filter(Boolean).join("\n");
+  $("preview").textContent=txt||d.name||"Nothing selected.";
 }
 function downloadVcf(){
   const a=document.createElement("a");
@@ -789,7 +884,7 @@ $("moreShareBtn").onclick=()=>{
   $("moreShareBtn").innerHTML=open?"More ways to share ▴":"More ways to share ▾";
 };
 $("vcfBtn").onclick=()=>{stat("vcf");downloadVcf();};
-$("shareBtn").onclick=async()=>{
+$("shareBtn").onclick=async()=>{haptic(10);
   stat("share");
   const file=new File([vcard(chosen(),curPic())],"OMNI.vcf",{type:"text/vcard"});
   try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"OMNI"});return;}}catch(e){}
@@ -813,21 +908,24 @@ $("linkBtn").onclick=async()=>{
   if(typeof QRCode!=="undefined")new QRCode($("qr"),{text:url,width:168,height:168,correctLevel:QRCode.CorrectLevel.M});
   else $("qr").innerHTML="<p style='color:#000;padding:10px'>QR needs internet on first load.</p>";
   $("qrDlBtn").hidden=false;
-  if(copied)alert("OMNI link copied — write it to your NFC sticker.");
+  // NFC status: browsers can't write NFC tags directly (iOS especially)
+  const nfcOK="NDEFReader" in window;
+  if(copied)toast(nfcOK?"Link copied — tap an NFC sticker to write it":"Link copied — iPhone can't write NFC from the browser. Use an NFC writer app, or show the QR below.");
   else prompt("Copy this OMNI link",url);
 };
 $("qrDlBtn").onclick=()=>{
   const img=document.querySelector("#qr img"),cv=document.querySelector("#qr canvas");
   const src=img?img.src:(cv?cv.toDataURL("image/png"):null);
-  if(!src){alert("Generate the QR first.");return;}
+  if(!src){toast("Generate the QR first");return;}
   const a=document.createElement("a");a.href=src;a.download="omni-qr.png";
   document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),800);
+  toast("QR image saved — check your Photos ✓");
 };
 
 /* ---------- recipient view (#s= short link or #c= full data) ---------- */
 function showContact(d){
   const href=URL.createObjectURL(new Blob([vcard(d)],{type:"text/vcard"}));
-  document.body.innerHTML=`<div style="max-width:480px;margin:0 auto;padding:22px 16px;font-family:-apple-system,sans-serif;background:#090a0d;color:#f5f6f8;min-height:100vh"><h1 style="letter-spacing:.14em;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">OMNI</h1><div style="background:#14161c;border:1px solid #262a33;border-radius:18px;padding:16px"><h2 style="margin:0 0 8px">${esc(d.name||"Contact")}</h2><pre style="white-space:pre-wrap;font:inherit;margin:0">${esc([d.title,d.org,...(d.phones||[]),...(d.emails||[]),...(d.urls||[])].filter(Boolean).join("\n"))}</pre><p><a href="${href}" download="OMNI.vcf" style="color:#9ec1ff">Save to Contacts</a></p></div><p style="text-align:center;margin-top:24px"><a href="${PUBLIC_URL}" style="color:#9aa1ad">Get your own OMNI card →</a></p></div>`;
+  document.body.innerHTML=`<div style="max-width:480px;margin:0 auto;padding:22px 16px;font-family:-apple-system,sans-serif;background:#090a0d;color:#f5f6f8;min-height:100vh"><h1 style="letter-spacing:.14em;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">OMNI</h1><div style="background:#14161c;border:1px solid #262a33;border-radius:18px;padding:16px"><h2 style="margin:0 0 8px">${esc(d.name||"Contact")}</h2><pre style="white-space:pre-wrap;font:inherit;margin:0">${esc([d.title,d.org,...(d.phones||[]),...(d.emails||[]),...(d.urls||[]),d.address,d.notes].filter(Boolean).join("\n"))}</pre><p><a href="${href}" download="OMNI.vcf" style="color:#9ec1ff">Save to Contacts</a></p></div><p style="text-align:center;margin-top:24px"><a href="${PUBLIC_URL}" style="color:#9aa1ad">Get your own OMNI card →</a></p></div>`;
 }
 async function renderRecipient(){
   if(location.hash.startsWith("#s=")){
