@@ -127,7 +127,7 @@ function downloadVcf(){
 }
 $("vcf").onclick=downloadVcf;
 $("link").onclick=async()=>{
-  const url="https://muse.ai/s/omni-tap-xzf6jgpxlxrxhx01#c="+btoa(unescape(encodeURIComponent(JSON.stringify(chosen()))));
+  const url="https://meyousufi.github.io/Omni/#c="+btoa(unescape(encodeURIComponent(JSON.stringify(chosen()))));
   let copied=false;
   try{ await navigator.clipboard.writeText(url); copied=true; }catch(e){}
   $("qr").style.display="block"; $("qr").innerHTML="";
