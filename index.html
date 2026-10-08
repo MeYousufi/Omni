@@ -15,12 +15,16 @@
 <style>
 :root{--bg:#07080c;--card:#12141b;--line:#232839;--text:#f5f6f8;--muted:#9aa1ad;--accent:#4f8cff;--accent2:#8b5cf6;--glow:rgba(79,140,255,.35)}
 *{box-sizing:border-box}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);background-image:radial-gradient(700px 320px at 50% -60px,rgba(79,140,255,.12),transparent)}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);background-image:radial-gradient(700px 320px at 50% -60px,rgba(79,140,255,.12),transparent);min-height:100vh;background-attachment:fixed}
 .wrap{max-width:480px;margin:0 auto;padding:calc(22px + env(safe-area-inset-top)) 16px calc(96px + env(safe-area-inset-bottom))}
+@media(min-width:700px){
+  .wrap{max-width:860px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+}
 .brand{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .brand h1{margin:0;font-size:24px;letter-spacing:.14em;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .brand span{color:var(--muted);font-size:11px;letter-spacing:.08em}
-.iconbtn{background:#1c2130;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:8px 12px;font-size:14px;margin:0}
+.iconbtn{background:#1c2130;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:8px 12px;font-size:14px;margin:0;min-height:44px;display:inline-flex;align-items:center}
 select,input,textarea{width:100%;margin:6px 0;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0e1118;color:var(--text);font:inherit}
 select:focus,input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,140,255,.15)}
 input[type=color]{height:48px;padding:6px}
@@ -30,7 +34,7 @@ button{border:0;border-radius:12px;padding:12px 14px;background:linear-gradient(
 button:active{transform:scale(.97)}
 button.gray{background:#232838;box-shadow:none;border:1px solid var(--line)}
 button.danger{background:linear-gradient(135deg,#7a2b2e,#5a2326);box-shadow:none}
-button.small{padding:8px 12px;font-size:13px}
+button.small{padding:8px 12px;font-size:13px;min-height:44px}
 label.chk{display:flex;gap:12px;align-items:center;padding:11px 4px;border-bottom:1px solid var(--line);border-radius:8px}
 label.chk:last-child{border-bottom:0}
 label.chk input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);flex-shrink:0}
@@ -49,10 +53,10 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 .pinpad{display:grid;grid-template-columns:repeat(3,84px);gap:12px;justify-content:center}
 .pinpad button{width:84px;height:84px;border-radius:50%;font-size:26px;background:#141926;color:var(--text);margin:0;padding:0;border:1px solid var(--line);box-shadow:none}
 .pinpad button:active{background:#1e2536;box-shadow:0 0 16px var(--glow)}
-.forgot{background:none;color:var(--muted);font-size:13px;margin-top:18px;text-decoration:underline;padding:8px;box-shadow:none;border:0}
+.forgot{background:none;color:var(--muted);font-size:15px;margin-top:18px;text-decoration:underline;padding:14px 20px;box-shadow:none;border:0;min-height:44px}
 /* cards */
 .searchrow{display:flex;gap:8px;margin-top:10px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-top:12px}
 .pcard{background:linear-gradient(165deg,#151a26,#0d1017);border:1px solid transparent;border-radius:18px;overflow:hidden;text-align:center;padding:0 0 12px;cursor:pointer;transition:transform .12s;position:relative;
   background:linear-gradient(#141824,#10131b) padding-box,linear-gradient(135deg,rgba(79,140,255,.55),rgba(139,92,246,.45)) border-box;border:1px solid transparent;
   box-shadow:0 6px 22px rgba(0,0,0,.4),0 0 18px rgba(79,140,255,.12)}
@@ -73,6 +77,8 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 .flipfront{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px}
 .flipfront img{width:84px;height:84px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);box-shadow:0 0 16px var(--glow);margin-bottom:10px}
 .flipfront .fph{width:84px;height:84px;border-radius:50%;background:#1a1e26;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#8ea6d8;border:2px dashed var(--line);margin-bottom:10px}
+.flipfront .fring{width:64px;height:64px;border-radius:50%;border:5px solid var(--accent);margin-bottom:14px;position:relative;box-shadow:0 0 18px var(--glow)}
+.flipfront .fring::after{content:"";position:absolute;top:-11px;left:50%;width:9px;height:9px;background:var(--accent);border-radius:50%;transform:translateX(-50%)}
 .flipfront h2{margin:0;font-size:26px;letter-spacing:.1em;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .flipfront .fsub{font-size:11px;letter-spacing:.24em;color:var(--accent);font-weight:700;margin-top:4px}
 .flipfront .ftag{color:var(--muted);font-size:12px;margin-top:6px}
@@ -93,6 +99,8 @@ h3.sec{margin:18px 0 4px;font-size:15px}
 .vhint{font-size:12px;color:#e08080;min-height:0;margin:-2px 0 4px}
 .vhint:empty{display:none}
 input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,.12)}
+.stickybar{position:sticky;bottom:0;z-index:20;background:rgba(9,10,13,.94);backdrop-filter:blur(12px);padding:12px 16px calc(12px + env(safe-area-inset-bottom));margin:14px -16px 0;border-top:1px solid var(--line);display:flex;gap:8px}
+.stickybar button{flex:1;margin:0;padding:14px;font-size:16px}
 /* dashboard */
 .statrow{display:flex;justify-content:space-between;align-items:center;padding:12px 4px;border-bottom:1px solid var(--line);font-size:16px}
 .statrow:last-child{border-bottom:0}
@@ -124,11 +132,11 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 </div>
 
 <!-- LOCK -->
-<div id="lockScreen">
+<div id="lockScreen" hidden>
   <h1>OMNI</h1>
   <div class="muted" style="letter-spacing:.1em">SHARE ONLY WHAT YOU CHOOSE</div>
   <p id="lockMsg" class="muted" style="margin-top:26px">Set a 4-digit PIN</p>
-  <div class="dots" id="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  <div class="dots" id="dots"></div>
   <div class="pinpad" id="pinpad"></div>
   <button class="forgot" id="forgotBtn" hidden>Forgot PIN? Reset everything</button>
 </div>
@@ -137,8 +145,9 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <div class="wrap" id="homeScreen" hidden>
   <div class="brand"><h1>OMNI</h1><div><button class="iconbtn small" id="dashBtn" aria-label="Open dashboard">📊</button><button class="iconbtn small" id="backupBtn" aria-label="Back up cards">Backup</button><button class="iconbtn" id="lockBtn" aria-label="Lock app">Lock</button></div></div>
   <div class="muted" style="letter-spacing:.08em;font-size:11px">SHARE ONLY WHAT YOU CHOOSE</div>
+  <div id="offlineBar" class="box" hidden style="border-color:#7a5a2b;text-align:center;padding:10px">📴 Offline — showing your saved cards</div>
   <div id="backupNudge" class="box" hidden style="border-color:#7a5a2b;background:linear-gradient(160deg,#1d1812,#14110c)">
-    <span>💾 It's been a while since your last backup.</span><br>
+    <span id="backupNudgeText">💾 Back up your cards to keep them safe.</span><br>
     <button class="small" id="nudgeBackup" style="margin-top:8px">Back up now</button>
     <button class="small gray" id="nudgeDismiss">Later</button>
   </div>
@@ -182,10 +191,12 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <div class="vhint" id="v_urls"></div>
     <div class="colorrow"><span class="muted">Card color</span><input type="color" id="f_color" value="#4f8cff"></div>
     <div class="rowbtns">
-      <button id="saveBtn">Save card</button>
       <button id="dupBtn" class="gray">Duplicate</button>
       <button id="delBtn" class="danger">Delete</button>
     </div>
+  </div>
+  <div class="stickybar">
+    <button id="saveBtn2">Save card</button>
   </div>
   <div class="box" id="shareBox" hidden>
     <h3 class="sec" style="margin-top:0">Share this card</h3>
@@ -237,9 +248,10 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   </div>
   <div class="box">
     <h3 class="sec" style="margin-top:0">🔐 Change PIN</h3>
+    <label class="chk" style="border-bottom:1px solid var(--line);margin-bottom:8px"><input type="checkbox" id="pin6chk" style="width:20px;height:20px"><span>Use 6-digit PIN <span class="muted">(1M combos, harder to guess)</span></span></label>
     <div id="chpinForm" hidden>
-      <input id="chpin1" type="password" inputmode="numeric" maxlength="4" placeholder="New 4-digit PIN" aria-label="New PIN">
-      <input id="chpin2" type="password" inputmode="numeric" maxlength="4" placeholder="Confirm new PIN" aria-label="Confirm new PIN">
+      <input id="chpin1" type="password" inputmode="numeric" maxlength="6" placeholder="New PIN" aria-label="New PIN">
+      <input id="chpin2" type="password" inputmode="numeric" maxlength="6" placeholder="Confirm new PIN" aria-label="Confirm new PIN">
       <div><button class="small" id="chpinSave">Save new PIN</button><button class="small gray" id="chpinCancel">Cancel</button></div>
       <p class="muted" id="chpinMsg"></p>
     </div>
@@ -305,6 +317,12 @@ function pinLockedLeft(){
 /* ---------- PIN lock ---------- */
 const hashPin=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return h.toString(36);};
 let pinBuf="",pinTmp=null;
+const pinLen=()=>parseInt(localStorage.getItem("omni_pinlen")||"4");
+function buildDots(){
+  const n=pinLen(),d=$("dots");d.innerHTML="";
+  for(let i=0;i<n;i++){const s=document.createElement("div");s.className="dot";d.appendChild(s);}
+  renderDots();
+}
 function renderDots(){[...$("dots").children].forEach((d,i)=>d.classList.toggle("on",i<pinBuf.length));}
 function pinMsg(t){$("lockMsg").textContent=t;}
 (function buildPad(){
@@ -315,9 +333,9 @@ function pinMsg(t){$("lockMsg").textContent=t;}
     else b.setAttribute("aria-label",k==="⌫"?"Delete digit":"Digit "+k);
     b.onclick=()=>{
       if(k==="⌫"){pinBuf=pinBuf.slice(0,-1);renderDots();return;}
-      if(pinBuf.length>=4)return;
+      if(pinBuf.length>=pinLen())return;
       pinBuf+=k;renderDots();
-      if(pinBuf.length===4)setTimeout(pinDone,160);
+      if(pinBuf.length===pinLen())setTimeout(pinDone,160);
     };
     $("pinpad").appendChild(b);
   });
@@ -366,7 +384,7 @@ $("welcomeGo").onclick=()=>{
   pinMsg("Set a 4-digit PIN");
 };
 function doLock(){
-  pinBuf="";pinTmp=null;sessionPin=null;profiles=[];curId=null;renderDots();
+  pinBuf="";pinTmp=null;sessionPin=null;profiles=[];curId=null;buildDots();
   const has=hasVault()||hasLegacy();
   pinMsg(has?"Enter your PIN":"Set a 4-digit PIN");
   $("forgotBtn").hidden=!has;
@@ -428,11 +446,21 @@ $("dashBtn").onclick=async()=>{
 $("dashBack").onclick=()=>{$("dashScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
 
 /* change PIN */
+$("pin6chk").checked=pinLen()===6;
+$("pin6chk").onchange=e=>{
+  localStorage.setItem("omni_pinlen",e.target.checked?"6":"4");
+  buildDots();
+  $("chpin1").setAttribute("maxlength",pinLen());
+  $("chpin2").setAttribute("maxlength",pinLen());
+  $("chpin1").placeholder="New "+pinLen()+"-digit PIN";
+  $("chpin2").placeholder="Confirm new PIN";
+};
 $("chpinBtn").onclick=()=>{$("chpinForm").hidden=false;$("chpinBtn").hidden=true;$("chpin1").value="";$("chpin2").value="";$("chpinMsg").textContent="";};
 $("chpinCancel").onclick=()=>{$("chpinForm").hidden=true;$("chpinBtn").hidden=false;};
 $("chpinSave").onclick=async()=>{
   const a=$("chpin1").value.trim(),b=$("chpin2").value.trim();
-  if(!/^\d{4}$/.test(a)){$("chpinMsg").textContent="PIN must be 4 digits.";return;}
+  const re=new RegExp("^\\d{"+pinLen()+"}$");
+  if(!re.test(a)){$("chpinMsg").textContent="PIN must be "+pinLen()+" digits.";return;}
   if(a!==b){$("chpinMsg").textContent="PINs don't match.";return;}
   if(!sessionPin){$("chpinMsg").textContent="Session expired — lock and unlock first.";return;}
   sessionPin=a;
@@ -500,12 +528,15 @@ const initials=n=>(n||"?").trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2).
 
 function renderCards(){
   const g=$("cardGrid");g.innerHTML="";
+  $("offlineBar").hidden=navigator.onLine!==false;
   const q=searchQ.toLowerCase();
   const list=profiles.filter(p=>!q||(p.label+" "+p.name+" "+p.org).toLowerCase().includes(q));
   $("emptyMsg").hidden=list.length>0;
   // backup nudge: show if cards exist and no backup in 30 days
   const lastB=parseInt(localStorage.getItem("omni_last_backup")||"0");
-  $("backupNudge").hidden=!(profiles.length>0&&(Date.now()-lastB)>30*86400000);
+  const showNudge=profiles.length>0&&(Date.now()-lastB)>30*86400000;
+  $("backupNudge").hidden=!showNudge;
+  if(showNudge)$("backupNudgeText").textContent=lastB===0?"💾 Back up your cards to keep them safe.":"💾 It's been a while since your last backup.";
   list.forEach(p=>{
     const d=document.createElement("div");d.className="pcard";
     d.setAttribute("role","button");d.setAttribute("tabindex","0");
@@ -540,7 +571,7 @@ function renderFlip(){
   $("flipCard").classList.remove("flipped");
   const pos=p.picPos||"50% 50%";
   $("flipFront").innerHTML=
-    (p.pic?`<img src="${p.pic}" style="object-position:${pos}" alt="">`:`<div class="fph">${initials(p.name||p.label)}</div>`)+
+    (p.pic?`<img src="${p.pic}" style="object-position:${pos}" alt="">`:`<div class="fring" aria-hidden="true"></div>`)+
     `<h2>${esc(p.label||"OMNI")}</h2><div class="fsub">DIGITAL SECURITY CARD</div>`+
     `<div class="ftag">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div>`;
   let back="";
@@ -589,7 +620,7 @@ function readFields(){
   p.color=$("f_color").value;
   if(!p.label)p.label=p.name||"Untitled";
 }
-$("saveBtn").onclick=()=>{readFields();saveAll();fillDetail();};
+$("saveBtn2").onclick=()=>{readFields();saveAll();fillDetail();};
 $("dupBtn").onclick=()=>{
   readFields();
   const p=getP();if(!p)return;
@@ -699,7 +730,7 @@ $("linkBtn").onclick=async()=>{
   let copied=false;
   try{await navigator.clipboard.writeText(url);copied=true;}catch(e){}
   $("qr").style.display="block";$("qr").innerHTML="";
-  if(typeof QRCode!=="undefined")new QRCode($("qr"),{text:url,width:168,height:168});
+  if(typeof QRCode!=="undefined")new QRCode($("qr"),{text:url,width:168,height:168,correctLevel:QRCode.CorrectLevel.M});
   else $("qr").innerHTML="<p style='color:#000;padding:10px'>QR needs internet on first load.</p>";
   $("qrDlBtn").hidden=false;
   if(copied)alert("OMNI link copied — write it to your NFC sticker.");
@@ -741,11 +772,13 @@ renderRecipient();
 window.addEventListener("hashchange",renderRecipient);
 /* init */
 (function init(){
+  buildDots();
   const welcomed=localStorage.getItem("omni_welcomed");
   const has=hasVault()||hasLegacy();
   if(!welcomed&&!has){
-    $("welcomeScreen").hidden=false;
+    $("welcomeScreen").hidden=false; // lockScreen stays hidden
   }else{
+    $("lockScreen").hidden=false;
     if(has)pinMsg("Enter your PIN");
     $("forgotBtn").hidden=!has;
   }
