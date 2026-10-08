@@ -572,7 +572,7 @@ function renderFlip(){
   const pos=p.picPos||"50% 50%";
   $("flipFront").innerHTML=
     (p.pic?`<img src="${p.pic}" style="object-position:${pos}" alt="">`:`<div class="fring" aria-hidden="true"></div>`)+
-    `<h2>${esc(p.label||"OMNI")}</h2><div class="fsub">DIGITAL SECURITY CARD</div>`+
+    `<h2>${esc(p.label||"OMNI")}</h2><div class="fsub">DIGITAL CARD</div>`+
     `<div class="ftag">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div>`;
   let back="";
   if(p.title)back+=`<div class="flabel">${esc(p.title)}</div>`;
