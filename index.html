@@ -16,7 +16,7 @@
 :root{--bg:#07080c;--card:#12141b;--line:#232839;--text:#f5f6f8;--muted:#9aa1ad;--accent:#4f8cff;--accent2:#8b5cf6;--glow:rgba(79,140,255,.35)}
 *{box-sizing:border-box}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);background-image:radial-gradient(700px 320px at 50% -60px,rgba(79,140,255,.12),transparent)}
-.wrap{max-width:480px;margin:0 auto;padding:22px 16px 96px}
+.wrap{max-width:480px;margin:0 auto;padding:calc(22px + env(safe-area-inset-top)) 16px calc(96px + env(safe-area-inset-bottom))}
 .brand{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .brand h1{margin:0;font-size:24px;letter-spacing:.14em;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .brand span{color:var(--muted);font-size:11px;letter-spacing:.08em}
@@ -60,6 +60,23 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 .pcard .pname{color:var(--muted);font-size:13px;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .empty{color:var(--muted);text-align:center;margin:60px 0}
 .fab{position:fixed;bottom:24px;right:24px;width:64px;height:64px;border-radius:50%;font-size:32px;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;margin:0;padding:0;box-shadow:0 6px 22px rgba(79,140,255,.45)}
+/* flip card */
+.flipwrap{perspective:1000px;margin-top:6px;cursor:pointer}
+.flipinner{position:relative;width:100%;height:230px;transition:transform .55s;transform-style:preserve-3d}
+.flipwrap.flipped .flipinner{transform:rotateY(180deg)}
+.flipfront,.flipback{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:20px;overflow:hidden;
+  background:linear-gradient(#141824,#10131b) padding-box,linear-gradient(135deg,rgba(79,140,255,.6),rgba(139,92,246,.5)) border-box;border:1px solid transparent;
+  box-shadow:0 8px 30px rgba(0,0,0,.5),0 0 24px rgba(79,140,255,.15)}
+.flipfront{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px}
+.flipfront img{width:84px;height:84px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);box-shadow:0 0 16px var(--glow);margin-bottom:10px}
+.flipfront .fph{width:84px;height:84px;border-radius:50%;background:#1a1e26;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#8ea6d8;border:2px dashed var(--line);margin-bottom:10px}
+.flipfront h2{margin:0;font-size:26px;letter-spacing:.1em;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.flipfront .fsub{font-size:11px;letter-spacing:.24em;color:var(--accent);font-weight:700;margin-top:4px}
+.flipfront .ftag{color:var(--muted);font-size:12px;margin-top:6px}
+.flipback{transform:rotateY(180deg);padding:16px;overflow-y:auto}
+.flipback a{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:6px 0;background:#1a1e26;border:1px solid var(--line);border-radius:12px;color:var(--text);font-size:15px}
+.flipback a:active{background:#232a3d}
+.flipback .flabel{color:var(--muted);font-size:12px;letter-spacing:.08em;margin:8px 0 2px}
 /* detail */
 .backrow{display:flex;align-items:center;gap:10px;margin-bottom:4px}
 .picwrap{text-align:center;margin:8px 0}
@@ -70,6 +87,18 @@ h3.sec{margin:18px 0 4px;font-size:15px}
 .rowbtns{display:flex;flex-wrap:wrap;gap:0}
 .colorrow{display:flex;align-items:center;gap:10px;margin-top:8px}
 .colorrow input{width:60px;margin:0}
+/* dashboard */
+.statrow{display:flex;justify-content:space-between;align-items:center;padding:12px 4px;border-bottom:1px solid var(--line);font-size:16px}
+.statrow:last-child{border-bottom:0}
+.statrow b{font-size:20px;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.statrow.sub{padding-left:18px;font-size:14px;color:var(--muted)}
+.statrow.sub b{font-size:16px}
+/* reposition overlay */
+#reposOverlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+#reposOverlay[hidden]{display:none}
+#reposCircle{width:260px;height:260px;border-radius:50%;overflow:hidden;border:3px solid var(--accent);box-shadow:0 0 30px var(--glow);touch-action:none;cursor:grab}
+#reposCircle img{width:100%;height:100%;object-fit:cover;pointer-events:none}
+#reposOverlay p{color:var(--muted);margin:18px 0}
 </style>
 </head>
 <body>
@@ -86,7 +115,7 @@ h3.sec{margin:18px 0 4px;font-size:15px}
 
 <!-- HOME -->
 <div class="wrap" id="homeScreen" hidden>
-  <div class="brand"><h1>OMNI</h1><div><button class="iconbtn small" id="backupBtn">Backup</button><button class="iconbtn" id="lockBtn">Lock</button></div></div>
+  <div class="brand"><h1>OMNI</h1><div><button class="iconbtn small" id="dashBtn">📊</button><button class="iconbtn small" id="backupBtn">Backup</button><button class="iconbtn" id="lockBtn">Lock</button></div></div>
   <div class="muted" style="letter-spacing:.08em;font-size:11px">SHARE ONLY WHAT YOU CHOOSE</div>
   <div class="searchrow"><input id="searchBox" placeholder="Search cards..."></div>
   <div id="cardGrid" class="grid"></div>
@@ -99,10 +128,21 @@ h3.sec{margin:18px 0 4px;font-size:15px}
 <div class="wrap" id="detailScreen" hidden>
   <div class="backrow"><button class="iconbtn" id="backBtn">← Back</button></div>
   <div class="brand"><h1 id="detailTitle">Card</h1></div>
+
+  <!-- Showcase flip card -->
+  <div class="flipwrap" id="flipCard">
+    <div class="flipinner" id="flipInner">
+      <div class="flipfront" id="flipFront"></div>
+      <div class="flipback" id="flipBack"></div>
+    </div>
+  </div>
+  <div class="muted" style="text-align:center;margin-top:8px">Tap the card to flip it</div>
+
   <div class="picwrap">
     <div id="picShow"></div>
     <input type="file" id="picInput" accept="image/*" hidden>
     <button class="chg" id="picBtn">Choose picture</button>
+    <button class="chg" id="reposBtn">Reposition picture</button>
   </div>
   <div class="box">
     <input id="f_label" placeholder="Card name, e.g. Studio">
@@ -134,6 +174,29 @@ h3.sec{margin:18px 0 4px;font-size:15px}
     </div>
     <p class="muted">Share uses AirDrop, Messages, and Mail. NFC / QR link is what you write onto a tap sticker.</p>
   </div>
+</div>
+
+<!-- REPOSITION OVERLAY -->
+<div id="reposOverlay" hidden>
+  <div id="reposCircle"><img id="reposImg" alt=""></div>
+  <p>Drag to position your picture</p>
+  <div><button id="reposDone">Done</button><button id="reposCancel" class="gray">Cancel</button></div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="wrap" id="dashScreen" hidden>
+  <div class="backrow"><button class="iconbtn" id="dashBack">← Back</button></div>
+  <div class="brand"><h1>Dashboard</h1></div>
+  <div class="muted" style="letter-spacing:.08em;font-size:11px">HOW YOUR APP IS DOING</div>
+  <div class="box">
+    <div class="statrow"><span>📱 App opens</span><b id="st_opens">0</b></div>
+    <div class="statrow"><span>📇 Cards created</span><b id="st_cards">0</b></div>
+    <div class="statrow"><span>📤 Total shares</span><b id="st_shares">0</b></div>
+    <div class="statrow sub"><span>— via Share</span><b id="st_share">0</b></div>
+    <div class="statrow sub"><span>— via Save .vcf</span><b id="st_vcf">0</b></div>
+    <div class="statrow sub"><span>— via NFC / QR link</span><b id="st_nfc">0</b></div>
+  </div>
+  <p class="muted">Stats are counted on this device. A shared cloud dashboard for all users is coming next.</p>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -176,6 +239,7 @@ function pinDone(){
 function unlock(){
   $("lockScreen").hidden=true;
   $("homeScreen").hidden=false;
+  stat("opens");
   renderCards();
 }
 function doLock(){
@@ -183,7 +247,7 @@ function doLock(){
   const has=!!localStorage.getItem("omni_pin");
   pinMsg(has?"Enter your PIN":"Set a 4-digit PIN");
   $("forgotBtn").hidden=!has;
-  $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("lockScreen").hidden=false;
+  $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("lockScreen").hidden=false;
 }
 $("lockBtn").onclick=doLock;
 $("forgotBtn").onclick=()=>{
@@ -192,6 +256,59 @@ $("forgotBtn").onclick=()=>{
     profiles=[];pinTmp=null;pinBuf="";renderDots();doLock();
   }
 };
+
+/* ---------- stats ---------- */
+function stat(k){
+  try{
+    const s=JSON.parse(localStorage.getItem("omni_stats")||"{}");
+    s[k]=(s[k]||0)+1;
+    localStorage.setItem("omni_stats",JSON.stringify(s));
+  }catch(e){}
+}
+function getStats(){try{return JSON.parse(localStorage.getItem("omni_stats")||"{}");}catch(e){return{};}}
+
+/* ---------- dashboard ---------- */
+$("dashBtn").onclick=()=>{
+  const s=getStats();
+  $("st_opens").textContent=s.opens||0;
+  $("st_cards").textContent=s.cards||0;
+  $("st_shares").textContent=(s.share||0)+(s.vcf||0)+(s.nfc||0);
+  $("st_share").textContent=s.share||0;
+  $("st_vcf").textContent=s.vcf||0;
+  $("st_nfc").textContent=s.nfc||0;
+  $("homeScreen").hidden=true;$("dashScreen").hidden=false;window.scrollTo(0,0);
+};
+$("dashBack").onclick=()=>{$("dashScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
+
+/* ---------- picture reposition ---------- */
+let reposDrag=null;
+$("reposBtn").onclick=()=>{
+  const p=getP();if(!p||!p.pic){alert("Choose a picture first.");return;}
+  $("reposImg").src=p.pic;
+  $("reposImg").style.objectPosition=p.picPos||"50% 50%";
+  $("reposOverlay").hidden=false;
+};
+function reposPos(ev){
+  const r=$("reposCircle").getBoundingClientRect();
+  const cx=(ev.touches?ev.touches[0].clientX:ev.clientX),cy=(ev.touches?ev.touches[0].clientY:ev.clientY);
+  let x=reposDrag.sx+((cx-reposDrag.x)/r.width)*100;
+  let y=reposDrag.sy+((cy-reposDrag.y)/r.height)*100;
+  x=Math.max(0,Math.min(100,x));y=Math.max(0,Math.min(100,y));
+  $("reposImg").style.objectPosition=x.toFixed(1)+"% "+y.toFixed(1)+"%";
+}
+$("reposCircle").addEventListener("pointerdown",ev=>{
+  const cur=($("reposImg").style.objectPosition||"50% 50%").split(" ");
+  reposDrag={x:ev.clientX,y:ev.clientY,sx:parseFloat(cur[0]),sy:parseFloat(cur[1])};
+  $("reposCircle").setPointerCapture(ev.pointerId);
+});
+$("reposCircle").addEventListener("pointermove",ev=>{if(reposDrag)reposPos(ev);});
+$("reposCircle").addEventListener("pointerup",()=>{reposDrag=null;});
+$("reposCircle").addEventListener("pointercancel",()=>{reposDrag=null;});
+$("reposDone").onclick=()=>{
+  const p=getP();if(p)p.picPos=$("reposImg").style.objectPosition;
+  saveAll();$("reposOverlay").hidden=true;renderPic();renderFlip();
+};
+$("reposCancel").onclick=()=>{$("reposOverlay").hidden=true;};
 
 /* ---------- profiles ---------- */
 let profiles=JSON.parse(localStorage.getItem("omni_profiles")||"[]");
@@ -208,7 +325,8 @@ function renderCards(){
   $("emptyMsg").hidden=list.length>0;
   list.forEach(p=>{
     const d=document.createElement("div");d.className="pcard";
-    d.innerHTML=(p.pic?`<img src="${p.pic}" alt="">`:`<div class="initials">${initials(p.name||p.label)}</div>`)+
+    const pos=p.picPos||"50% 50%";
+    d.innerHTML=(p.pic?`<img src="${p.pic}" style="object-position:${pos}" alt="">`:`<div class="initials">${initials(p.name||p.label)}</div>`)+
       `<div style="height:3px;background:linear-gradient(90deg,${p.color||"#4f8cff"},#8b5cf6)"></div>`+
       `<div class="plabel">${esc(p.label||"Untitled")}</div><div class="pname">${esc(p.name||"")}</div>`;
     d.onclick=()=>openDetail(p.id);
@@ -218,8 +336,8 @@ function renderCards(){
 $("searchBox").oninput=e=>{searchQ=e.target.value;renderCards();};
 
 $("fabPlus").onclick=()=>{
-  const p={id:Date.now(),label:"",name:"",org:"",title:"",phones:"",emails:"",urls:"",pic:"",color:"#4f8cff"};
-  profiles.push(p);curId=p.id;openDetail(p.id);
+  const p={id:Date.now(),label:"",name:"",org:"",title:"",phones:"",emails:"",urls:"",pic:"",picPos:"50% 50%",color:"#4f8cff"};
+  profiles.push(p);stat("cards");curId=p.id;openDetail(p.id);
 };
 function openDetail(id){
   curId=id;
@@ -228,17 +346,35 @@ function openDetail(id){
 }
 $("backBtn").onclick=()=>{$("detailScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
 
+$("flipCard").onclick=()=>$("flipCard").classList.toggle("flipped");
+function renderFlip(){
+  const p=getP();if(!p)return;
+  $("flipCard").classList.remove("flipped");
+  const pos=p.picPos||"50% 50%";
+  $("flipFront").innerHTML=
+    (p.pic?`<img src="${p.pic}" style="object-position:${pos}" alt="">`:`<div class="fph">${initials(p.name||p.label)}</div>`)+
+    `<h2>${esc(p.label||"OMNI")}</h2><div class="fsub">DIGITAL SECURITY CARD</div>`+
+    `<div class="ftag">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div>`;
+  let back="";
+  if(p.org||p.title)back+=`<div class="flabel">${esc(p.org||"")}${p.org&&p.title?" · ":""}${esc(p.title||"")}</div>`;
+  lines(p.phones).forEach(v=>back+=`<a href="tel:${esc(v.replace(/\s/g,""))}">📞 ${esc(v)}</a>`);
+  lines(p.emails).forEach(v=>back+=`<a href="mailto:${esc(v)}">✉️ ${esc(v)}</a>`);
+  lines(p.urls).forEach(v=>{const u=/^https?:/i.test(v)?v:"https://"+v;back+=`<a href="${esc(u)}" target="_blank" rel="noopener">🌐 ${esc(v)}</a>`;});
+  $("flipBack").innerHTML=back||`<p class="muted" style="text-align:center;margin-top:60px">No contact info yet.<br>Add some below.</p>`;
+}
 function fillDetail(){
   const p=getP();if(!p)return;
   $("detailTitle").textContent=p.label||"New card";
   ["label","name","org","title","phones","emails","urls"].forEach(k=>$("f_"+k).value=p[k]||"");
   $("f_color").value=p.color||"#4f8cff";
   renderPic();
+  renderFlip();
   buildShare();
 }
 function renderPic(){
   const p=getP();
-  $("picShow").innerHTML=p&&p.pic?`<img src="${p.pic}" alt="">`:`<div class="ph">${initials(p?p.name:"?")}</div>`;
+  const pos=p?(p.picPos||"50% 50%"):"50% 50%";
+  $("picShow").innerHTML=p&&p.pic?`<img src="${p.pic}" style="object-position:${pos}" alt="">`:`<div class="ph">${initials(p?p.name:"?")}</div>`;
 }
 $("picBtn").onclick=()=>$("picInput").click();
 $("picInput").onchange=e=>{
@@ -352,14 +488,16 @@ function downloadVcf(){
   a.download="OMNI.vcf";document.body.appendChild(a);a.click();
   setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},800);
 }
-$("vcfBtn").onclick=downloadVcf;
+$("vcfBtn").onclick=()=>{stat("vcf");downloadVcf();};
 $("shareBtn").onclick=async()=>{
+  stat("share");
   const file=new File([vcard(chosen(),curPic())],"OMNI.vcf",{type:"text/vcard"});
   try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"OMNI"});return;}}catch(e){}
   try{if(navigator.share){await navigator.share({title:"OMNI",text:$("preview").textContent});return;}}catch(e){}
   downloadVcf();
 };
 $("linkBtn").onclick=async()=>{
+  stat("nfc");
   const url=PUBLIC_URL+"#c="+btoa(unescape(encodeURIComponent(JSON.stringify(chosen()))));
   let copied=false;
   try{await navigator.clipboard.writeText(url);copied=true;}catch(e){}
