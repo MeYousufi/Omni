@@ -78,6 +78,11 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 .flipfront img{width:84px;height:84px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);box-shadow:0 0 16px var(--glow);margin-bottom:10px}
 .flipfront .fph{width:84px;height:84px;border-radius:50%;background:#1a1e26;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#8ea6d8;border:2px dashed var(--line);margin-bottom:10px}
 .flipfront .fring{width:64px;height:64px;border-radius:50%;border:5px solid var(--accent);margin-bottom:14px;position:relative;box-shadow:0 0 18px var(--glow)}
+.flipfront.has-cover{background-size:cover;background-position:center;justify-content:flex-end;padding-bottom:28px}
+.flipfront .fcover-dim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.25) 0%,rgba(0,0,0,.75) 100%);border-radius:inherit}
+.flipfront .fcover-text{position:relative;z-index:2;text-align:center}
+.flipfront .fcover-text h2{text-shadow:0 2px 12px rgba(0,0,0,.8)}
+.flipfront .fcover-text .ftag{text-shadow:0 1px 8px rgba(0,0,0,.8)}
 .flipfront .fring::after{content:"";position:absolute;top:-11px;left:50%;width:9px;height:9px;background:var(--accent);border-radius:50%;transform:translateX(-50%)}
 .flipfront h2{margin:0;font-size:26px;letter-spacing:.1em;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .flipfront .fsub{font-size:11px;letter-spacing:.24em;color:var(--accent);font-weight:700;margin-top:4px}
@@ -230,11 +235,16 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <button class="chg" id="picBtn">Choose picture</button>
     <button class="chg" id="reposBtn">Reposition picture</button>
   </div>
+  <div class="picwrap" style="margin-top:4px">
+    <div id="coverShow" style="width:100%;height:90px;border-radius:14px;overflow:hidden;background:#1a1e26;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;border:1px dashed var(--line)">No cover image</div>
+    <input type="file" id="coverInput" accept="image/*" hidden>
+    <button class="chg" id="coverBtn">Choose card cover</button>
+    <button class="chg" id="coverClear" hidden>Remove cover</button>
+  </div>
   <div class="box">
     <input id="f_label" placeholder="Card name, e.g. Studio">
     <input id="f_name" placeholder="Name">
     <input id="f_org" placeholder="Business">
-    <input id="f_title" placeholder="Title">
     <textarea id="f_phones" placeholder="Phones, one per line"></textarea>
     <div class="vhint" id="v_phones"></div>
     <textarea id="f_emails" placeholder="Emails, one per line"></textarea>
@@ -311,7 +321,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <h3 class="sec" style="margin-top:0">🔐 Change PIN</h3>
     <label class="chk" style="border-bottom:1px solid var(--line);margin-bottom:8px"><input type="checkbox" id="pin4chk" style="width:20px;height:20px"><span>Use 4-digit PIN <span class="muted">(weaker — only 10,000 combos)</span></span></label>
     <div id="chpinForm" hidden>
-      <input id="chpin1" type="password" inputmode="numeric" maxlength="6" placeholder="New PIN" aria-label="New PIN">
+      <input id="chpin1" type="password" inputmode="numeric" maxlength="6" placeholder="New PIN (4 or 6 digits)" aria-label="New PIN">
       <input id="chpin2" type="password" inputmode="numeric" maxlength="6" placeholder="Confirm new PIN" aria-label="Confirm new PIN">
       <div><button class="small" id="chpinSave">Save new PIN</button><button class="small gray" id="chpinCancel">Cancel</button></div>
       <p class="muted" id="chpinMsg"></p>
@@ -493,7 +503,7 @@ $("quickSave").onclick=()=>{
   if(!name){$("q_hint").textContent="Please enter your name.";$("q_name").classList.add("bad");return;}
   if(!c){$("q_hint").textContent="Enter a valid phone number or email.";$("q_contact").classList.add("bad");return;}
   $("q_hint").textContent="";$("q_name").classList.remove("bad");$("q_contact").classList.remove("bad");
-  pendingCard={id:"c"+Date.now(),label:"My Card",name:name,org:"",title:"",phones:c.type==="phones"?c.val:"",emails:c.type==="emails"?c.val:"",urls:"",address:"",notes:"",pic:"",picPos:"50% 50%",color:"#4f8cff",primary:c.type};
+  pendingCard={id:"c"+Date.now(),label:"My Card",name:name,org:"",phones:c.type==="phones"?c.val:"",emails:c.type==="emails"?c.val:"",urls:"",address:"",notes:"",pic:"",picPos:"50% 50%",cover:"",coverPos:"50% 50%",coverColor:"",color:"#4f8cff",primary:c.type};
   onboarding=true;
   $("quickScreen").hidden=true;$("lockScreen").hidden=false;
   pinMsg("Set a "+pinLen()+"-digit PIN to protect your card");
@@ -615,16 +625,19 @@ $("chpinBtn").onclick=()=>{$("chpinForm").hidden=false;$("chpinBtn").hidden=true
 $("chpinCancel").onclick=()=>{$("chpinForm").hidden=true;$("chpinBtn").hidden=false;};
 $("chpinSave").onclick=async()=>{
   const a=$("chpin1").value.trim(),b=$("chpin2").value.trim();
-  const re=new RegExp("^\\d{"+pinLen()+"}$");
-  if(!re.test(a)){$("chpinMsg").textContent="PIN must be "+pinLen()+" digits.";return;}
+  // accept 4 or 6 digits — the entered length becomes the new setting
+  if(!/^\d{4}$/.test(a)&&!/^\d{6}$/.test(a)){$("chpinMsg").textContent="PIN must be 4 or 6 digits.";return;}
   if(isObviousPin(a)){$("chpinMsg").textContent="Too obvious — pick a harder PIN.";return;}
   if(a!==b){$("chpinMsg").textContent="PINs don't match.";return;}
   if(!sessionPin){$("chpinMsg").textContent="Session expired — lock and unlock first.";return;}
   sessionPin=a;
+  localStorage.setItem("omni_pinlen",String(a.length));
+  $("pin4chk").checked=a.length===4;
+  buildDots();
   await vaultEncrypt(a,profiles);
-  $("chpinMsg").textContent="PIN changed ✓";
+  $("chpinMsg").textContent="PIN changed to "+a.length+" digits ✓";
   $("chpin1").value="";$("chpin2").value="";
-  setTimeout(()=>{$("chpinForm").hidden=true;$("chpinBtn").hidden=false;},1200);
+  setTimeout(()=>{$("chpinForm").hidden=true;$("chpinBtn").hidden=false;},1500);
 };
 
 /* ---------- picture reposition ---------- */
@@ -721,7 +734,7 @@ $("emptyCreate").onclick=()=>$("fabPlus").click();
 $("searchBox").oninput=e=>{searchQ=e.target.value;renderCards();};
 
 $("fabPlus").onclick=()=>{
-  const p={id:Date.now(),label:"",name:"",org:"",title:"",phones:"",emails:"",urls:"",pic:"",picPos:"50% 50%",color:"#4f8cff"};
+  const p={id:Date.now(),label:"",name:"",org:"",phones:"",emails:"",urls:"",address:"",notes:"",pic:"",picPos:"50% 50%",cover:"",coverPos:"50% 50%",coverColor:"",color:"#4f8cff"};
   profiles.push(p);stat("cards");curId=p.id;openDetail(p.id);
 };
 function openDetail(id){
@@ -746,23 +759,40 @@ function renderFlip(){
   const p=getP();if(!p)return;
   $("flipCard").classList.remove("flipped");
   const pos=p.picPos||"50% 50%";
-  $("flipFront").innerHTML=
-    (p.pic?`<img src="${p.pic}" style="object-position:${pos}" alt="">`:`<div class="fring" aria-hidden="true"></div>`)+
-    `<h2>${esc(p.label||"OMNI")}</h2><div class="fsub">DIGITAL CARD</div>`+
-    `<div class="ftag">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div>`;
+  const ff=$("flipFront"),fb=$("flipBack");
+  // front: cover image as full-bleed background if set
+  if(p.cover){
+    ff.classList.add("has-cover");
+    ff.style.backgroundImage=`url("${p.cover}")`;
+    ff.style.backgroundPosition=p.coverPos||"50% 50%";
+    ff.innerHTML=`<div class="fcover-dim" aria-hidden="true"></div>`+
+      `<div class="fcover-text"><h2>${esc(p.label||"OMNI")}</h2><div class="fsub">DIGITAL CARD</div>`+
+      `<div class="ftag">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div></div>`;
+  }else{
+    ff.classList.remove("has-cover");
+    ff.style.backgroundImage="";
+    ff.innerHTML=
+      (p.pic?`<img src="${p.pic}" style="object-position:${pos}" alt="">`:`<div class="fring" aria-hidden="true"></div>`)+
+      `<h2>${esc(p.label||"OMNI")}</h2><div class="fsub">DIGITAL CARD</div>`+
+      `<div class="ftag">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div>`;
+  }
+  // back: solid sampled color from cover, else default
+  fb.style.background=p.coverColor||"";
+  fb.style.borderColor=p.coverColor||"";
   let back="";
   if(p.title)back+=`<div class="flabel">${esc(p.title)}</div>`;
   lines(p.phones).forEach(v=>back+=`<a href="tel:${esc(v.replace(/\s/g,""))}">📞 ${esc(v)}</a>`);
   lines(p.emails).forEach(v=>back+=`<a href="mailto:${esc(v)}">✉️ ${esc(v)}</a>`);
   lines(p.urls).forEach(v=>{const u=/^https?:/i.test(v)?v:"https://"+v;back+=`<a href="${esc(u)}" target="_blank" rel="noopener">🌐 ${esc(v)}</a>`;});
-  $("flipBack").innerHTML=back||`<p class="muted" style="text-align:center;margin-top:60px">No contact info yet.<br>Add some below.</p>`;
+  fb.innerHTML=back||`<p class="muted" style="text-align:center;margin-top:60px">No contact info yet.<br>Add some below.</p>`;
 }
 function fillDetail(){
   const p=getP();if(!p)return;
   $("detailTitle").textContent=p.label||"New card";
-  ["label","name","org","title","phones","emails","urls","address","notes"].forEach(k=>$("f_"+k).value=p[k]||"");
+  ["label","name","org","phones","emails","urls","address","notes"].forEach(k=>$("f_"+k).value=p[k]||"");
   $("f_color").value=p.color||"#4f8cff";
   renderPic();
+  renderCover();
   renderFlip();
   buildShare();
 }
@@ -772,6 +802,55 @@ function renderPic(){
   $("picShow").innerHTML=p&&p.pic?`<img src="${p.pic}" style="object-position:${pos}" alt="">`:`<div class="ph">${initials(p?p.name:"?")}</div>`;
 }
 $("picBtn").onclick=()=>$("picInput").click();
+/* dominant color from image (for card back) */
+function sampleCoverColor(src,cb){
+  const img=new Image();
+  img.onload=()=>{
+    try{
+      const s=24,c=document.createElement("canvas");
+      c.width=s;c.height=s;
+      const x=c.getContext("2d",{willReadFrequently:true});
+      x.drawImage(img,0,0,s,s);
+      const d=x.getImageData(0,0,s,s).data;
+      let r=0,g=0,b=0,n=0;
+      for(let i=0;i<d.length;i+=4){r+=d[i];g+=d[i+1];b+=d[i+2];n++;}
+      r=Math.round(r/n);g=Math.round(g/n);b=Math.round(b/n);
+      cb(`rgb(${r},${g},${b})`);
+    }catch(e){cb(null);}
+  };
+  img.onerror=()=>cb(null);
+  img.src=src;
+}
+function renderCover(){
+  const p=getP();
+  const el=$("coverShow");
+  if(p&&p.cover){el.innerHTML=`<img src="${p.cover}" style="width:100%;height:100%;object-fit:cover;object-position:${p.coverPos||"50% 50%"}" alt="">`;}
+  else{el.innerHTML=`No cover image`;}
+  $("coverClear").hidden=!(p&&p.cover);
+}
+$("coverBtn").onclick=()=>$("coverInput").click();
+$("coverInput").onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement("canvas");
+      const s=800/Math.max(img.width,img.height);
+      c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+      const p=getP();if(!p)return;
+      p.cover=c.toDataURL("image/jpeg",0.82);
+      p.coverPos="50% 50%";
+      sampleCoverColor(p.cover,col=>{if(col){p.coverColor=col;renderFlip();}});
+      renderCover();renderFlip();
+    };
+    img.src=r.result;
+  };
+  r.readAsDataURL(f);
+  e.target.value="";
+};
+$("coverClear").onclick=()=>{const p=getP();if(!p)return;p.cover="";p.coverColor="";renderCover();renderFlip();};
 $("picInput").onchange=e=>{
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
@@ -792,7 +871,7 @@ $("picInput").onchange=e=>{
 };
 function readFields(){
   const p=getP();if(!p)return;
-  ["label","name","org","title","phones","emails","urls","address","notes"].forEach(k=>p[k]=$("f_"+k).value.trim());
+  ["label","name","org","phones","emails","urls","address","notes"].forEach(k=>p[k]=$("f_"+k).value.trim());
   p.color=$("f_color").value;
   if(!p.label)p.label=p.name||"Untitled";
   // auto-detect primary contact method if not set (for safe share defaults)
