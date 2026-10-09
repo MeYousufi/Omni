@@ -508,7 +508,9 @@ $("quickSave").onclick=()=>{
   $("quickScreen").hidden=true;$("lockScreen").hidden=false;
   pinMsg("Set a "+pinLen()+"-digit PIN to protect your card");
 };
-function doLock(){
+async function doLock(){
+  // save any pending changes before wiping memory
+  await saveAll();
   pinBuf="";pinTmp=null;sessionPin=null;profiles=[];curId=null;buildDots();updateGo();
   const has=hasVault()||hasLegacy();
   pinMsg(has?"Enter your PIN":"Set a 6-digit PIN");
@@ -664,9 +666,9 @@ $("reposCircle").addEventListener("pointerdown",ev=>{
 $("reposCircle").addEventListener("pointermove",ev=>{if(reposDrag)reposPos(ev);});
 $("reposCircle").addEventListener("pointerup",()=>{reposDrag=null;});
 $("reposCircle").addEventListener("pointercancel",()=>{reposDrag=null;});
-$("reposDone").onclick=()=>{
+$("reposDone").onclick=async()=>{
   const p=getP();if(p)p.picPos=$("reposImg").style.objectPosition;
-  saveAll();$("reposOverlay").hidden=true;renderPic();renderFlip();
+  await saveAll();$("reposOverlay").hidden=true;renderPic();renderFlip();
 };
 $("reposCancel").onclick=()=>{$("reposOverlay").hidden=true;};
 
@@ -885,16 +887,16 @@ function readFields(){
     else if(lines(p.urls).length)p.primary="urls";
   }
 }
-$("saveBtn2").onclick=()=>{readFields();saveAll();fillDetail();haptic(10);toast("Saved on this device ✓");};
-$("dupBtn").onclick=()=>{
+$("saveBtn2").onclick=async()=>{readFields();await saveAll();fillDetail();haptic(10);toast("Saved on this device ✓");};
+$("dupBtn").onclick=async()=>{
   readFields();
   const p=getP();if(!p)return;
   const c=JSON.parse(JSON.stringify(p));c.id=Date.now();c.label=(p.label||"Card")+" copy";
-  profiles.push(c);saveAll();curId=c.id;fillDetail();
+  profiles.push(c);await saveAll();curId=c.id;fillDetail();
 };
-$("delBtn").onclick=()=>{
+$("delBtn").onclick=async()=>{
   if(!confirm("Delete this card?"))return;
-  profiles=profiles.filter(p=>p.id!==curId);saveAll();
+  profiles=profiles.filter(p=>p.id!==curId);await saveAll();
   $("detailScreen").hidden=true;$("homeScreen").hidden=false;renderCards();
 };
 
@@ -911,12 +913,12 @@ $("backupBtn").onclick=()=>{
 $("importInput").onchange=e=>{
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
-  r.onload=()=>{
+  r.onload=async()=>{
     try{
       const d=JSON.parse(r.result);
       if(!d.profiles||!Array.isArray(d.profiles))throw 0;
       if(confirm(`Import ${d.profiles.length} card(s)? This replaces your current cards.`)){
-        profiles=d.profiles;saveAll();renderCards();
+        profiles=d.profiles;await saveAll();renderCards();
       }
     }catch(err){alert("That file doesn't look like an OMNI backup.");}
   };
@@ -1062,6 +1064,9 @@ async function renderRecipient(){
 }
 renderRecipient();
 window.addEventListener("hashchange",renderRecipient);
+/* safety net: save if page is hidden/closed with unsaved changes */
+document.addEventListener("visibilitychange",()=>{if(document.hidden)saveAll();});
+window.addEventListener("pagehide",()=>{saveAll();});
 /* init */
 (function init(){
   buildDots();
