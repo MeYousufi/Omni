@@ -450,7 +450,10 @@ function pinMsg(t){$("lockMsg").textContent=t;}
     if(k==="GO"){
       b.setAttribute("aria-label","Submit PIN");
       b.style.background="linear-gradient(135deg,#2d5a2d,#3a7a3a)";
-      b.onclick=()=>{if(pinBuf.length>=4)pinDone();};
+      b.onclick=()=>{
+        // only allow early submit when unlocking an existing vault (unknown PIN length)
+        if((hasVault()||hasLegacy())&&pinBuf.length>=4)pinDone();
+      };
     }else{
       b.setAttribute("aria-label",k==="⌫"?"Delete digit":"Digit "+k);
       b.onclick=()=>{
@@ -480,8 +483,9 @@ async function pinDone(){
       if(isObviousPin(pin)){pinMsg("Too obvious — pick a harder PIN");return;}
       if(pinTmp===null){pinTmp=pin;pinMsg("Confirm your PIN");return;}
       if(pinTmp!==pin){pinTmp=null;pinMsg("Didn't match — try again");return;}
-      profiles=[];sessionPin=pin;
-      if(pendingCard){profiles.push(pendingCard);stat("cards");}
+      // keep any restored profiles in memory (from backup restore); only start empty if truly fresh
+      if(profiles.length===0&&pendingCard){profiles.push(pendingCard);stat("cards");}
+      sessionPin=pin;
       await vaultEncrypt(pin,profiles);
       pinFailReset();haptic(15);
       if(onboarding){
@@ -545,8 +549,8 @@ $("quickSave").onclick=()=>{
   pinMsg("Set a "+pinLen()+"-digit PIN to protect your card");
 };
 async function doLock(){
-  // save any pending changes before wiping memory
-  await saveAll();
+  // save any pending changes before wiping memory — but ALWAYS wipe even if save fails
+  try{await saveAll();}catch(e){console.warn("Lock-time save failed:",e);}
   pinBuf="";pinTmp=null;sessionPin=null;profiles=[];curId=null;buildDots();updateGo();
   const has=hasVault()||hasLegacy();
   pinMsg(has?"Enter your PIN":"Set a 6-digit PIN");
@@ -576,9 +580,15 @@ $("resetRestore").onclick=()=>{
         if(!d.profiles||!Array.isArray(d.profiles))throw 0;
         if(confirm("Restore "+d.profiles.length+" cards from backup? This replaces what's on this device.")){
           profiles=d.profiles;sessionPin=null;
-          alert("Backup loaded. Set a new PIN to encrypt and save these cards.");
           localStorage.removeItem("omni_vault");localStorage.removeItem("omni_profiles");localStorage.removeItem("omni_pin");
-          pinTmp=null;pinBuf="";buildDots();doLock();
+          // do NOT call doLock() — it would wipe the restored profiles from memory.
+          // Go straight to PIN setup, keeping profiles in memory for encryption.
+          alert("Backup loaded. Set a new PIN to encrypt and save these cards.");
+          pinTmp=null;pinBuf="";buildDots();
+          pinMsg("Set a "+(localStorage.getItem("omni_pinlen")||"6")+"-digit PIN");
+          $("forgotBtn").hidden=true;
+          $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("welcomeScreen").hidden=true;$("lockScreen").hidden=false;
+          updateGo();
         }
       }catch(e){alert("Couldn't read that backup file.");}
     };
@@ -668,11 +678,12 @@ $("chpinSave").onclick=async()=>{
   if(isObviousPin(a)){$("chpinMsg").textContent="Too obvious — pick a harder PIN.";return;}
   if(a!==b){$("chpinMsg").textContent="PINs don't match.";return;}
   if(!sessionPin){$("chpinMsg").textContent="Session expired — lock and unlock first.";return;}
+  try{await vaultEncrypt(a,profiles);}
+  catch(e){$("chpinMsg").textContent="Couldn't save new PIN — storage may be full.";return;}
   sessionPin=a;
   localStorage.setItem("omni_pinlen",String(a.length));
   $("pin4chk").checked=a.length===4;
   buildDots();
-  await vaultEncrypt(a,profiles);
   $("chpinMsg").textContent="PIN changed to "+a.length+" digits ✓";
   $("chpin1").value="";$("chpin2").value="";
   setTimeout(()=>{$("chpinForm").hidden=true;$("chpinBtn").hidden=false;},1500);
@@ -816,8 +827,8 @@ $("emptyCreate").onclick=()=>$("fabPlus").click();
 $("searchBox").oninput=e=>{searchQ=e.target.value;renderCards();};
 
 $("fabPlus").onclick=()=>{
-  const p={id:Date.now(),label:"",name:"",org:"",phones:"",emails:"",urls:"",address:"",notes:"",pic:"",picPos:"50% 50%",cover:"",coverPos:"50% 50%",coverColor:"",color:"#4f8cff"};
-  profiles.push(p);stat("cards");curId=p.id;openDetail(p.id);
+  const p={id:Date.now(),label:"",name:"",org:"",phones:"",emails:"",urls:"",address:"",notes:"",pic:"",picPos:"50% 50%",cover:"",coverPos:"50% 50%",coverColor:"",color:"#4f8cff",_draft:true};
+  profiles.push(p);curId=p.id;openDetail(p.id);
 };
 function openDetail(id,toShare){
   curId=id;
@@ -825,7 +836,14 @@ function openDetail(id,toShare){
   fillDetail();window.scrollTo(0,0);
   if(toShare)setTimeout(()=>{const s=$("shareBox");if(s&&!s.hidden)s.scrollIntoView({behavior:"smooth",block:"center"});},120);
 }
-$("backBtn").onclick=()=>{$("detailScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
+$("backBtn").onclick=async()=>{
+  // drop unsaved draft cards (created via + but never saved)
+  const p=getP();
+  if(p&&p._draft&&!p.label&&!p.name)profiles=profiles.filter(x=>x.id!==p.id);
+  else{readFields();if(p)delete p._draft;}
+  try{await saveAll();}catch(e){}
+  curId=null;activeWallet=-1;$("detailScreen").hidden=true;$("homeScreen").hidden=false;renderCards();
+};
 
 function doFlip(){
   $("flipCard").classList.toggle("flipped");
@@ -964,7 +982,13 @@ function readFields(){
     else if(lines(p.urls).length)p.primary="urls";
   }
 }
-$("saveBtn2").onclick=async()=>{readFields();await saveAll();fillDetail();haptic(10);toast("Saved on this device ✓");};
+$("saveBtn2").onclick=async()=>{
+  readFields();
+  const p=getP();if(p&&p._draft){delete p._draft;stat("cards");}
+  try{await saveAll();}
+  catch(e){toast("⚠️ Save failed — storage may be full");return;}
+  fillDetail();haptic(10);toast("Saved on this device ✓");
+};
 $("dupBtn").onclick=async()=>{
   readFields();
   const p=getP();if(!p)return;
@@ -1080,9 +1104,14 @@ $("linkBtn").onclick=async()=>{
   const data=chosen();
   let url=null;
   // Try short cloud link first (fits on any NFC sticker)
+  // Payload is encrypted client-side; the key stays in the URL fragment (never sent to server)
   try{
-    const r=await fetch(STATS_URL+"/api/card",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({d:data})});
-    if(r.ok){const j=await r.json();if(j.id)url=PUBLIC_URL+"#s="+j.id;}
+    const key=crypto.getRandomValues(new Uint8Array(32));
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const ck=await crypto.subtle.importKey("raw",key,"AES-GCM",false,["encrypt"]);
+    const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},ck,te.encode(JSON.stringify(data)));
+    const r=await fetch(STATS_URL+"/api/card",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({d:b64(iv)+"."+b64(ct)})});
+    if(r.ok){const j=await r.json();if(j.id)url=PUBLIC_URL+"#s="+j.id+"&k="+b64(key).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}
   }catch(e){}
   // Fallback: full data in URL (works offline, but long)
   if(!url)url=PUBLIC_URL+"#c="+btoa(unescape(encodeURIComponent(JSON.stringify(data))));
@@ -1122,12 +1151,26 @@ function showContact(d){
 }
 async function renderRecipient(){
   if(location.hash.startsWith("#s=")){
-    const id=location.hash.slice(3).replace(/[^A-Za-z0-9]/g,"").slice(0,16);
+    const m=location.hash.match(/^#s=([A-Za-z0-9]+)(?:&k=([A-Za-z0-9\-_]+))?/);
+    const id=m?m[1].slice(0,16):"";
+    const keyB64=m&&m[2]?m[2].replace(/-/g,"+").replace(/_/g,"/"):"";
     document.body.innerHTML=`<div style="max-width:480px;margin:0 auto;padding:60px 16px;font-family:-apple-system,sans-serif;background:#090a0d;color:#9aa1ad;min-height:100vh;text-align:center">Loading contact…</div>`;
     try{
       const r=await fetch(STATS_URL+"/api/card/"+id);
       if(!r.ok)throw 0;
-      showContact(await r.json());
+      const stored=await r.json();
+      let data;
+      if(keyB64&&typeof stored.d==="string"&&stored.d.includes(".")){
+        // encrypted payload: decrypt with key from URL fragment
+        const parts=stored.d.split(".");
+        const rawKey=Uint8Array.from(atob(keyB64),c=>c.charCodeAt(0));
+        const ck=await crypto.subtle.importKey("raw",rawKey,"AES-GCM",false,["decrypt"]);
+        const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:ub64(parts[0])},ck,ub64(parts[1]));
+        data=JSON.parse(td.decode(pt));
+      }else if(stored.d&&typeof stored.d==="object"){
+        data=stored.d; // legacy plaintext link
+      }else throw 0;
+      showContact(data);
     }catch(e){
       document.body.innerHTML=`<div style="max-width:480px;margin:0 auto;padding:60px 16px;font-family:-apple-system,sans-serif;background:#090a0d;color:#f5f6f8;min-height:100vh;text-align:center"><h1>OMNI</h1><p class="muted">This link didn't work — it may have expired.</p></div>`;
     }
