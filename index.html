@@ -156,6 +156,16 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .statrow b{font-size:20px;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .statrow.sub{padding-left:18px;font-size:14px;color:var(--muted)}
 .statrow.sub b{font-size:16px}
+/* share credits */
+.creditbar{text-align:center;padding:10px 12px;margin:10px 0;background:#141926;border:1px dashed var(--line);border-radius:12px;font-size:14px;line-height:1.6}
+.togglerow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line);font-size:15px}
+.togglerow:last-child{border-bottom:0}
+.switch{position:relative;width:52px;height:30px;flex:none}
+.switch input{opacity:0;width:100%;height:100%;position:absolute;margin:0;cursor:pointer;z-index:2}
+.sl{position:absolute;inset:0;background:#2a3040;border-radius:20px;transition:.2s;pointer-events:none}
+.sl:before{content:"";position:absolute;width:24px;height:24px;left:3px;top:3px;background:#8a93a5;border-radius:50%;transition:.2s}
+.switch input:checked+.sl{background:linear-gradient(135deg,var(--accent),var(--accent2))}
+.switch input:checked+.sl:before{transform:translateX(22px);background:#fff}
 /* reposition overlay */
 #reposOverlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
 #reposOverlay[hidden]{display:none}
@@ -235,6 +245,17 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   </div>
 </div>
 
+<!-- OUT OF SHARES MODAL -->
+<div id="limitModal" class="modal" hidden role="dialog" aria-label="Out of shares">
+  <div class="box">
+    <h3 class="sec" style="margin-top:0">🎟️ You're out of shares!</h3>
+    <p class="muted">Your 20 free shares reset Friday. Get more now:</p>
+    <div id="limitInviteWrap"><button id="limitInviteBtn" style="width:100%">💌 Invite a friend — earn 100 shares</button></div>
+    <div id="limitBuyWrap"><button id="limitBuyBtn" style="width:100%;margin-top:8px">💳 Buy 100 shares — $3.99</button></div>
+    <button id="limitClose" class="gray" style="width:100%;margin-top:8px">Not now</button>
+  </div>
+</div>
+
 <!-- HOME -->
 <div class="wrap" id="homeScreen" hidden>
   <div class="brand"><h1>OMNI</h1><div><button class="iconbtn small" id="dashBtn" aria-label="Open dashboard">📊</button><button class="iconbtn small" id="backupBtn" aria-label="Back up cards">Backup</button><button class="iconbtn" id="lockBtn" aria-label="Lock app">Lock</button></div></div>
@@ -309,6 +330,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <pre id="preview" aria-live="polite"></pre>
     <div id="qr"></div>
     <p class="muted" id="nfcNote" hidden style="text-align:center"></p>
+    <div id="creditBar" class="creditbar" hidden></div>
     <button id="shareBtn" style="width:100%;padding:15px;font-size:17px">Share…</button>
     <button id="moreShareBtn" class="gray small" style="width:100%;margin-top:8px" aria-expanded="false">More ways to share ▾</button>
     <div id="moreShare" hidden style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
@@ -352,6 +374,42 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <div class="statrow"><span>App opens</span><b id="st_opens">0</b></div>
     <div class="statrow"><span>Cards created</span><b id="st_cards">0</b></div>
     <div class="statrow"><span>Total shares</span><b id="st_shares">0</b></div>
+    <div class="statrow" id="creditStatRow" hidden><span>🎟️ Free shares left (week)</span><b id="st_sharesleft">20</b></div>
+    <div class="statrow" id="bonusStatRow" hidden><span>✨ Bonus shares</span><b id="st_bonus">0</b></div>
+  </div>
+  <div class="box" id="inviteBox" hidden>
+    <h3 class="sec" style="margin-top:0">💌 Invite friends</h3>
+    <p class="muted">Share your invite link — you both get <b>100 bonus shares</b>. Bonus shares never expire.</p>
+    <div class="statrow"><span>✨ Bonus shares</span><b id="bonusBal">0</b></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input id="inviteLink" readonly style="flex:1;margin:0" aria-label="Your invite link">
+      <button class="small" id="copyInvite" style="flex:none">Copy</button>
+    </div>
+    <button class="small gray" id="shareInviteBtn" style="width:100%;margin-top:8px">Share invite link…</button>
+  </div>
+  <div class="box" id="buyBox" hidden>
+    <h3 class="sec" style="margin-top:0">💳 Buy shares</h3>
+    <p class="muted">Top up anytime — bonus shares never expire.</p>
+    <button id="buySharesBtn" style="width:100%">Buy 100 shares — $3.99</button>
+    <p class="muted" id="buyMsg" style="text-align:center"></p>
+  </div>
+  <div class="box" id="ownerBox">
+    <h3 class="sec" style="margin-top:0">👑 Owner controls</h3>
+    <div id="ownerLocked">
+      <p class="muted">Restricted area.</p>
+      <button class="small gray" id="ownerUnlockBtn">Unlock</button>
+    </div>
+    <div id="ownerOpen" hidden>
+      <div class="togglerow"><span>🎟️ Share limits<br><span class="muted" style="font-size:12px">20 free shares / week</span></span><label class="switch"><input type="checkbox" id="tgLimits" aria-label="Toggle share limits"><span class="sl"></span></label></div>
+      <div class="togglerow"><span>💌 Invite system<br><span class="muted" style="font-size:12px">100 bonus shares per invite</span></span><label class="switch"><input type="checkbox" id="tgInvites" aria-label="Toggle invite system"><span class="sl"></span></label></div>
+      <div class="togglerow"><span>💳 Buy shares<br><span class="muted" style="font-size:12px">$3.99 per 100 shares</span></span><label class="switch"><input type="checkbox" id="tgBuy" aria-label="Toggle buy shares"><span class="sl"></span></label></div>
+      <h3 class="sec">🎁 Grant bonus shares</h3>
+      <p class="muted">Enter the user's invite code (they'll find it in Dashboard → Invite friends).</p>
+      <input id="grantCode" placeholder="Invite code (e.g. X7K2P9QA)" autocomplete="off" autocapitalize="characters" aria-label="User invite code">
+      <input id="grantAmt" type="number" min="1" max="10000" value="100" aria-label="Share amount">
+      <button class="small" id="grantBtn">Grant shares</button>
+      <p class="muted" id="grantMsg"></p>
+    </div>
   </div>
   <div class="box">
     <h3 class="sec" style="margin-top:0">🔐 Change PIN</h3>
@@ -523,6 +581,8 @@ function unlock(){
   $("homeScreen").hidden=false;
   stat("opens");
   renderCards();
+  updateCreditUI();
+  collectPendingInvites();
 }
 $("welcomeGo").onclick=()=>{
   localStorage.setItem("omni_welcomed","1");
@@ -614,6 +674,217 @@ function stat(k){
 }
 function getStats(){try{return JSON.parse(localStorage.getItem("omni_stats")||"{}");}catch(e){return{};}}
 
+/* ---------- share credits (v1) ---------- */
+const WEEKLY_FREE=20, INVITE_BONUS=100, SHARE_PACK=100;
+let FLAGS={shareLimits:false,invites:false,buyShares:false};
+function fridayWeekId(d){
+  const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  x.setDate(x.getDate()-((x.getDay()-5+7)%7));
+  return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");
+}
+function creditsState(){
+  let c={};
+  try{c=JSON.parse(localStorage.getItem("omni_credits")||"{}");}catch(e){}
+  const wid=fridayWeekId(new Date());
+  if(c.weekId!==wid){c={weekId:wid,used:0,bonus:(c&&c.bonus)||0};try{localStorage.setItem("omni_credits",JSON.stringify(c));}catch(e){}}
+  c.used=c.used||0;c.bonus=c.bonus||0;
+  return c;
+}
+function saveCredits(c){try{localStorage.setItem("omni_credits",JSON.stringify(c));}catch(e){}}
+async function loadFlags(){
+  try{
+    const r=await fetch(STATS_URL+"/api/flags",{cache:"no-store"});
+    if(r.ok){FLAGS=Object.assign({},FLAGS,await r.json());try{localStorage.setItem("omni_flags",JSON.stringify({f:FLAGS,at:Date.now()}));}catch(e){}}
+  }catch(e){
+    try{const c=JSON.parse(localStorage.getItem("omni_flags")||"{}");if(c.f)FLAGS=Object.assign({},FLAGS,c.f);}catch(e2){}
+  }
+}
+function updateCreditUI(){
+  const bar=$("creditBar");if(!bar)return;
+  if(!FLAGS.shareLimits){bar.hidden=true;}
+  else{
+    bar.hidden=false;
+    const s=creditsState();
+    const wl=Math.max(0,WEEKLY_FREE-s.used);
+    let t=`🎟️ <b>${wl}/${WEEKLY_FREE}</b> free shares left`;
+    if(s.bonus>0)t+=` &nbsp;·&nbsp; ✨ <b>${s.bonus}</b> bonus`;
+    t+=`<br><span style="font-size:11px">Used ${s.used} this week · resets Friday</span>`;
+    bar.innerHTML=t;
+  }
+  if($("st_sharesleft")){const s=creditsState();$("st_sharesleft").textContent=Math.max(0,WEEKLY_FREE-s.used);$("creditStatRow").hidden=!FLAGS.shareLimits;}
+  if($("st_bonus")){const s=creditsState();$("st_bonus").textContent=s.bonus;$("bonusStatRow").hidden=!FLAGS.shareLimits;}
+}
+/* returns true if the share may proceed, false if blocked (limit modal shown) */
+function consumeShare(){
+  if(!FLAGS.shareLimits)return true;
+  const s=creditsState();
+  if(WEEKLY_FREE-s.used>0){s.used++;saveCredits(s);updateCreditUI();return true;}
+  if(s.bonus>0){s.bonus--;saveCredits(s);updateCreditUI();return true;}
+  showLimitModal();
+  return false;
+}
+function showLimitModal(){
+  $("limitInviteWrap").style.display=FLAGS.invites?"":"none";
+  $("limitBuyWrap").style.display=FLAGS.buyShares?"":"none";
+  $("limitModal").hidden=false;
+}
+$("limitClose").onclick=()=>{$("limitModal").hidden=true;};
+$("limitInviteBtn").onclick=()=>{$("limitModal").hidden=true;copyInviteLink();};
+$("limitBuyBtn").onclick=()=>{$("limitModal").hidden=true;buyShares();};
+
+/* ---------- invites ---------- */
+function myDeviceId(){
+  let d=null;try{d=localStorage.getItem("omni_device_id");}catch(e){}
+  if(!d){d="d"+Date.now().toString(36)+Math.random().toString(36).slice(2,10);try{localStorage.setItem("omni_device_id",d);}catch(e){}}
+  return d;
+}
+function myInviteCode(){
+  let c=null;try{c=localStorage.getItem("omni_invite_code");}catch(e){}
+  if(!c){
+    const ch="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",r=crypto.getRandomValues(new Uint8Array(8));
+    c="";for(let i=0;i<8;i++)c+=ch[r[i]%ch.length];
+    try{localStorage.setItem("omni_invite_code",c);}catch(e){}
+    try{fetch(STATS_URL+"/api/invite/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:c,deviceId:myDeviceId()})}).catch(()=>{});}catch(e){}
+  }
+  return c;
+}
+const inviteLink=()=>PUBLIC_URL+"?invite="+myInviteCode();
+async function claimInvite(code){
+  try{
+    const r=await fetch(STATS_URL+"/api/invite/claim",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({inviterCode:code,deviceId:myDeviceId()})});
+    const j=await r.json();
+    if(j&&j.ok){
+      try{localStorage.setItem("omni_invite_claimed","1");}catch(e){}
+      const s=creditsState();s.bonus+=INVITE_BONUS;saveCredits(s);updateCreditUI();
+      ping("invite_claimed");
+      setTimeout(()=>toast(`🎉 +${INVITE_BONUS} bonus shares — welcome!`),1200);
+    }
+  }catch(e){}
+}
+async function handleInviteParam(){
+  let code="";
+  try{
+    const q=new URLSearchParams(location.search);code=(q.get("invite")||"").toUpperCase().trim();
+    if(code){q.delete("invite");const ns=q.toString();history.replaceState(null,"",location.pathname+(ns?"?"+ns:"")+location.hash);}
+  }catch(e){return;}
+  if(!code)return;
+  let claimed=null,self=null;
+  try{claimed=localStorage.getItem("omni_invite_claimed");self=localStorage.getItem("omni_invite_code");}catch(e){}
+  if(claimed)return;
+  if(self&&code===self)return;
+  if(!FLAGS.invites)return;
+  await claimInvite(code);
+}
+async function collectPendingInvites(){
+  if(!FLAGS.invites)return;
+  try{
+    const r=await fetch(STATS_URL+"/api/invite/pending?code="+encodeURIComponent(myInviteCode()),{cache:"no-store"});
+    if(!r.ok)return;
+    const j=await r.json();
+    if(j&&j.pending>0){
+      const s=creditsState();s.bonus+=j.pending;saveCredits(s);updateCreditUI();
+      toast(`🎉 +${j.pending} bonus shares — a friend joined!`);
+    }
+  }catch(e){}
+}
+async function copyInviteLink(){
+  const l=inviteLink();
+  try{await navigator.clipboard.writeText(l);toast("Invite link copied ✓");}
+  catch(e){prompt("Copy your invite link",l);}
+}
+$("copyInvite").onclick=copyInviteLink;
+$("shareInviteBtn").onclick=async()=>{
+  const l=inviteLink();
+  try{if(navigator.share){await navigator.share({title:"OMNI",text:"Get OMNI — we both earn 100 bonus shares!",url:l});return;}}catch(e){}
+  copyInviteLink();
+};
+
+/* ---------- buy shares ---------- */
+async function buyShares(){
+  if(!FLAGS.buyShares)return;
+  const msg=$("buyMsg");if(msg)msg.textContent="Opening secure checkout…";
+  try{
+    const r=await fetch(STATS_URL+"/api/checkout/shares",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({deviceCode:myInviteCode()})});
+    const j=await r.json();
+    if(j&&j.url){location.href=j.url;return;}
+    if(msg)msg.textContent="";toast((j&&j.error)||"Checkout unavailable right now");
+  }catch(e){if(msg)msg.textContent="";toast("Couldn't reach checkout — check connection");}
+}
+$("buySharesBtn").onclick=buyShares;
+async function handlePurchaseReturn(){
+  let sid="";
+  try{
+    const q=new URLSearchParams(location.search);
+    if(q.get("purchase")!=="ok")return;
+    sid=q.get("session_id")||"";
+    q.delete("purchase");q.delete("session_id");
+    const ns=q.toString();history.replaceState(null,"",location.pathname+(ns?"?"+ns:"")+location.hash);
+  }catch(e){return;}
+  if(!sid)return;
+  try{
+    const r=await fetch(STATS_URL+"/api/purchase/verify?session_id="+encodeURIComponent(sid),{cache:"no-store"});
+    const j=await r.json();
+    if(j&&(j.credited||j.already)){
+      if(j.credited){const s=creditsState();s.bonus+=(j.shares||SHARE_PACK);saveCredits(s);updateCreditUI();}
+      setTimeout(()=>toast(`🎉 +${j.shares||SHARE_PACK} bonus shares added!`),1200);
+    }else setTimeout(()=>toast("Payment not confirmed yet"),1200);
+  }catch(e){}
+}
+
+/* ---------- owner controls ---------- */
+function renderCreditBoxes(){
+  const inv=!!FLAGS.invites, buy=!!FLAGS.buyShares;
+  $("inviteBox").hidden=!inv;
+  $("buyBox").hidden=!buy;
+  if(inv){
+    $("inviteLink").value=inviteLink();
+    $("bonusBal").textContent=creditsState().bonus;
+  }
+  let unlocked=false;
+  try{unlocked=localStorage.getItem("omni_owner_unlocked")==="1";}catch(e){}
+  $("ownerLocked").hidden=unlocked;
+  $("ownerOpen").hidden=!unlocked;
+  if(unlocked){
+    $("tgLimits").checked=!!FLAGS.shareLimits;
+    $("tgInvites").checked=inv;
+    $("tgBuy").checked=buy;
+  }
+}
+async function setFlag(name,on){
+  try{
+    const r=await fetch(STATS_URL+"/api/flags",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({key:OWNER_KEY,flags:{[name]:!!on}})});
+    const j=await r.json();
+    if(j&&j.ok){
+      FLAGS=Object.assign({},FLAGS,j.flags);
+      try{localStorage.setItem("omni_flags",JSON.stringify({f:FLAGS,at:Date.now()}));}catch(e){}
+      updateCreditUI();renderCreditBoxes();toast("Saved ✓");
+    }else toast("Couldn't save — check connection");
+  }catch(e){toast("Couldn't reach server");}
+}
+$("ownerUnlockBtn").onclick=()=>{
+  const k=prompt("Owner key:");
+  if(k===null)return;
+  if(k===OWNER_KEY){try{localStorage.setItem("omni_owner_unlocked","1");}catch(e){}renderCreditBoxes();toast("Owner controls unlocked");}
+  else alert("Wrong key.");
+};
+$("tgLimits").onchange=e=>setFlag("shareLimits",e.target.checked);
+$("tgInvites").onchange=e=>setFlag("invites",e.target.checked);
+$("tgBuy").onchange=e=>setFlag("buyShares",e.target.checked);
+$("grantBtn").onclick=async()=>{
+  const code=(($("grantCode").value||"").toUpperCase().trim());
+  const amt=Math.max(1,Math.min(10000,parseInt($("grantAmt").value,10)||0));
+  const m=$("grantMsg");
+  if(!code){m.textContent="Enter an invite code.";return;}
+  if(!amt){m.textContent="Enter an amount.";return;}
+  m.textContent="Working…";
+  try{
+    const r=await fetch(STATS_URL+"/api/grant",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({key:OWNER_KEY,code,amount:amt})});
+    const j=await r.json();
+    m.textContent=(j&&j.ok)?`Granted ${amt} shares to ${code} ✓ — they'll arrive on next app open`:`Error: ${(j&&j.error)||"unknown"}`;
+    if(j&&j.ok)$("grantCode").value="";
+  }catch(e){m.textContent="Couldn't reach server.";}
+};
+
 /* ---------- dashboard ---------- */
 $("dashBtn").onclick=async()=>{
   const s=getStats();
@@ -621,6 +892,9 @@ $("dashBtn").onclick=async()=>{
   $("st_cards").textContent=s.cards||0;
   $("st_shares").textContent=(s.share||0)+(s.vcf||0)+(s.nfc||0);
   $("homeScreen").hidden=true;$("dashScreen").hidden=false;window.scrollTo(0,0);
+  // share credits: refresh flags + boxes
+  try{await loadFlags();}catch(e){}
+  renderCreditBoxes();
   // cloud stats: hidden until loaded
   $("cloudBox").hidden=true;$("chartBox").hidden=true;$("cloudLoading").hidden=false;
   try{
@@ -1073,6 +1347,7 @@ function buildShare(){
   document.querySelectorAll("#fields input").forEach(el=>el.onchange=preview);
   $("qr").style.display="none";$("qr").innerHTML="";$("nfcNote").hidden=true;$("qrDlBtn").hidden=true;
   preview();
+  updateCreditUI();
 }
 function preview(){
   const d=chosen();
@@ -1091,8 +1366,8 @@ $("moreShareBtn").onclick=()=>{
   $("moreShareBtn").setAttribute("aria-expanded",open?"true":"false");
   $("moreShareBtn").innerHTML=open?"More ways to share ▴":"More ways to share ▾";
 };
-$("vcfBtn").onclick=()=>{stat("vcf");downloadVcf();};
-$("shareBtn").onclick=async()=>{haptic(10);
+$("vcfBtn").onclick=()=>{if(!consumeShare())return;stat("vcf");downloadVcf();};
+$("shareBtn").onclick=async()=>{if(!consumeShare())return;haptic(10);
   stat("share");
   const file=new File([vcard(chosen(),curPic())],"OMNI.vcf",{type:"text/vcard"});
   try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"OMNI"});return;}}catch(e){}
@@ -1100,6 +1375,7 @@ $("shareBtn").onclick=async()=>{haptic(10);
   downloadVcf();
 };
 $("linkBtn").onclick=async()=>{
+  if(!consumeShare())return;
   stat("nfc");
   const data=chosen();
   let url=null;
@@ -1200,6 +1476,14 @@ window.addEventListener("pagehide",()=>{saveAll();});
     $("forgotBtn").hidden=!has;
   }
   updateGo();
+  // share credits: fetch flags, then process invite / purchase deep links
+  (async()=>{
+    try{await Promise.race([loadFlags(),new Promise(r=>setTimeout(r,4000))]);}catch(e){}
+    updateCreditUI();
+    await handleInviteParam();
+    await handlePurchaseReturn();
+    collectPendingInvites();
+  })();
 })();
 
 /* ---------- PWA ---------- */
