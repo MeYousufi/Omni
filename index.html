@@ -65,6 +65,22 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 .pcard .initials{width:100%;height:120px;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:800;color:#8ea6d8;background:linear-gradient(160deg,#161c2c,#0e1220)}
 .pcard .plabel{font-weight:700;margin-top:10px;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pcard .pname{color:var(--muted);font-size:13px;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Apple Wallet style stacked cards */
+#walletStack{position:relative;margin-top:6px}
+.wcard{position:absolute;left:0;right:0;height:190px;border-radius:22px;overflow:hidden;cursor:pointer;
+  background-size:cover;background-position:center;
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:0 -4px 18px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.18);
+  transition:top .28s cubic-bezier(.32,.72,.35,1),transform .28s cubic-bezier(.32,.72,.35,1),box-shadow .28s;
+  -webkit-tap-highlight-color:transparent}
+.wcard:active{transform:scale(.985)}
+.wcard .wdim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.08) 0%,rgba(0,0,0,.62) 78%);border-radius:inherit}
+.wcard .wtext{position:absolute;left:18px;right:18px;bottom:16px;z-index:2}
+.wcard .wlabel{font-size:21px;font-weight:800;letter-spacing:.2px;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wcard .wname{font-size:13px;font-weight:500;color:rgba(255,255,255,.85);text-shadow:0 1px 6px rgba(0,0,0,.6);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wcard .wbrand{position:absolute;top:14px;left:18px;z-index:2;font-size:12px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,.92);text-shadow:0 1px 6px rgba(0,0,0,.55)}
+.wcard .wring{position:absolute;top:12px;right:16px;z-index:2;width:30px;height:30px;border-radius:50%;border:3px solid rgba(255,255,255,.85);box-shadow:0 0 10px rgba(0,0,0,.4)}
+.wcard.active{box-shadow:0 12px 34px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.22),0 0 24px rgba(79,140,255,.18)}
 .empty{color:var(--muted);text-align:center;margin:60px 0}
 .fab{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));right:24px;width:64px;height:64px;border-radius:50%;font-size:32px;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;margin:0;padding:0;box-shadow:0 6px 22px rgba(79,140,255,.45)}
 /* flip card */
@@ -74,8 +90,11 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 .flipfront,.flipback{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:20px;overflow:hidden;
   background:linear-gradient(#141824,#10131b) padding-box,linear-gradient(135deg,rgba(79,140,255,.6),rgba(139,92,246,.5)) border-box;border:1px solid transparent;
   box-shadow:0 8px 30px rgba(0,0,0,.5),0 0 24px rgba(79,140,255,.15)}
-.flipfront{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px}
-.flipfront img{width:84px;height:84px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);box-shadow:0 0 16px var(--glow);margin-bottom:10px}
+.flipfront{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:24px;position:relative;overflow:hidden;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.flipfront::before{content:"";position:absolute;top:-40%;right:-30%;width:70%;height:70%;border-radius:50%;
+  background:radial-gradient(closest-side,var(--glow),transparent);opacity:.35;pointer-events:none}
+.flipfront img{width:92px;height:92px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.35);box-shadow:0 4px 18px rgba(0,0,0,.45),0 0 16px var(--glow);margin-bottom:12px;position:relative;z-index:1}
 .flipfront .fph{width:84px;height:84px;border-radius:50%;background:#1a1e26;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#8ea6d8;border:2px dashed var(--line);margin-bottom:10px}
 .flipfront .fring{width:64px;height:64px;border-radius:50%;border:5px solid var(--accent);margin-bottom:14px;position:relative;box-shadow:0 0 18px var(--glow)}
 .flipfront.has-cover{background-size:cover;background-position:center;justify-content:flex-end;padding-bottom:28px}
@@ -84,8 +103,11 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 .flipfront .fcover-text h2{text-shadow:0 2px 12px rgba(0,0,0,.8)}
 .flipfront .fcover-text .ftag{text-shadow:0 1px 8px rgba(0,0,0,.8)}
 .flipfront .fring::after{content:"";position:absolute;top:-11px;left:50%;width:9px;height:9px;background:var(--accent);border-radius:50%;transform:translateX(-50%)}
-.flipfront h2{margin:0;font-size:26px;letter-spacing:.1em;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.flipfront .fsub{font-size:11px;letter-spacing:.24em;color:var(--accent);font-weight:700;margin-top:4px}
+.flipfront h2{margin:0;font-size:28px;font-weight:800;letter-spacing:.06em;position:relative;z-index:1;
+  background:linear-gradient(120deg,#8ab8ff,#c4a8ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  text-shadow:0 2px 20px rgba(110,168,255,.25)}
+.flipfront .fsub{font-size:10px;letter-spacing:.32em;color:var(--accent);font-weight:700;margin-top:6px;position:relative;z-index:1;opacity:.9}
+.flipfront .ftag{margin-top:10px;font-size:14px;color:rgba(255,255,255,.88);font-weight:500;position:relative;z-index:1}
 .flipfront .ftag{color:var(--muted);font-size:12px;margin-top:6px}
 .flipback{transform:rotateY(180deg);padding:16px;overflow-y:auto}
 .flipback a{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:6px 0;background:#1a1e26;border:1px solid var(--line);border-radius:12px;color:var(--text);font-size:15px}
@@ -209,7 +231,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <button class="small gray" id="nudgeDismiss">Later</button>
   </div>
   <div class="searchrow"><input id="searchBox" placeholder="Search cards..."></div>
-  <div id="cardGrid" class="grid"></div>
+  <div id="walletStack"></div>
   <div id="emptyMsg" class="empty" hidden><button id="emptyCreate" style="background:none;border:0;color:inherit;font:inherit;padding:20px;box-shadow:none">No cards yet.<br><span style="color:#9ec1ff;text-decoration:underline">Tap here to create your first →</span></button></div>
   <input type="file" id="importInput" accept="application/json" hidden>
   <button class="fab" id="fabPlus" aria-label="Create new card">+</button>
@@ -707,8 +729,9 @@ const lines=s=>(s||"").split("\n").map(x=>x.trim()).filter(Boolean);
 const getP=()=>profiles.find(p=>p.id===curId);
 const initials=n=>(n||"?").trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
 
+let activeWallet=0;
 function renderCards(){
-  const g=$("cardGrid");g.innerHTML="";
+  const g=$("walletStack");g.innerHTML="";
   $("offlineBar").hidden=navigator.onLine!==false;
   const q=searchQ.toLowerCase();
   const list=profiles.filter(p=>!q||(p.label+" "+p.name+" "+p.org).toLowerCase().includes(q));
@@ -718,21 +741,30 @@ function renderCards(){
   const showNudge=profiles.length>0&&(Date.now()-lastB)>30*86400000;
   $("backupNudge").hidden=!showNudge;
   if(showNudge)$("backupNudgeText").textContent=lastB===0?"💾 Back up your cards to keep them safe.":"💾 It's been a while since your last backup.";
-  list.forEach(p=>{
-    const d=document.createElement("div");d.className="pcard";
+  if(activeWallet>=list.length)activeWallet=Math.max(0,list.length-1);
+  const PEEK=58, FULL=190;
+  list.forEach((p,i)=>{
+    const d=document.createElement("div");
+    d.className="wcard"+(i===activeWallet?" active":"");
     d.setAttribute("role","button");d.setAttribute("tabindex","0");
     d.setAttribute("aria-label","Open card "+(p.label||"Untitled"));
-    const pos=p.picPos||"50% 50%";
-    // thumbnail: cover image takes priority over profile pic
-    const thumb=p.cover
-      ?`<img src="${p.cover}" style="object-position:${p.coverPos||"50% 50%"}" alt="">`
-      :(p.pic?`<img src="${p.pic}" style="object-position:${pos}" alt="">`:`<div class="initials">${initials(p.name||p.label)}</div>`);
-    d.innerHTML=thumb+
-      `<div style="height:3px;background:linear-gradient(90deg,${p.color||"#4f8cff"},#8b5cf6)"></div>`+
-      `<div class="plabel">${esc(p.label||"Untitled")}</div><div class="pname">${esc(p.name||"")}</div>`;
-    d.onclick=()=>openDetail(p.id);
+    // position: active card on top, others peek from behind
+    if(i<=activeWallet){d.style.top=(i*PEEK)+"px";d.style.zIndex=list.length-i;}
+    else{d.style.top=(activeWallet*PEEK+FULL+(i-activeWallet-1)*PEEK)+"px";d.style.zIndex=list.length-i;}
+    // face: cover image or color gradient
+    if(p.cover){d.style.backgroundImage=`url("${p.cover}")`;d.style.backgroundPosition=p.coverPos||"50% 50%";}
+    else{const c=p.color||"#4f8cff";d.style.background=`linear-gradient(135deg,${c},#141824 130%)`;}
+    d.innerHTML=`<div class="wdim" aria-hidden="true"></div><div class="wbrand">OMNI</div><div class="wring" aria-hidden="true"></div>`+
+      `<div class="wtext"><div class="wlabel">${esc(p.label||"Untitled")}</div><div class="wname">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div></div>`;
+    d.onclick=()=>{
+      if(i===activeWallet)openDetail(p.id);
+      else{activeWallet=i;renderCards();haptic(8);}
+    };
+    d.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();d.click();}};
     g.appendChild(d);
   });
+  // container height fits the stack
+  g.style.height=list.length?(activeWallet*PEEK+FULL+(list.length-activeWallet-1)*PEEK+16)+"px":"0px";
 }
 $("nudgeBackup").onclick=()=>{$("backupBtn").click();};
 $("nudgeDismiss").onclick=()=>{$("backupNudge").hidden=true;};
