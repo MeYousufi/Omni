@@ -81,6 +81,20 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 .wcard .wbrand{position:absolute;top:14px;left:18px;z-index:2;font-size:12px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,.92);text-shadow:0 1px 6px rgba(0,0,0,.55)}
 .wcard .wring{position:absolute;top:12px;right:16px;z-index:2;width:30px;height:30px;border-radius:50%;border:3px solid rgba(255,255,255,.85);box-shadow:0 0 10px rgba(0,0,0,.4)}
 .wcard.active{box-shadow:0 12px 34px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.22),0 0 24px rgba(79,140,255,.18)}
+/* wallet detail panel (below selected card) */
+.wdetail{position:absolute;left:0;right:0;background:#141824;border:1px solid var(--line);border-radius:18px;overflow:hidden;animation:slideup .25s ease}
+@keyframes slideup{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.wdetail-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px;font-size:15px}
+.wclose{background:#232a3a;border:0;color:#fff;width:30px;height:30px;border-radius:50%;font-size:14px;cursor:pointer}
+.wrow{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid rgba(255,255,255,.06);color:inherit;text-decoration:none}
+.wrow .wico{font-size:20px;width:28px;text-align:center;flex:none}
+.wrow span b{display:block;font-size:13px;color:var(--muted);font-weight:600}
+.wrow span i{display:block;font-style:normal;font-size:15px;margin-top:1px;word-break:break-all}
+.wrow .wchev{margin-left:auto;color:var(--muted);font-size:20px;flex:none}
+a.wrow:active{background:rgba(255,255,255,.05)}
+.wdetail-actions{display:flex;gap:10px;padding:14px 16px}
+.wact{flex:1;padding:13px;border:0;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#4f8cff,#8b5cf6);color:#fff}
+.wact:last-child{background:#232a3a}
 .empty{color:var(--muted);text-align:center;margin:60px 0}
 .fab{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));right:24px;width:64px;height:64px;border-radius:50%;font-size:32px;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;margin:0;padding:0;box-shadow:0 6px 22px rgba(79,140,255,.45)}
 /* flip card */
@@ -729,7 +743,7 @@ const lines=s=>(s||"").split("\n").map(x=>x.trim()).filter(Boolean);
 const getP=()=>profiles.find(p=>p.id===curId);
 const initials=n=>(n||"?").trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
 
-let activeWallet=0;
+let activeWallet=-1;
 function renderCards(){
   const g=$("walletStack");g.innerHTML="";
   $("offlineBar").hidden=navigator.onLine!==false;
@@ -741,31 +755,61 @@ function renderCards(){
   const showNudge=profiles.length>0&&(Date.now()-lastB)>30*86400000;
   $("backupNudge").hidden=!showNudge;
   if(showNudge)$("backupNudgeText").textContent=lastB===0?"💾 Back up your cards to keep them safe.":"💾 It's been a while since your last backup.";
-  if(activeWallet>=list.length)activeWallet=Math.max(0,list.length-1);
+  if(activeWallet>=list.length)activeWallet=-1;
   const PEEK=58, FULL=190;
-  list.forEach((p,i)=>{
-    const d=document.createElement("div");
-    d.className="wcard"+(i===activeWallet?" active":"");
-    d.setAttribute("role","button");d.setAttribute("tabindex","0");
-    d.setAttribute("aria-label","Open card "+(p.label||"Untitled"));
-    // position: active card on top, others peek from behind
-    if(i<=activeWallet){d.style.top=(i*PEEK)+"px";d.style.zIndex=list.length-i;}
-    else{d.style.top=(activeWallet*PEEK+FULL+(i-activeWallet-1)*PEEK)+"px";d.style.zIndex=list.length-i;}
-    // face: cover image or color gradient
-    if(p.cover){d.style.backgroundImage=`url("${p.cover}")`;d.style.backgroundPosition=p.coverPos||"50% 50%";}
-    else{const c=p.color||"#4f8cff";d.style.background=`linear-gradient(135deg,${c},#141824 130%)`;}
-    d.innerHTML=`<div class="wdim" aria-hidden="true"></div><div class="wbrand">OMNI</div><div class="wring" aria-hidden="true"></div>`+
+  if(activeWallet<0){
+    // stack mode: all cards peek from behind the top one
+    list.forEach((p,i)=>{
+      const d=document.createElement("div");
+      d.className="wcard";
+      d.setAttribute("role","button");d.setAttribute("tabindex","0");
+      d.setAttribute("aria-label","Select card "+(p.label||"Untitled"));
+      d.style.top=(i*PEEK)+"px";
+      d.style.zIndex=list.length-i;
+      if(p.cover){d.style.backgroundImage=`url("${p.cover}")`;d.style.backgroundPosition=p.coverPos||"50% 50%";}
+      else{const c=p.color||"#4f8cff";d.style.background=`linear-gradient(135deg,${c},#141824 130%)`;}
+      d.innerHTML=`<div class="wdim" aria-hidden="true"></div><div class="wbrand">OMNI</div><div class="wring" aria-hidden="true"></div>`+
+        `<div class="wtext"><div class="wlabel">${esc(p.label||"Untitled")}</div><div class="wname">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div></div>`;
+      d.onclick=()=>{activeWallet=i;renderCards();haptic(10);};
+      d.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();d.click();}};
+      g.appendChild(d);
+    });
+    g.style.height=list.length?((list.length-1)*PEEK+FULL+16)+"px":"0px";
+  }else{
+    // selected mode: chosen card on top, details below
+    const p=list[activeWallet];
+    const top=document.createElement("div");
+    top.className="wcard active";
+    top.style.top="0px";top.style.zIndex=10;
+    if(p.cover){top.style.backgroundImage=`url("${p.cover}")`;top.style.backgroundPosition=p.coverPos||"50% 50%";}
+    else{const c=p.color||"#4f8cff";top.style.background=`linear-gradient(135deg,${c},#141824 130%)`;}
+    top.innerHTML=`<div class="wdim" aria-hidden="true"></div><div class="wbrand">OMNI</div><div class="wring" aria-hidden="true"></div>`+
       `<div class="wtext"><div class="wlabel">${esc(p.label||"Untitled")}</div><div class="wname">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div></div>`;
-    d.onclick=()=>{
-      if(i===activeWallet)openDetail(p.id);
-      else{activeWallet=i;renderCards();haptic(8);}
-    };
-    d.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();d.click();}};
-    g.appendChild(d);
-  });
-  // container height fits the stack
-  g.style.height=list.length?(activeWallet*PEEK+FULL+(list.length-activeWallet-1)*PEEK+16)+"px":"0px";
+    top.onclick=()=>openDetail(p.id);
+    g.appendChild(top);
+    // detail panel (business card version of "Latest Transactions")
+    const panel=document.createElement("div");
+    panel.className="wdetail";
+    panel.style.top=(FULL+12)+"px";
+    let rows="";
+    lines(p.phones).forEach(v=>rows+=`<a class="wrow" href="tel:${esc(v.replace(/\s/g,""))}"><span class="wico">📞</span><span><b>Call</b><i>${esc(v)}</i></span><span class="wchev">›</span></a>`);
+    lines(p.emails).forEach(v=>rows+=`<a class="wrow" href="mailto:${esc(v)}"><span class="wico">✉️</span><span><b>Email</b><i>${esc(v)}</i></span><span class="wchev">›</span></a>`);
+    lines(p.urls).forEach(v=>{const u=/^https?:/i.test(v)?v:"https://"+v;rows+=`<a class="wrow" href="${esc(u)}" target="_blank" rel="noopener"><span class="wico">🌐</span><span><b>Website</b><i>${esc(v)}</i></span><span class="wchev">›</span></a>`;});
+    if(p.address)rows+=`<div class="wrow"><span class="wico">📍</span><span><b>Address</b><i>${esc(p.address)}</i></span></div>`;
+    if(p.notes)rows+=`<div class="wrow"><span class="wico">📝</span><span><b>Notes</b><i>${esc(p.notes)}</i></span></div>`;
+    panel.innerHTML=`<div class="wdetail-head"><b>Contact details</b><button class="wclose" aria-label="Back to cards">✕</button></div>`+
+      (rows||`<p class="muted" style="padding:12px">No contact info yet.</p>`)+
+      `<div class="wdetail-actions"><button class="wact" id="wShare">Share</button><button class="wact" id="wEdit">Edit</button></div>`;
+    g.appendChild(panel);
+    panel.querySelector(".wclose").onclick=()=>{activeWallet=-1;renderCards();haptic(8);};
+    panel.querySelector("#wShare").onclick=()=>openDetail(p.id,true);
+    panel.querySelector("#wEdit").onclick=()=>openDetail(p.id);
+    g.style.height=(FULL+12+panelHeight(panel)+16)+"px";
+    // measure after append
+    requestAnimationFrame(()=>{g.style.height=(FULL+12+panel.offsetHeight+16)+"px";});
+  }
 }
+function panelHeight(el){return el.offsetHeight||300;}
 $("nudgeBackup").onclick=()=>{$("backupBtn").click();};
 $("nudgeDismiss").onclick=()=>{$("backupNudge").hidden=true;};
 $("emptyCreate").onclick=()=>$("fabPlus").click();
@@ -775,10 +819,11 @@ $("fabPlus").onclick=()=>{
   const p={id:Date.now(),label:"",name:"",org:"",phones:"",emails:"",urls:"",address:"",notes:"",pic:"",picPos:"50% 50%",cover:"",coverPos:"50% 50%",coverColor:"",color:"#4f8cff"};
   profiles.push(p);stat("cards");curId=p.id;openDetail(p.id);
 };
-function openDetail(id){
+function openDetail(id,toShare){
   curId=id;
   $("homeScreen").hidden=true;$("detailScreen").hidden=false;
   fillDetail();window.scrollTo(0,0);
+  if(toShare)setTimeout(()=>{const s=$("shareBox");if(s&&!s.hidden)s.scrollIntoView({behavior:"smooth",block:"center"});},120);
 }
 $("backBtn").onclick=()=>{$("detailScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
 
