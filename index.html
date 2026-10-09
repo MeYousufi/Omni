@@ -721,7 +721,11 @@ function renderCards(){
     d.setAttribute("role","button");d.setAttribute("tabindex","0");
     d.setAttribute("aria-label","Open card "+(p.label||"Untitled"));
     const pos=p.picPos||"50% 50%";
-    d.innerHTML=(p.pic?`<img src="${p.pic}" style="object-position:${pos}" alt="">`:`<div class="initials">${initials(p.name||p.label)}</div>`)+
+    // thumbnail: cover image takes priority over profile pic
+    const thumb=p.cover
+      ?`<img src="${p.cover}" style="object-position:${p.coverPos||"50% 50%"}" alt="">`
+      :(p.pic?`<img src="${p.pic}" style="object-position:${pos}" alt="">`:`<div class="initials">${initials(p.name||p.label)}</div>`);
+    d.innerHTML=thumb+
       `<div style="height:3px;background:linear-gradient(90deg,${p.color||"#4f8cff"},#8b5cf6)"></div>`+
       `<div class="plabel">${esc(p.label||"Untitled")}</div><div class="pname">${esc(p.name||"")}</div>`;
     d.onclick=()=>openDetail(p.id);
