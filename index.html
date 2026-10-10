@@ -1332,9 +1332,8 @@ function contrastText(bgHex){
   return luminance(bgHex) > 0.179 ? "#000000" : "#FFFFFF";
 }
 
-async function saveAll(){
-  if(sessionPin)await vaultEncrypt(sessionPin,profiles);
-}
+async function saveAll(){if(sessionPin){await shrinkImgs();await vaultEncrypt(sessionPin,profiles);}}
+async function shrinkImgs(){for(const p of profiles){for(const k of["pic","cover"]){const L=k=="pic"?60000:250000,M=k=="pic"?220:800;if(p[k]&&p[k].length>L){const I=new Image();await new Promise(r=>{I.onload=r;I.onerror=r;I.src=p[k];});if(I.width&&Math.max(I.width,I.height)>M){const s=M/Math.max(I.width,I.height),C=document.createElement("canvas");C.width=Math.round(I.width*s);C.height=Math.round(I.height*s);try{C.getContext("2d").drawImage(I,0,0,C.width,C.height);p[k]=C.toDataURL("image/jpeg",0.8);}catch(e){}}}}}}
 const lines=s=>(s||"").split("\n").map(x=>x.trim()).filter(Boolean);
 const getP=()=>profiles.find(p=>p.id===curId);
 const initials=n=>(n||"?").trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
