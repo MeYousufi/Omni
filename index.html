@@ -261,7 +261,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 #frontPicker,#backPicker{display:flex;flex-wrap:wrap;gap:4px 10px;margin:4px 0 8px}
 #frontPicker .chk,#backPicker .chk{display:inline-flex;align-items:center;gap:6px;background:#0e1118;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;cursor:pointer}
 #frontPicker .chk input,#backPicker .chk input{width:auto;margin:0}
-#ownerModal:not([hidden]){display:flex}
 </style>
 </head>
 <body>
@@ -553,6 +552,43 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
         <button class="small gray" id="changePinCancel" style="flex:1">Cancel</button>
       </div>
       <p class="muted" id="changePinMsg" style="font-size:12px;margin-top:6px"></p>
+    </div>
+  </div>
+  <div class="box" id="ownerBox">
+    <h3 class="sec" style="margin-top:0">👑 Owner controls</h3>
+    <p class="muted" style="font-size:12px;margin-top:0">Owner password is separate from your card PIN — it unlocks these controls only.</p>
+    <div id="ownerLocked">
+      <p class="muted">Restricted area.</p>
+      <button class="small gray" id="ownerUnlockBtn">Unlock</button>
+    </div>
+    <div id="ownerOpen" hidden>
+      <div style="margin-bottom:12px;padding:10px;border:1px solid var(--line);border-radius:12px">
+        <b style="font-size:14px">Change owner password</b>
+        <div id="chPwForm" hidden style="margin-top:8px">
+          <input id="chPwCur" type="password" placeholder="Current password" style="width:100%;margin:4px 0" autocomplete="current-password">
+          <input id="chPwNew" type="password" placeholder="New password (8+ characters)" style="width:100%;margin:4px 0" autocomplete="new-password">
+          <input id="chPwNew2" type="password" placeholder="Confirm new password" style="width:100%;margin:4px 0" autocomplete="new-password">
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <button class="small" id="chPwGo" style="flex:1">Change</button>
+            <button class="small gray" id="chPwCancel" style="flex:1">Cancel</button>
+          </div>
+          <p class="muted" id="chPwMsg" style="font-size:12px;margin-top:6px"></p>
+        </div>
+        <button class="small gray" id="chPwBtn" style="width:100%;margin-top:8px">Change password</button>
+      </div>
+      <div class="togglerow"><span>🎟️ Share limits<br><span class="muted" style="font-size:12px">20 free shares / week</span></span><label class="switch"><input type="checkbox" id="tgLimits" aria-label="Toggle share limits"><span class="sl"></span></label></div>
+      <div class="togglerow"><span>💌 Invite system<br><span class="muted" style="font-size:12px">100 bonus shares per invite</span></span><label class="switch"><input type="checkbox" id="tgInvites" aria-label="Toggle invite system"><span class="sl"></span></label></div>
+      <div class="togglerow"><span>💳 Buy shares<br><span class="muted" style="font-size:12px">$3.99 per 100 shares</span></span><label class="switch"><input type="checkbox" id="tgBuy" aria-label="Toggle buy shares"><span class="sl"></span></label></div>
+      <h3 class="sec">👥 Users</h3>
+      <p style="font-size:32px;font-weight:800;margin:8px 0" id="ownerUserCount">—</p>
+      <p class="muted" style="font-size:12px" id="ownerUserSub">accounts created</p>
+      <button class="small" id="refreshUserCount">Refresh</button>
+      <h3 class="sec">🎁 Grant bonus shares</h3>
+      <p class="muted">Enter the user's invite code (they'll find it in Dashboard → Invite friends).</p>
+      <input id="grantCode" placeholder="Invite code (e.g. X7K2P9QA)" autocomplete="off" autocapitalize="characters" aria-label="User invite code">
+      <input id="grantAmt" type="number" min="1" max="10000" value="100" aria-label="Share amount">
+      <button class="small" id="grantBtn">Grant shares</button>
+      <p class="muted" id="grantMsg"></p>
     </div>
   </div>
   <div class="box" id="accountBox">
@@ -1197,8 +1233,43 @@ document.addEventListener("DOMContentLoaded",()=>{
   };
 });
 $("ownerUnlockBtn").onclick=async()=>{
-  const ok=await ownerPasswordPrompt();
-  if(ok){renderCreditBoxes();toast("Owner controls unlocked");}
+  // Check if an owner password exists yet
+  let hasOwner=true;
+  try{
+    const r=await fetch(STATS_URL+"/api/owner/status");
+    hasOwner=(await r.json()).hasOwner;
+  }catch(e){toast("Couldn't reach server");return;}
+  if(!hasOwner){
+    const p1=prompt("Create your owner password (8+ characters). Only you will know this:");
+    if(p1===null)return;
+    if(p1.length<8){alert("Password must be 8+ characters.");return;}
+    const p2=prompt("Confirm owner password:");
+    if(p2!==p1){alert("Passwords didn't match.");return;}
+    try{
+      const r=await fetch(STATS_URL+"/api/owner/setup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:p1})});
+      const j=await r.json();
+      if(j.ok&&j.token){
+        OWNER_TOKEN=j.token;
+        try{sessionStorage.setItem("omni_owner_token",OWNER_TOKEN);}catch(e){}
+        try{localStorage.setItem("omni_owner_unlocked","1");}catch(e){}
+        renderCreditBoxes();toast("Owner password set — controls unlocked");
+      }else alert("Setup failed: "+(j.error||"unknown"));
+    }catch(e){alert("Couldn't reach server.");}
+    return;
+  }
+  const pw=prompt("Enter owner password:");
+  if(pw===null)return;
+  try{
+    const r=await fetch(STATS_URL+"/api/owner/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pw})});
+    const j=await r.json();
+    if(j.ok&&j.token){
+      OWNER_TOKEN=j.token;
+      try{sessionStorage.setItem("omni_owner_token",OWNER_TOKEN);}catch(e){}
+      try{localStorage.setItem("omni_owner_unlocked","1");}catch(e){}
+      renderCreditBoxes();toast("Owner controls unlocked");
+    }else if(j.needSetup){toast("No owner password set yet.");}
+    else{toast("Wrong password.");}
+  }catch(e){toast("Couldn't reach server.");}
 };
 $("tgLimits").onchange=e=>setFlag("shareLimits",e.target.checked);
 $("tgInvites").onchange=e=>setFlag("invites",e.target.checked);
@@ -2248,60 +2319,16 @@ $("dashBtn").onclick = async function(e){
   }
 };
 
-// Owner password prompt — returns true if successfully unlocked
-async function ownerPasswordPrompt(){
-  let hasOwner=true;
-  try{
-    const r=await fetch(STATS_URL+"/api/owner/status");
-    hasOwner=(await r.json()).hasOwner;
-  }catch(e){toast("Couldn't reach server");return false;}
-  if(!hasOwner){
-    const p1=prompt("Create your owner password (8+ characters). Only you will know this:");
-    if(p1===null)return false;
-    if(p1.length<8){alert("Password must be 8+ characters.");return false;}
-    const p2=prompt("Confirm owner password:");
-    if(p2!==p1){alert("Passwords didn't match.");return false;}
-    try{
-      const r=await fetch(STATS_URL+"/api/owner/setup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:p1})});
-      const j=await r.json();
-      if(j.ok&&j.token){
-        OWNER_TOKEN=j.token;
-        try{sessionStorage.setItem("omni_owner_token",OWNER_TOKEN);}catch(e){}
-        try{localStorage.setItem("omni_owner_unlocked","1");}catch(e){}
-        return true;
-      }else{alert("Setup failed: "+(j.error||"unknown"));return false;}
-    }catch(e){alert("Couldn't reach server.");return false;}
-  }
-  const pw=prompt("Enter owner password:");
-  if(pw===null)return false;
-  try{
-    const r=await fetch(STATS_URL+"/api/owner/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pw})});
-    const j=await r.json();
-    if(j.ok&&j.token){
-      OWNER_TOKEN=j.token;
-      try{sessionStorage.setItem("omni_owner_token",OWNER_TOKEN);}catch(e){}
-      try{localStorage.setItem("omni_owner_unlocked","1");}catch(e){}
-      return true;
-    }else if(j.needSetup){alert("No owner password set yet.");return false;}
-    else{alert("Wrong password.");return false;}
-  }catch(e){alert("Couldn't reach server.");return false;}
-}
-
 $("ownerBtn").onclick=async()=>{
-  // Ask for password directly (not via dashboard) — 2026-10-10
-  let unlocked=false;
-  try{unlocked=localStorage.getItem("omni_owner_unlocked")==="1"&&!!OWNER_TOKEN;}catch(e){}
-  if(!OWNER_TOKEN)unlocked=false;
-  if(!unlocked){
-    const ok=await ownerPasswordPrompt();
-    if(!ok)return;
-    toast("Owner controls unlocked");
-  }
-  renderCreditBoxes();
-  $("ownerModal").hidden=false;
+  // Open dashboard then scroll to owner controls
+  await $("dashBtn").onclick();
+  setTimeout(()=>{
+    const ob=$("ownerBox");
+    if(ob){ob.scrollIntoView({behavior:"smooth",block:"start"});
+      ob.style.outline="2px solid var(--accent)";ob.style.borderRadius="12px";
+      setTimeout(()=>{ob.style.outline="";},2000);}
+  },400);
 };
-$("ownerModalClose").onclick=()=>{$("ownerModal").hidden=true;};
-$("ownerModal").addEventListener("click",e=>{if(e.target===$("ownerModal"))$("ownerModal").hidden=true;});
 
 /* ---------- rich social link buttons ---------- */
 function socialButton(url){
@@ -2752,49 +2779,6 @@ async function tryRememberedPin(){
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}
 </script>
 
-<!-- OWNER MODAL (moved from dashboard per owner request 2026-10-10) -->
-<div id="ownerModal" hidden style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:10000;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto">
-  <div style="background:#14161c;border:1px solid var(--line);border-radius:18px;padding:22px;max-width:460px;width:100%;margin-top:40px;position:relative">
-    <button class="iconbtn small" id="ownerModalClose" aria-label="Close owner controls" style="position:absolute;top:12px;right:12px">✕</button>
-<div class="box" id="ownerBox">
-    <h3 class="sec" style="margin-top:0">👑 Owner controls</h3>
-    <p class="muted" style="font-size:12px;margin-top:0">Owner password is separate from your card PIN — it unlocks these controls only.</p>
-    <div id="ownerLocked">
-      <p class="muted">Restricted area.</p>
-      <button class="small gray" id="ownerUnlockBtn">Unlock</button>
-    </div>
-    <div id="ownerOpen" hidden>
-      <div style="margin-bottom:12px;padding:10px;border:1px solid var(--line);border-radius:12px">
-        <b style="font-size:14px">Change owner password</b>
-        <div id="chPwForm" hidden style="margin-top:8px">
-          <input id="chPwCur" type="password" placeholder="Current password" style="width:100%;margin:4px 0" autocomplete="current-password">
-          <input id="chPwNew" type="password" placeholder="New password (8+ characters)" style="width:100%;margin:4px 0" autocomplete="new-password">
-          <input id="chPwNew2" type="password" placeholder="Confirm new password" style="width:100%;margin:4px 0" autocomplete="new-password">
-          <div style="display:flex;gap:8px;margin-top:6px">
-            <button class="small" id="chPwGo" style="flex:1">Change</button>
-            <button class="small gray" id="chPwCancel" style="flex:1">Cancel</button>
-          </div>
-          <p class="muted" id="chPwMsg" style="font-size:12px;margin-top:6px"></p>
-        </div>
-        <button class="small gray" id="chPwBtn" style="width:100%;margin-top:8px">Change password</button>
-      </div>
-      <div class="togglerow"><span>🎟️ Share limits<br><span class="muted" style="font-size:12px">20 free shares / week</span></span><label class="switch"><input type="checkbox" id="tgLimits" aria-label="Toggle share limits"><span class="sl"></span></label></div>
-      <div class="togglerow"><span>💌 Invite system<br><span class="muted" style="font-size:12px">100 bonus shares per invite</span></span><label class="switch"><input type="checkbox" id="tgInvites" aria-label="Toggle invite system"><span class="sl"></span></label></div>
-      <div class="togglerow"><span>💳 Buy shares<br><span class="muted" style="font-size:12px">$3.99 per 100 shares</span></span><label class="switch"><input type="checkbox" id="tgBuy" aria-label="Toggle buy shares"><span class="sl"></span></label></div>
-      <h3 class="sec">👥 Users</h3>
-      <p style="font-size:32px;font-weight:800;margin:8px 0" id="ownerUserCount">—</p>
-      <p class="muted" style="font-size:12px" id="ownerUserSub">accounts created</p>
-      <button class="small" id="refreshUserCount">Refresh</button>
-      <h3 class="sec">🎁 Grant bonus shares</h3>
-      <p class="muted">Enter the user's invite code (they'll find it in Dashboard → Invite friends).</p>
-      <input id="grantCode" placeholder="Invite code (e.g. X7K2P9QA)" autocomplete="off" autocapitalize="characters" aria-label="User invite code">
-      <input id="grantAmt" type="number" min="1" max="10000" value="100" aria-label="Share amount">
-      <button class="small" id="grantBtn">Grant shares</button>
-      <p class="muted" id="grantMsg"></p>
-    </div>
-  </div>
-  </div>
-</div>
 </body>
 </html>
 
