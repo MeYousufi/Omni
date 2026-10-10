@@ -179,6 +179,96 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 #reposCircle{width:260px;height:260px;border-radius:50%;overflow:hidden;border:3px solid var(--accent);box-shadow:0 0 30px var(--glow);touch-action:none;cursor:grab}
 #reposCircle img{width:100%;height:100%;object-fit:cover;pointer-events:none}
 #reposOverlay p{color:var(--muted);margin:18px 0}
+/* ---------- encounter memory ---------- */
+.etabs{display:flex;gap:8px;margin:12px 0 4px}
+.etabs button{flex:1;padding:11px;border-radius:12px;background:#14161c;border:1px solid var(--line);color:var(--muted);font-weight:700;font-size:15px}
+.etabs button.on{background:linear-gradient(135deg,#4f8cff,#a78bfa);color:#fff;border-color:transparent}
+.nudgecard{background:linear-gradient(160deg,#16241a,#10160f);border:1px solid #2d5a35;border-radius:14px;padding:12px 14px;margin:8px 0}
+.memcard{background:linear-gradient(160deg,#1c1830,#12101c);border:1px solid #4a3f6b;border-radius:14px;padding:12px 14px;margin:8px 0}
+.nudgecard h4,.memcard h4{margin:0 0 4px;font-size:14px}
+.nudgecard p,.memcard p{margin:0 0 8px;font-size:13px;color:var(--muted)}
+.nudgecard .rowbtns,.memcard .rowbtns{display:flex;gap:8px}
+.nudgecard button,.memcard button{flex:1;padding:9px;border-radius:10px;font-size:14px}
+.tlitem{background:#14161c;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:8px 0}
+.tlitem .tldate{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.tlitem h4{margin:4px 0;font-size:16px}
+.tlitem p{margin:4px 0;font-size:13px;color:var(--muted)}
+.tlitem .tlmeta{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.tlitem .tlmeta button{padding:7px 12px;font-size:13px;border-radius:10px}
+.tlitem .tlmeta .gray{background:none;border:1px solid var(--line);color:var(--muted);box-shadow:none}
+.fudone{opacity:.55}
+.fudone h4{text-decoration:line-through}
+#encModal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+#encModal .mbox{background:#14161c;border:1px solid var(--line);border-radius:18px;padding:22px;max-width:400px;width:100%}
+#encModal h2{margin:0 0 6px;font-size:20px}
+#encModal .msub{color:var(--muted);font-size:13px;margin:0 0 10px}
+#encModal label.fl{display:block;font-size:12px;color:var(--muted);margin:8px 0 2px}
+#encModal .mrow{display:flex;gap:8px;margin-top:14px}
+#encModal .mrow button{flex:1;padding:12px;border-radius:12px;font-size:15px}
+#encModal .mrow .gray{background:none;border:1px solid var(--line);color:var(--muted);box-shadow:none}
+#encModal .noask{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--muted)}
+#encModal .noask input{width:auto;margin:0}
+/* ---------- business card view ---------- */
+.bcard{width:100%;height:100%;border-radius:14px;overflow:hidden;position:relative;box-sizing:border-box;padding:18px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.bcard .bc-fields{display:flex;flex-direction:column;gap:2px;min-height:0;overflow:hidden}
+.bc-photo{width:54px;height:54px;border-radius:50%;object-fit:cover;margin-bottom:6px}
+.bc-name{font-size:21px;font-weight:800;line-height:1.15}
+.bc-title{font-size:13px;opacity:.85}
+.bc-org{font-size:13px;font-weight:600}
+.bc-line{font-size:12.5px;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* modern: dark gradient, accent bar */
+.tpl-modern{background:linear-gradient(135deg,#18244d,#0b1026);color:#fff;border:1px solid #2c3d6e}
+.tpl-modern::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:linear-gradient(180deg,#4f8cff,#a78bfa)}
+.tpl-modern .bc-title{color:#9ec1ff}
+/* classic: cream paper, serif, centered */
+.tpl-classic{background:#faf7f0;color:#1c1a16;border:1px solid #d9d0ba;text-align:center;font-family:Georgia,"Times New Roman",serif;align-items:center}
+.tpl-classic .bc-name{font-size:23px;letter-spacing:.04em}
+.tpl-classic .bc-title{font-style:italic;opacity:.75}
+.tpl-classic .bc-photo{margin-left:auto;margin-right:auto}
+/* bold: vibrant duotone */
+.tpl-bold{background:linear-gradient(135deg,#ff5e3a,#c81d5e);color:#fff;border:0}
+.tpl-bold .bc-name{font-size:24px;letter-spacing:.02em;text-transform:uppercase}
+.tpl-bold .bc-org{background:rgba(0,0,0,.25);display:inline-block;padding:2px 10px;border-radius:20px;font-size:12px;margin-top:4px}
+/* minimal: near-black, hairline */
+.tpl-minimal{background:#0e0e12;color:#ececf1;border:1px solid #2a2a32;padding:22px}
+.tpl-minimal .bc-name{font-size:20px;font-weight:600;letter-spacing:.01em}
+.tpl-minimal .bc-title{color:#8e8e99;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+/* receiver flip */
+.rcv{max-width:480px;margin:0 auto;padding:22px 16px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#090a0d;color:#f5f6f8;min-height:100vh}
+.rcvbrand{letter-spacing:.14em;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin:0 0 14px;font-size:26px}
+.rcvflip{perspective:1200px;cursor:pointer}
+.rcvinner{position:relative;width:100%;aspect-ratio:3.5/2;transition:transform .6s;transform-style:preserve-3d}
+.rcvflip.flipped .rcvinner{transform:rotateY(180deg)}
+.rcvface{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.rcvface.rcvback{transform:rotateY(180deg)}
+.rcvface .bcard{box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.bc-backrow{display:flex;gap:12px;align-items:center;height:100%}
+.bc-backrow .bc-fields{flex:1}
+.bc-qrwrap{flex-shrink:0;text-align:center}
+.bc-qrwrap .qrbox{background:#fff;padding:6px;border-radius:8px;line-height:0}
+.bc-qrwrap .qrbox img,.bc-qrwrap .qrbox canvas{width:84px!important;height:84px!important}
+.bc-qrlabel{font-size:10px;opacity:.75;margin-top:4px}
+.bc-tap{margin-top:8px;font-size:12px;font-weight:700;text-align:center;opacity:.9}
+.rcvhint{text-align:center;color:#9aa1ad;font-size:13px;margin:8px 0 14px}
+.rcvbtn{display:block;text-align:center;padding:14px;border-radius:14px;background:linear-gradient(135deg,#4f8cff,#a78bfa);color:#fff;font-weight:700;text-decoration:none;margin:0 0 16px}
+.rcvlead{background:#14161c;border:1px solid #262a33;border-radius:18px;padding:16px;margin-top:16px}
+.rcvlead h3{margin:0 0 8px;font-size:16px}
+.rcvlead p{color:#9aa1ad;font-size:13px;margin:0 0 12px}
+.rcvlead input{width:100%;margin:4px 0;padding:10px;border-radius:10px;border:1px solid #262a33;background:#0e1118;color:#fff;box-sizing:border-box}
+.rcvlead button{width:100%;margin-top:8px;padding:12px;border:0;border-radius:12px;background:linear-gradient(135deg,#4f8cff,#a78bfa);color:#fff;font-weight:600}
+.rcvlead .lmsg{font-size:13px;text-align:center;min-height:18px;color:#9aa1ad}
+.rcvfoot{text-align:center;margin-top:24px}
+.rcvfoot a{color:#9aa1ad}
+/* editor: template picker + preview */
+.tplpicker{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:6px 0}
+.tplbtn{padding:10px 4px;border-radius:10px;background:#0e1118;border:1px solid var(--line);color:var(--muted);font-size:13px;font-weight:600}
+.tplbtn.on{border-color:var(--accent);color:#fff;background:#16203a}
+.bizprev{margin:8px 0;display:flex;flex-direction:column;gap:8px}
+.bizprev .bcard{aspect-ratio:3.5/2}
+.bizprev .plabel{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+#frontPicker,#backPicker{display:flex;flex-wrap:wrap;gap:4px 10px;margin:4px 0 8px}
+#frontPicker .chk,#backPicker .chk{display:inline-flex;align-items:center;gap:6px;background:#0e1118;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;cursor:pointer}
+#frontPicker .chk input,#backPicker .chk input{width:auto;margin:0}
 </style>
 </head>
 <body>
@@ -286,11 +376,42 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <button class="small" id="nudgeBackup" style="margin-top:8px">Back up now</button>
     <button class="small gray" id="nudgeDismiss">Later</button>
   </div>
+  <div id="memNudgeBox"></div>
+  <div class="etabs" role="tablist">
+    <button id="tabCards" class="on" role="tab">Cards</button>
+    <button id="tabTimeline" role="tab">Timeline</button>
+  </div>
+  <div id="cardsView">
   <div class="searchrow"><input id="searchBox" placeholder="Search cards..."></div>
   <div id="walletStack"></div>
   <div id="emptyMsg" class="empty" hidden><button id="emptyCreate" style="background:none;border:0;color:inherit;font:inherit;padding:20px;box-shadow:none">No cards yet.<br><span style="color:#9ec1ff;text-decoration:underline">Tap here to create your first →</span></button></div>
   <input type="file" id="importInput" accept="application/json" hidden>
   <button class="fab" id="fabPlus" aria-label="Create new card">+</button>
+  </div><!-- /cardsView -->
+  <div id="timelineView" hidden>
+    <button id="addEncBtn" style="width:100%;padding:12px;margin:4px 0 8px">+ Log an encounter</button>
+    <div id="timelineBox"></div>
+  </div>
+</div>
+<!-- encounter note modal -->
+<div id="encModal" hidden>
+  <div class="mbox">
+    <h2 id="encModalTitle">Who did you share with?</h2>
+    <p class="msub">Save a memory of this encounter. Everything stays encrypted on this device.</p>
+    <label class="fl" for="encName">Who did you meet?</label>
+    <input id="encName" placeholder="Their name" autocomplete="off">
+    <label class="fl" for="encWhere">Where?</label>
+    <input id="encWhere" placeholder="e.g. KCK Car Show" autocomplete="off">
+    <label class="fl" for="encAbout">What did you talk about?</label>
+    <textarea id="encAbout" rows="2" placeholder="Topics, interests, follow-up ideas..."></textarea>
+    <label class="fl" for="encFollow">Follow up on (optional)</label>
+    <input id="encFollow" type="date">
+    <div class="mrow">
+      <button id="encSave">Save memory</button>
+      <button id="encSkip" class="gray">Skip</button>
+    </div>
+    <label class="noask"><input type="checkbox" id="encNoAsk"> Don't ask after every share</label>
+  </div>
 </div>
 
 <!-- DETAIL -->
@@ -306,6 +427,17 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     </div>
   </div>
   <p class="muted" id="flipHint" style="text-align:center;font-size:13px;margin:6px 0 0">👆 Tap the card to flip it</p>
+  <div class="box" id="bizBox">
+    <h3 class="sec" style="margin-top:0">Business card view</h3>
+    <div class="muted">How your card looks when someone opens your shared link — front and back.</div>
+    <div class="bizprev"><span class="plabel">Front</span><div id="bizPrevFront"></div><span class="plabel">Back</span><div id="bizPrevBack"></div></div>
+    <h3 class="sec">Card style</h3>
+    <div id="tplPicker" class="tplpicker"></div>
+    <h3 class="sec">Front fields</h3>
+    <div id="frontPicker"></div>
+    <h3 class="sec">Back fields</h3>
+    <div id="backPicker"></div>
+  </div>
 
   <div class="picwrap">
     <div id="picShow"></div>
@@ -596,19 +728,33 @@ async function deriveKey(pin,salt){
   const km=await crypto.subtle.importKey("raw",te.encode("OMNI:"+pin),"PBKDF2",false,["deriveKey"]);
   return crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:120000,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
 }
-async function vaultEncrypt(pin,obj){
+async function vaultEncrypt(pin,obj,vkey){
+  vkey=vkey||"omni_vault";
   const salt=crypto.getRandomValues(new Uint8Array(16));
   const iv=crypto.getRandomValues(new Uint8Array(12));
   const key=await deriveKey(pin,salt);
   const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,te.encode(JSON.stringify(obj)));
-  localStorage.setItem("omni_vault",b64(salt)+"."+b64(iv)+"."+b64(ct));
+  localStorage.setItem(vkey,b64(salt)+"."+b64(iv)+"."+b64(ct));
 }
-async function vaultDecrypt(pin){
-  const parts=(localStorage.getItem("omni_vault")||"").split(".");
+async function vaultDecrypt(pin,vkey){
+  vkey=vkey||"omni_vault";
+  const parts=(localStorage.getItem(vkey)||"").split(".");
   if(parts.length!==3)throw new Error("no vault");
   const key=await deriveKey(pin,ub64(parts[0]));
   const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:ub64(parts[1])},key,ub64(parts[2]));
   return JSON.parse(td.decode(pt));
+}
+/* ---------- encounter memory: separate encrypted store, local-only, same PIN ---------- */
+const ENC_VAULT_KEY="omni_vault_enc";
+let encounters=[];
+async function loadEncounters(pin){
+  try{
+    const e=await vaultDecrypt(pin,ENC_VAULT_KEY);
+    encounters=Array.isArray(e)?e:[];
+  }catch(err){encounters=[];}
+}
+async function saveEncounters(){
+  if(sessionPin){try{await vaultEncrypt(sessionPin,encounters,ENC_VAULT_KEY);}catch(e){}}
 }
 const hasVault=()=>!!localStorage.getItem("omni_vault");
 const hasLegacy=()=>!!localStorage.getItem("omni_profiles");
@@ -704,6 +850,7 @@ async function pinDone(){
     }
     if(hasVault()){
       profiles=await vaultDecrypt(pin);
+      await loadEncounters(pin);
       sessionPin=pin;pinFailReset();haptic(15);
       // remember working PIN length for this device
       if(!localStorage.getItem("omni_pinlen"))localStorage.setItem("omni_pinlen",String(pin.length));
@@ -735,6 +882,8 @@ function unlock(){
   $("homeScreen").hidden=false;
   stat("opens");
   renderCards();
+  renderNudgesMemories();
+  if(homeTab==="timeline")renderTimeline();
   updateCreditUI();
   collectPendingInvites();
 }
@@ -765,7 +914,7 @@ $("quickSave").onclick=()=>{
 async function doLock(){
   // save any pending changes before wiping memory — but ALWAYS wipe even if save fails
   try{await saveAll();}catch(e){console.warn("Lock-time save failed:",e);}
-  pinBuf="";pinTmp=null;sessionPin=null;profiles=[];curId=null;buildDots();updateGo();
+  pinBuf="";pinTmp=null;sessionPin=null;profiles=[];encounters=[];curId=null;buildDots();updateGo();
   const has=hasVault()||hasLegacy();
   pinMsg(has?"Enter your PIN":"Set a 6-digit PIN");
   $("forgotBtn").hidden=!has;
@@ -793,13 +942,14 @@ $("resetRestore").onclick=()=>{
         const d=JSON.parse(r.result);
         if(d.v===3&&d.vault){
           localStorage.setItem("omni_vault",d.vault);
+          if(d.vault_enc)localStorage.setItem("omni_vault_enc",d.vault_enc);
           localStorage.setItem("omni_last_backup",Date.now().toString());
           alert("Encrypted backup installed. Enter your PIN to unlock.");location.reload();return;
         }
         if(!d.profiles||!Array.isArray(d.profiles))throw 0;
         if(confirm("Restore "+d.profiles.length+" cards from backup? This replaces what's on this device.")){
           profiles=d.profiles;sessionPin=null;
-          localStorage.removeItem("omni_vault");localStorage.removeItem("omni_profiles");localStorage.removeItem("omni_pin");
+          localStorage.removeItem("omni_vault");localStorage.removeItem("omni_vault_enc");localStorage.removeItem("omni_profiles");localStorage.removeItem("omni_pin");
           // do NOT call doLock() — it would wipe the restored profiles from memory.
           // Go straight to PIN setup, keeping profiles in memory for encryption.
           alert("Backup loaded. Set a new PIN to encrypt and save these cards.");
@@ -1332,7 +1482,7 @@ function contrastText(bgHex){
   return luminance(bgHex) > 0.179 ? "#000000" : "#FFFFFF";
 }
 
-async function saveAll(){if(sessionPin){await shrinkImgs();await vaultEncrypt(sessionPin,profiles);}}
+async function saveAll(){if(sessionPin){await shrinkImgs();await vaultEncrypt(sessionPin,profiles);await saveEncounters();}}
 async function shrinkImgs(){for(const p of profiles){for(const k of["pic","cover"]){const L=k=="pic"?60000:250000,M=k=="pic"?220:800;if(p[k]&&p[k].length>L){const I=new Image();await new Promise(r=>{I.onload=r;I.onerror=r;I.src=p[k];});if(I.width&&Math.max(I.width,I.height)>M){const s=M/Math.max(I.width,I.height),C=document.createElement("canvas");C.width=Math.round(I.width*s);C.height=Math.round(I.height*s);try{C.getContext("2d").drawImage(I,0,0,C.width,C.height);p[k]=C.toDataURL("image/jpeg",0.8);}catch(e){}}}}}}
 const lines=s=>(s||"").split("\n").map(x=>x.trim()).filter(Boolean);
 const getP=()=>profiles.find(p=>p.id===curId);
@@ -1481,6 +1631,7 @@ function fillDetail(){
   renderPic();
   renderCover();
   renderFlip();
+  renderBizSettings();
   buildShare();
 }
 function renderPic(){
@@ -2262,7 +2413,8 @@ function socialButton(url){
 /* ---------- backup ---------- */
 $("backupBtn").onclick=()=>{
   const vault=localStorage.getItem("omni_vault")||"";
-  const data=JSON.stringify({v:3,exported:new Date().toISOString(),vault});
+  const vault_enc=localStorage.getItem("omni_vault_enc")||"";
+  const data=JSON.stringify({v:3,exported:new Date().toISOString(),vault,vault_enc});
   localStorage.setItem("omni_last_backup",Date.now().toString());
   const a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));
@@ -2280,6 +2432,7 @@ $("importInput").onchange=e=>{
         // Encrypted vault backup: install directly, user unlocks with original PIN
         if(confirm(`Restore encrypted backup from ${d.exported?new Date(d.exported).toLocaleDateString():"unknown date"}? This replaces what's on this device. You'll need the PIN from when the backup was made.`)){
           localStorage.setItem("omni_vault",d.vault);
+          if(d.vault_enc)localStorage.setItem("omni_vault_enc",d.vault_enc);
           localStorage.setItem("omni_last_backup",Date.now().toString());
           alert("Backup installed. Enter your PIN to unlock.");location.reload();
         }
@@ -2302,7 +2455,8 @@ function chosen(){
     phones:lines(p.phones).filter((_,i)=>on.includes("phone:"+i)),
     emails:lines(p.emails).filter((_,i)=>on.includes("email:"+i)),
     urls:lines(p.urls).filter((_,i)=>on.includes("url:"+i)),
-    address:on.includes("address")?p.address:"",notes:on.includes("notes")?p.notes:""};
+    address:on.includes("address")?p.address:"",notes:on.includes("notes")?p.notes:"",
+    photo:p.pic||"",cardTemplate:p.cardTemplate||"modern",cardFront:bizFront(p),cardBack:bizBack(p)};
 }
 function vcard(d,pic){
   const e=s=>String(s||"").replace(/\\/g,"\\\\").replace(/\n/g,"\\n").replace(/,/g,"\\,");
@@ -2360,13 +2514,13 @@ $("moreShareBtn").onclick=()=>{
   $("moreShareBtn").setAttribute("aria-expanded",open?"true":"false");
   $("moreShareBtn").innerHTML=open?"More ways to share ▴":"More ways to share ▾";
 };
-$("vcfBtn").onclick=()=>{if(!consumeShare())return;stat("vcf");downloadVcf();};
+$("vcfBtn").onclick=()=>{if(!consumeShare())return;stat("vcf");downloadVcf();offerEncounterNote("vcf");};
 $("shareBtn").onclick=async()=>{if(!consumeShare())return;haptic(10);
   stat("share");
   const file=new File([vcard(chosen(),curPic())],"OMNI.vcf",{type:"text/vcard"});
-  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"OMNI"});return;}}catch(e){}
-  try{if(navigator.share){await navigator.share({title:"OMNI",text:$("preview").textContent});return;}}catch(e){}
-  downloadVcf();
+  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"OMNI"});offerEncounterNote("share");return;}}catch(e){}
+  try{if(navigator.share){await navigator.share({title:"OMNI",text:$("preview").textContent});offerEncounterNote("share");return;}}catch(e){}
+  downloadVcf();offerEncounterNote("vcf");
 };
 $("linkBtn").onclick=async()=>{
   if(!consumeShare())return;
@@ -2384,7 +2538,10 @@ $("linkBtn").onclick=async()=>{
     if(r.ok){const j=await r.json();if(j.id)url=PUBLIC_URL+"#s="+j.id+"&k="+b64(key).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}
   }catch(e){}
   // Fallback: full data in URL (works offline, but long)
-  if(!url)url=PUBLIC_URL+"#c="+btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  if(!url){
+    url=PUBLIC_URL+"#c="+btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+    if(url.length>4000&&data.photo){const dd={...data,photo:""};url=PUBLIC_URL+"#c="+btoa(unescape(encodeURIComponent(JSON.stringify(dd))));}
+  }
   let copied=false;
   try{await navigator.clipboard.writeText(url);copied=true;}catch(e){}
   $("qr").style.display="block";$("qr").innerHTML="";
@@ -2406,6 +2563,7 @@ $("linkBtn").onclick=async()=>{
   _lastNfcUrl = url;
   if($("nfcWriteBtn") && "NDEFReader" in window) $("nfcWriteBtn").hidden = false;
   if(!copied)prompt("Copy this OMNI link",url);
+  offerEncounterNote("link");
 };
 $("qrDlBtn").onclick=()=>{
   const img=document.querySelector("#qr img"),cv=document.querySelector("#qr canvas");
@@ -2416,18 +2574,102 @@ $("qrDlBtn").onclick=()=>{
   toast("QR image saved — check your Photos ✓");
 };
 
+/* ================= business card view ================= */
+const BIZ_TPLS=[["modern","Modern"],["classic","Classic"],["bold","Bold"],["minimal","Minimal"]];
+const BIZ_FIELDS=[
+  {k:"photo",label:"Photo / logo"},{k:"name",label:"Name"},{k:"title",label:"Title"},{k:"org",label:"Business"},
+  {k:"phone",label:"Phone"},{k:"email",label:"Email"},{k:"url",label:"Website"},{k:"address",label:"Address"}];
+const bizFront=p=>Array.isArray(p.cardFront)&&p.cardFront.length?p.cardFront:["photo","name","title","org"];
+const bizBack=p=>Array.isArray(p.cardBack)&&p.cardBack.length?p.cardBack:["phone","email","url"];
+function bizVal(d,k){
+  const arr=v=>Array.isArray(v)?v:String(v||"").split("\n").map(x=>x.trim()).filter(Boolean);
+  switch(k){
+    case "photo":return d.photo||d.pic||"";
+    case "name":return d.name||"";
+    case "title":return d.title||"";
+    case "org":return d.org||"";
+    case "phone":return arr(d.phones)[0]||"";
+    case "email":return arr(d.emails)[0]||"";
+    case "url":return arr(d.urls)[0]||"";
+    case "address":return d.address||"";
+  }
+  return "";
+}
+function bizFieldHTML(d,k){
+  const v=bizVal(d,k);if(!v)return "";
+  if(k==="photo")return `<img class="bc-photo" src="${v}" alt="">`;
+  if(k==="name")return `<div class="bc-name">${esc(v)}</div>`;
+  if(k==="title")return `<div class="bc-title">${esc(v)}</div>`;
+  if(k==="org")return `<div class="bc-org">${esc(v)}</div>`;
+  const ic=k==="phone"?"📞":k==="email"?"✉️":k==="url"?"🌐":"📍";
+  return `<div class="bc-line">${ic} ${esc(v)}</div>`;
+}
+function bizCardHTML(d,keys,tpl,qrMode){
+  const fields=keys.map(k=>bizFieldHTML(d,k)).join("");
+  let extra="";
+  if(qrMode==="qr")extra=`<div class="bc-backrow"><div class="bc-fields">${fields}</div><div class="bc-qrwrap"><div class="qrbox" data-qr></div><div class="bc-qrlabel">Scan for full profile</div></div></div><div class="bc-tap">📲 Tap phone here to save contact</div>`;
+  else if(qrMode==="preview")extra=`<div class="bc-backrow"><div class="bc-fields">${fields}</div><div class="bc-qrwrap"><div class="qrbox"><span style="font-size:10px;color:#666">QR</span></div><div class="bc-qrlabel">Scan for full profile</div></div></div><div class="bc-tap">📲 Tap phone here to save contact</div>`;
+  else extra=`<div class="bc-fields">${fields}</div>`;
+  return `<div class="bcard tpl-${tpl}">${extra}</div>`;
+}
+function renderBizSettings(){
+  const p=getP();if(!p||!$("bizBox"))return;
+  const tpl=p.cardTemplate||"modern";
+  $("tplPicker").innerHTML=BIZ_TPLS.map(([k,l])=>`<button class="tplbtn${tpl===k?" on":""}" data-tpl="${k}">${l}</button>`).join("");
+  $("tplPicker").querySelectorAll("[data-tpl]").forEach(b=>b.onclick=async()=>{p.cardTemplate=b.dataset.tpl;await saveAll();renderBizSettings();});
+  const mk=(el,keys)=>{
+    $(el).innerHTML=BIZ_FIELDS.map(f=>`<label class="chk"><input type="checkbox" value="${f.k}"${keys.includes(f.k)?" checked":""}>${f.label}</label>`).join("");
+    $(el).querySelectorAll("input").forEach(cb=>cb.onchange=async()=>{
+      const vals=[...$(el).querySelectorAll("input:checked")].map(x=>x.value);
+      if(el==="frontPicker")p.cardFront=vals;else p.cardBack=vals;
+      await saveAll();renderBizPreview();
+    });
+  };
+  mk("frontPicker",bizFront(p));mk("backPicker",bizBack(p));
+  renderBizPreview();
+}
+function renderBizPreview(){
+  const p=getP();if(!p||!$("bizPrevFront"))return;
+  const tpl=p.cardTemplate||"modern";
+  $("bizPrevFront").innerHTML=bizCardHTML(p,bizFront(p),tpl,"");
+  $("bizPrevBack").innerHTML=bizCardHTML(p,bizBack(p),tpl,"preview");
+}
+
 /* ---------- recipient view (#s= short link or #c= full data) ---------- */
 function showContact(d){
+  const tpl=String(d.cardTemplate||"modern").replace(/[^a-z]/g,"")||"modern";
+  const frontKeys=Array.isArray(d.cardFront)&&d.cardFront.length?d.cardFront:["photo","name","title","org"];
+  const backKeys=Array.isArray(d.cardBack)&&d.cardBack.length?d.cardBack:["phone","email","url"];
   const href=URL.createObjectURL(new Blob([vcard(d)],{type:"text/vcard"}));
-  document.body.innerHTML=`<div style="max-width:480px;margin:0 auto;padding:22px 16px;font-family:-apple-system,sans-serif;background:#090a0d;color:#f5f6f8;min-height:100vh"><h1 style="letter-spacing:.14em;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">OMNI</h1><div style="background:#14161c;border:1px solid #262a33;border-radius:18px;padding:16px"><h2 style="margin:0 0 8px">${esc(d.name||"Contact")}</h2><pre style="white-space:pre-wrap;font:inherit;margin:0">${esc([d.title,d.org,...(d.phones||[]),...(d.emails||[]),...(d.urls||[]),d.address,d.notes].filter(Boolean).join("\n"))}</pre><p><a href="${href}" download="OMNI.vcf" style="color:#9ec1ff">Save to Contacts</a></p></div><div style="background:#14161c;border:1px solid #262a33;border-radius:18px;padding:16px;margin-top:16px">
-<h3 style="margin:0 0 8px;font-size:16px;color:#f5f6f8">Send your contact back</h3>
-<p style="color:#9aa1ad;font-size:13px;margin:0 0 12px">Share your info with ${esc(d.name||"them")}.</p>
-<input id="leadName" placeholder="Your name" style="width:100%;margin:4px 0;padding:10px;border-radius:10px;border:1px solid #262a33;background:#0e1118;color:#fff;box-sizing:border-box">
-<input id="leadEmail" placeholder="Email" type="email" style="width:100%;margin:4px 0;padding:10px;border-radius:10px;border:1px solid #262a33;background:#0e1118;color:#fff;box-sizing:border-box">
-<input id="leadPhone" placeholder="Phone (optional)" type="tel" style="width:100%;margin:4px 0;padding:10px;border-radius:10px;border:1px solid #262a33;background:#0e1118;color:#fff;box-sizing:border-box">
-<button id="leadSend" style="width:100%;margin-top:8px;padding:12px;border:0;border-radius:12px;background:linear-gradient(135deg,#4f8cff,#a78bfa);color:#fff;font-weight:600">Send contact</button>
-<p id="leadMsg" style="font-size:13px;text-align:center;min-height:18px;color:#9aa1ad"></p>
-</div><p style="text-align:center;margin-top:24px"><a href="${PUBLIC_URL}" style="color:#9aa1ad">Get your own OMNI card →</a></p></div>`;
+  const frontHTML=bizCardHTML(d,frontKeys,tpl,"");
+  const backHTML=bizCardHTML(d,backKeys,tpl,"qr");
+  document.body.innerHTML=`<div class="rcv"><h1 class="rcvbrand">OMNI</h1>
+<div class="rcvflip" id="rcvFlip" role="button" tabindex="0" aria-label="Business card. Activate to flip.">
+  <div class="rcvinner">
+    <div class="rcvface">${frontHTML}</div>
+    <div class="rcvface rcvback">${backHTML}</div>
+  </div>
+</div>
+<p class="rcvhint">👆 Tap the card to flip it</p>
+<a class="rcvbtn" href="${href}" download="OMNI.vcf">📇 Save to Contacts</a>
+<div class="rcvlead">
+<h3>Send your contact back</h3>
+<p>Share your info with ${esc(d.name||"them")}.</p>
+<input id="leadName" placeholder="Your name">
+<input id="leadEmail" placeholder="Email" type="email">
+<input id="leadPhone" placeholder="Phone (optional)" type="tel">
+<button id="leadSend">Send contact</button>
+<p class="lmsg" id="leadMsg"></p>
+</div><p class="rcvfoot"><a href="${PUBLIC_URL}">Get your own OMNI card →</a></p></div>`;
+  const flip=()=>{document.getElementById("rcvFlip").classList.toggle("flipped");};
+  document.getElementById("rcvFlip").onclick=flip;
+  document.getElementById("rcvFlip").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();flip();}};
+  // QR on the back encodes this share URL (the full digital profile)
+  try{
+    const q=document.querySelector("[data-qr]");
+    if(q&&typeof QRCode!=="undefined")new QRCode(q,{text:location.href,width:84,height:84,correctLevel:QRCode.CorrectLevel.M});
+    else if(q)q.innerHTML=`<a href="${esc(location.href)}" style="font-size:11px;word-break:break-all">Open profile</a>`;
+  }catch(e){}
   setTimeout(()=>{
     var cardId=(location.hash.match(/^#s=([A-Za-z0-9]+)/)||[])[1]||"";
     if(cardId)fetch(STATS_URL+"/api/ping",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event:"view",card_id:cardId})}).catch(function(){});
@@ -2482,6 +2724,137 @@ async function renderRecipient(){
 }
 renderRecipient();
 window.addEventListener("hashchange",renderRecipient);
+/* ================= encounter memory ================= */
+let homeTab="cards", editingEncId=null;
+function switchHomeTab(t){
+  homeTab=t;
+  $("tabCards").classList.toggle("on",t==="cards");
+  $("tabTimeline").classList.toggle("on",t==="timeline");
+  $("cardsView").hidden=t!=="cards";
+  $("timelineView").hidden=t!=="timeline";
+  if(t==="timeline")renderTimeline();
+}
+$("tabCards").onclick=()=>switchHomeTab("cards");
+$("tabTimeline").onclick=()=>switchHomeTab("timeline");
+$("addEncBtn").onclick=()=>openEncModal(null,"manual");
+
+function encDateStr(ts){return new Date(ts).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});}
+function encTimeStr(ts){return new Date(ts).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});}
+function shareIcon(t){return t==="nfc"?"📲":t==="qr"?"🔳":t==="link"?"🔗":t==="vcf"?"📇":"🤝";}
+
+/* location only if the OS already granted it — never triggers a permission prompt */
+async function maybeLoc(){
+  try{
+    if(!navigator.permissions||!navigator.permissions.query)return null;
+    const st=await navigator.permissions.query({name:"geolocation"});
+    if(!st||st.state!=="granted")return null;
+    return await new Promise(res=>{
+      navigator.geolocation.getCurrentPosition(
+        p=>res({lat:+p.coords.latitude.toFixed(4),lon:+p.coords.longitude.toFixed(4)}),
+        ()=>res(null),{timeout:4000,maximumAge:600000});
+    });
+  }catch(e){return null;}
+}
+
+function openEncModal(existing,shareType){
+  editingEncId=existing?existing.id:null;
+  $("encModalTitle").textContent=existing?"Edit memory":(shareType&&shareType!=="manual"?"Who did you share with?":"Log an encounter");
+  $("encName").value=existing?existing.contactName:"";
+  $("encWhere").value=existing?existing.where:"";
+  $("encAbout").value=existing?existing.talkedAbout:"";
+  const d=existing&&existing.followUp?new Date(existing.followUp):new Date(Date.now()+3*86400000);
+  $("encFollow").value=d.toISOString().slice(0,10);
+  $("encModal").dataset.sharetype=existing?existing.shareType:(shareType||"manual");
+  $("encModal").hidden=false;
+  setTimeout(()=>$("encName").focus(),50);
+}
+function closeEncModal(){$("encModal").hidden=true;editingEncId=null;}
+$("encSkip").onclick=()=>{
+  if($("encNoAsk").checked){try{localStorage.setItem("omni_enc_noask","1");}catch(e){}}
+  closeEncModal();
+};
+$("encSave").onclick=async()=>{
+  const name=$("encName").value.trim(),where=$("encWhere").value.trim(),about=$("encAbout").value.trim();
+  if(!name&&!where&&!about){toast("Add at least a name or a note");return;}
+  if($("encNoAsk").checked){try{localStorage.setItem("omni_enc_noask","1");}catch(e){}}
+  const fdate=$("encFollow").value;
+  const followUp=fdate?new Date(fdate+"T12:00:00").getTime():null;
+  if(editingEncId){
+    const e=encounters.find(x=>x.id===editingEncId);
+    if(e){e.contactName=name;e.where=where;e.talkedAbout=about;e.followUp=followUp;if(followUp)e.followUpDone=false;}
+  }else{
+    const loc=await maybeLoc();
+    encounters.push({id:"e"+Date.now()+Math.random().toString(36).slice(2,7),
+      ts:Date.now(),contactName:name,where:where,talkedAbout:about,
+      followUp:followUp,followUpDone:false,
+      shareType:$("encModal").dataset.sharetype||"manual",
+      cardId:curId,cardLabel:(getP()||{}).label||"",loc:loc});
+  }
+  await saveEncounters();
+  closeEncModal();renderTimeline();renderNudgesMemories();
+  toast("Memory saved ✓");
+};
+
+/* prompt after a share completes */
+function offerEncounterNote(shareType){
+  try{if(localStorage.getItem("omni_enc_noask")==="1")return;}catch(e){}
+  if(!$("encModal").hidden)return;
+  openEncModal(null,shareType);
+}
+
+function renderTimeline(){
+  const box=$("timelineBox");if(!box)return;
+  const list=[...encounters].sort((a,b)=>b.ts-a.ts);
+  if(!list.length){box.innerHTML=`<div class="empty">No encounters yet.<br><span class="muted">Share your card or tap "+ Log an encounter" to start your timeline.</span></div>`;return;}
+  box.innerHTML=list.map(e=>{
+    const fu=e.followUp?`<div class="muted" style="font-size:12px;margin-top:6px">⏰ Follow up ${e.followUpDone?"✓ done":encDateStr(e.followUp)}</div>`:"";
+    const loc=e.loc?` <span class="muted" style="font-size:12px">📍 ${e.loc.lat}, ${e.loc.lon}</span>`:"";
+    return `<div class="tlitem${e.followUp&&e.followUpDone?" fudone":""}">
+      <div class="tldate">${shareIcon(e.shareType)} ${encDateStr(e.ts)} · ${encTimeStr(e.ts)}${loc}</div>
+      <h4>${esc(e.contactName||"Someone")}</h4>
+      ${e.where?`<p>📍 ${esc(e.where)}</p>`:""}
+      ${e.talkedAbout?`<p>💬 ${esc(e.talkedAbout)}</p>`:""}
+      ${fu}
+      <div class="tlmeta">
+        <button data-enc-edit="${e.id}">Edit</button>
+        ${e.followUp&&!e.followUpDone?`<button data-enc-done="${e.id}">✓ Done</button>`:""}
+        <button class="gray" data-enc-del="${e.id}">Delete</button>
+      </div></div>`;
+  }).join("");
+  box.querySelectorAll("[data-enc-edit]").forEach(b=>b.onclick=()=>{const e=encounters.find(x=>x.id===b.dataset.encEdit);if(e)openEncModal(e);});
+  box.querySelectorAll("[data-enc-done]").forEach(b=>b.onclick=async()=>{const e=encounters.find(x=>x.id===b.dataset.encDone);if(e){e.followUpDone=true;await saveEncounters();renderTimeline();renderNudgesMemories();}});
+  box.querySelectorAll("[data-enc-del]").forEach(b=>b.onclick=async()=>{if(!confirm("Delete this memory?"))return;encounters=encounters.filter(x=>x.id!==b.dataset.encDel);await saveEncounters();renderTimeline();renderNudgesMemories();});
+}
+
+/* nudges + memories shown at top of home on unlock */
+function renderNudgesMemories(){
+  const box=$("memNudgeBox");if(!box)return;
+  const now=Date.now(),today=new Date();let html="";
+  // follow-up nudges
+  encounters.filter(e=>e.followUp&&!e.followUpDone&&e.followUp<=now)
+    .sort((a,b)=>a.followUp-b.followUp).slice(0,5).forEach(e=>{
+    html+=`<div class="nudgecard"><h4>⏰ Follow up with ${esc(e.contactName||"them")}</h4>
+      <p>${e.where?esc(e.where)+" · ":""}${e.talkedAbout?esc(e.talkedAbout.slice(0,80)):""}</p>
+      <div class="rowbtns"><button data-nudge-done="${e.id}">✓ Mark done</button>
+      <button class="gray" data-nudge-snooze="${e.id}" style="background:none;border:1px solid var(--line);color:var(--muted);box-shadow:none">Snooze 3d</button></div></div>`;
+  });
+  // memories: same calendar date, 1 year and 6 months ago
+  const isSameMD=(ts,yearsBack,monthsBack)=>{
+    const d=new Date(ts),t=new Date(today);
+    t.setFullYear(t.getFullYear()-yearsBack);t.setMonth(t.getMonth()-monthsBack);
+    return d.getFullYear()===t.getFullYear()&&d.getMonth()===t.getMonth()&&d.getDate()===t.getDate();
+  };
+  encounters.filter(e=>isSameMD(e.ts,1,0)).slice(0,3).forEach(e=>{
+    html+=`<div class="memcard"><h4>📸 A year ago today</h4><p>You met <b>${esc(e.contactName||"someone")}</b>${e.where?" at "+esc(e.where):""}.</p></div>`;
+  });
+  encounters.filter(e=>isSameMD(e.ts,0,6)).slice(0,3).forEach(e=>{
+    html+=`<div class="memcard"><h4>📸 6 months ago today</h4><p>You met <b>${esc(e.contactName||"someone")}</b>${e.where?" at "+esc(e.where):""}.</p></div>`;
+  });
+  box.innerHTML=html;
+  box.querySelectorAll("[data-nudge-done]").forEach(b=>b.onclick=async()=>{const e=encounters.find(x=>x.id===b.dataset.nudgeDone);if(e){e.followUpDone=true;await saveEncounters();renderNudgesMemories();renderTimeline();toast("Follow-up done ✓");}});
+  box.querySelectorAll("[data-nudge-snooze]").forEach(b=>b.onclick=async()=>{const e=encounters.find(x=>x.id===b.dataset.nudgeSnooze);if(e){e.followUp=Date.now()+3*86400000;await saveEncounters();renderNudgesMemories();renderTimeline();}});
+}
+
 /* safety net: save if page is hidden/closed with unsaved changes */
 document.addEventListener("visibilitychange",()=>{if(document.hidden)saveAll();});
 window.addEventListener("pagehide",()=>{saveAll();});
@@ -2491,6 +2864,7 @@ async function tryRememberedPin(){
     const rp=localStorage.getItem("omni_remembered_pin");
     if(!rp||!hasVault())return false;
     profiles=await vaultDecrypt(rp);
+    await loadEncounters(rp);
     sessionPin=rp;pinFailReset();
     // keep the checkbox checked
     const cb=$("rememberPin");if(cb)cb.checked=true;
