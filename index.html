@@ -104,6 +104,10 @@ a.wrow:active{background:rgba(255,255,255,.05)}
 .wact:last-child{background:#232a3a}
 .empty{color:var(--muted);text-align:center;margin:60px 0}
 .fab{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));right:24px;width:64px;height:64px;border-radius:50%;font-size:32px;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;margin:0;padding:0;box-shadow:0 6px 22px rgba(79,140,255,.45)}
+/* present mode: one-tap share from home screen */
+.present-share{width:100%;padding:16px;font-size:18px;font-weight:700;margin:10px 0 2px;border-radius:16px;min-height:56px;box-shadow:0 6px 22px rgba(79,140,255,.45)}
+#presentQr{display:flex;justify-content:center;margin:14px 0}
+#presentQr table,#presentQr canvas,#presentQr img{border-radius:8px}
 /* flip card */
 .flipwrap{perspective:1000px;margin-top:6px;cursor:pointer}
 .flipinner{position:relative;width:100%;height:230px;transition:transform .55s;transform-style:preserve-3d}
@@ -241,6 +245,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .rcvhint{text-align:center;color:#9aa1ad;font-size:13px;margin:8px 0 14px}
 .rcvbtn{display:block;text-align:center;padding:14px;border-radius:14px;background:linear-gradient(135deg,#4f8cff,#a78bfa);color:#fff;font-weight:700;text-decoration:none;margin:0 0 16px}
 .rcvlead{background:#14161c;border:1px solid #262a33;border-radius:18px;padding:16px;margin-top:16px}
+.rcvlead summary::-webkit-details-marker{display:none}
 .rcvlead h3{margin:0 0 8px;font-size:16px}
 .rcvlead p{color:#9aa1ad;font-size:13px;margin:0 0 12px}
 .rcvlead input{width:100%;margin:4px 0;padding:10px;border-radius:10px;border:1px solid #262a33;background:#0e1118;color:#fff;box-sizing:border-box}
@@ -327,11 +332,12 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <div id="lockScreen" hidden>
   <h1>OMNI</h1>
   <div class="muted" style="letter-spacing:.1em">SHARE ONLY WHAT YOU CHOOSE</div>
+  <button id="bioUnlockBtn" hidden style="margin-top:22px;width:100%;max-width:280px;font-size:16px;padding:14px;min-height:52px">Unlock with biometrics</button>
+  <button id="bioEnrollBtn" class="gray" hidden style="margin-top:18px;width:100%;max-width:280px;font-size:13px;">Set up biometrics for faster unlock</button>
+  <div id="bioDivider" class="muted" hidden style="margin:14px 0 0;font-size:12px">or enter your PIN</div>
   <p id="lockMsg" class="muted" style="margin-top:26px">Set a 6-digit PIN</p>
   <div class="dots" id="dots"></div>
   <div class="pinpad" id="pinpad"></div>
-  <button id="bioUnlockBtn" class="gray" hidden style="margin-top:12px;width:100%;max-width:280px;">🔓 Unlock with Biometrics</button>
-  <button id="bioEnrollBtn" class="gray" hidden style="margin-top:8px;width:100%;max-width:280px;font-size:13px;">Enable Face ID / Touch ID</button>
   <button class="forgot" id="forgotBtn" hidden>Forgot PIN? Reset everything</button>
   <button class="forgot" id="lockSyncBtn" style="margin-top:4px">☁️ Restore my cards from cloud</button>
   <div id="lockSyncForm" hidden style="margin-top:8px;width:100%;max-width:280px;">
@@ -344,34 +350,59 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   </div>
 </div>
 
-<!-- FORGOT PIN MODAL -->
+<!-- FORGOT PIN MODAL — 3-step safety flow -->
 <div id="resetModal" class="modal" hidden role="dialog" aria-label="Reset app confirmation">
   <div class="box">
     <h3 class="sec" style="margin-top:0">Forgot your PIN?</h3>
-    <p>Resetting <b style="color:#e08080">permanently deletes</b> from this device:</p>
-    <ul>
-      <li>All your cards</li>
-      <li>Profile photos</li>
-      <li>Backups stored on this device</li>
-    </ul>
-    <p><b>Have a backup file?</b> Restore it instead — nothing gets deleted.</p>
-    <button id="resetRestore">📥 I have a backup</button>
-    <p class="muted" style="margin-top:12px">No backup? To wipe everything, type <b>RESET</b> below:</p>
-    <input id="resetType" placeholder="Type RESET" autocomplete="off" autocapitalize="characters" aria-label="Type RESET to confirm wipe">
-    <div class="rowbtns">
-      <button id="resetConfirm" class="danger" disabled>Wipe everything</button>
-      <button id="resetCancel" class="gray">Cancel</button>
+
+    <!-- STEP 1: what's at stake -->
+    <div id="resetStep1">
+      <p>Resetting <b style="color:#e08080">permanently deletes</b> from this device:</p>
+      <ul>
+        <li>All your cards (stored in your encrypted vault)</li>
+        <li>Profile photos</li>
+        <li>Backups stored on this device</li>
+      </ul>
+      <p class="muted" style="font-size:13px">Your data is encrypted with your PIN. <b>Without the PIN there is no way to recover it</b> — not even we can unlock it. This cannot be undone.</p>
+      <div class="rowbtns">
+        <button id="resetStep1Next" class="danger">I understand — continue</button>
+        <button id="resetStep1Cancel" class="gray">Cancel</button>
+      </div>
     </div>
+
+    <!-- STEP 2: backup check -->
+    <div id="resetStep2" hidden>
+      <p><b>Before you wipe everything, check for a backup:</b></p>
+      <div id="resetBackupStatus" class="muted" style="font-size:13px;margin:8px 0"></div>
+      <button id="resetRestore" style="width:100%">📥 I have a backup file — restore it instead</button>
+      <p class="muted" style="margin-top:12px;font-size:13px">No backup available? Only continue if you accept losing everything.</p>
+      <div class="rowbtns">
+        <button id="resetStep2Next" class="danger">No backup — continue to wipe</button>
+        <button id="resetStep2Cancel" class="gray">Cancel</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: type RESET to confirm -->
+    <div id="resetStep3" hidden>
+      <p style="color:#e08080"><b>Final step — this wipes everything.</b></p>
+      <p class="muted" style="font-size:13px">To confirm, type <b>RESET</b> below:</p>
+      <input id="resetType" placeholder="Type RESET" autocomplete="off" autocapitalize="characters" aria-label="Type RESET to confirm wipe">
+      <div class="rowbtns">
+        <button id="resetConfirm" class="danger" disabled>Wipe everything</button>
+        <button id="resetStep3Cancel" class="gray">Cancel</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- OUT OF SHARES MODAL -->
-<div id="limitModal" class="modal" hidden role="dialog" aria-label="Out of shares">
+<!-- TRACKED SHARES USED-UP MODAL -->
+<div id="limitModal" class="modal" hidden role="dialog" aria-label="Tracked shares used up">
   <div class="box">
-    <h3 class="sec" style="margin-top:0">You're out of shares!</h3>
-    <p class="muted">Your 20 free shares reset Friday. Get more now:</p>
-    <div id="limitInviteWrap"><button id="limitInviteBtn" style="width:100%">💌 Invite a friend — earn 100 shares</button></div>
-    <div id="limitBuyWrap"><button id="limitBuyBtn" style="width:100%;margin-top:8px">💳 Buy 100 shares — $3.99</button></div>
+    <h3 class="sec" style="margin-top:0">Tracked shares used up</h3>
+    <p class="muted">You've used your 20 tracked shares this week (resets Friday). QR and .vcf sharing still work unlimited — or get more tracked shares:</p>
+    <div id="limitInviteWrap"><button id="limitInviteBtn" style="width:100%">💌 Invite a friend — earn 100 tracked shares</button></div>
+    <div id="limitBuyWrap"><button id="limitBuyBtn" style="width:100%;margin-top:8px">💳 Buy 100 tracked shares — $3.99</button></div>
     <button id="limitClose" class="gray" style="width:100%;margin-top:8px">Not now</button>
   </div>
 </div>
@@ -391,9 +422,24 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   </aside>
 </div>
 
+<!-- PRESENT MODE SHARE -->
+<div id="presentModal" class="modal" hidden role="dialog" aria-label="Share your card">
+  <div class="box">
+    <h3 class="sec" style="margin-top:0">Share <span id="presentCardName"></span></h3>
+    <div id="presentQr"></div>
+    <p class="muted" id="presentEmpty" hidden style="text-align:center">Add contact info to this card before sharing.</p>
+    <button id="presentShareSys" style="width:100%;padding:15px;font-size:17px">Share…</button>
+    <button id="presentVcf" class="gray" style="width:100%;margin-top:8px">Save .vcf file</button>
+    <button id="presentCopyLink" class="gray" style="width:100%;margin-top:8px">Copy link</button>
+    <button id="presentNfc" class="gray" style="width:100%;margin-top:8px" hidden>Write to NFC tag</button>
+    <button id="presentClose" class="gray" style="width:100%;margin-top:8px">Close</button>
+  </div>
+</div>
+
 <!-- HOME -->
 <div class="wrap" id="homeScreen" hidden>
   <div class="brand"><h1>OMNI</h1><div><button class="iconbtn" id="menuBtn" aria-label="Open menu" aria-haspopup="true">☰</button><span id="legacyHeaderBtns" style="display:none"><button class="iconbtn small" id="ownerBtn" aria-label="Owner controls">👑</button><button class="iconbtn small" id="dashBtn" aria-label="Open dashboard">📊</button><button class="iconbtn small" id="backupBtn" aria-label="Back up cards">Back up</button><button class="iconbtn" id="lockBtn" aria-label="Lock app">Lock</button></span></div></div>
+  <button id="presentShareBtn" class="present-share" aria-label="Share your card now">Share my card</button>
   <div id="offlineBar" class="box" hidden style="border-color:#7a5a2b;text-align:center;padding:10px">📴 Offline — you can view and share saved cards.<br><span class="muted">Backing up and cloud stats need internet.</span></div>
   <div id="backupNudge" class="box" hidden style="border-color:#7a5a2b;background:linear-gradient(160deg,#1d1812,#14110c)">
     <span id="backupNudgeText">💾 Back up your cards to keep them safe.</span><br>
@@ -562,7 +608,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
         </div>
         <button class="small gray" id="chPwBtn" style="width:100%;margin-top:8px">Change password</button>
       </div>
-      <div class="togglerow"><span>🎟️ Share limits<br><span class="muted" style="font-size:12px">20 free shares / week</span></span><label class="switch"><input type="checkbox" id="tgLimits" aria-label="Toggle share limits"><span class="sl"></span></label></div>
+      <div class="togglerow"><span>Share limits<br><span class="muted" style="font-size:12px">20 tracked shares / week</span></span><label class="switch"><input type="checkbox" id="tgLimits" aria-label="Toggle share limits"><span class="sl"></span></label></div>
       <div class="togglerow"><span>💌 Invite system<br><span class="muted" style="font-size:12px">100 bonus shares per invite</span></span><label class="switch"><input type="checkbox" id="tgInvites" aria-label="Toggle invite system"><span class="sl"></span></label></div>
       <div class="togglerow"><span>💳 Buy shares<br><span class="muted" style="font-size:12px">$3.99 per 100 shares</span></span><label class="switch"><input type="checkbox" id="tgBuy" aria-label="Toggle buy shares"><span class="sl"></span></label></div>
       <h3 class="sec">Users</h3>
@@ -611,10 +657,11 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <summary><span>Sharing</span></summary>
 <div id="sharePlanCard" hidden style="background:#1e1e1e;border-radius:20px;padding:20px;margin:4px 0 12px;">
       <div style="display:flex;justify-content:space-between;align-items:baseline;">
-        <span style="font-size:20px;font-weight:600;color:#fff;">Free shares</span>
+        <span style="font-size:20px;font-weight:600;color:#fff;">Tracked shares</span>
         <span id="planFreePct" style="font-size:15px;color:#9aa1ad;">0% used</span>
       </div>
-      <div id="planFreeReset" style="font-size:14px;color:#9aa1ad;margin-top:4px;">Weekly limit resets Friday</div>
+      <div style="margin-top:6px;font-size:13px;color:#4ade80;">● Unlimited QR &amp; .vcf sharing — free forever</div>
+      <div id="planFreeReset" style="font-size:14px;color:#9aa1ad;margin-top:4px;">Tracked limit resets Friday</div>
       <div style="height:10px;background:#2c2c2e;border-radius:5px;margin-top:10px;overflow:hidden;">
         <div id="planFreeBar" style="height:100%;width:0%;background:#0a84ff;border-radius:5px;transition:width .3s;"></div>
       </div>
@@ -947,12 +994,44 @@ async function doLock(){
   $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("welcomeScreen").hidden=true;$("lockScreen").hidden=false;
 }
 $("lockBtn").onclick=doLock;
-/* forgot PIN: safe reset flow */
+/* forgot PIN: 3-step safety flow */
+function resetShowStep(n){
+  $("resetStep1").hidden=n!==1;
+  $("resetStep2").hidden=n!==2;
+  $("resetStep3").hidden=n!==3;
+  if(n===2)resetCheckBackup();
+  if(n===3){$("resetType").value="";$("resetConfirm").disabled=true;}
+}
+function resetCheckBackup(){
+  const el=$("resetBackupStatus");
+  let html="";
+  try{
+    const sid=localStorage.getItem("omni_sync_id");
+    const syncLast=parseInt(localStorage.getItem("omni_sync_last")||"0",10);
+    const lastB=parseInt(localStorage.getItem("omni_last_backup")||"0",10);
+    if(sid){
+      html+="<p>Cloud Sync was set up on this device"+(syncLast?" (last synced "+new Date(syncLast).toLocaleDateString()+")":"")+". A cloud backup may exist — but it's encrypted with the same forgotten PIN, so it can't be unlocked without it.</p>";
+    }
+    if(lastB>0){
+      html+="<p>A backup file was created on "+new Date(lastB).toLocaleDateString()+". If you still have that file, use the restore button below instead of wiping.</p>";
+    }
+    if(!sid&&!lastB){
+      html="<p>We couldn't find any backup for this device. If you wipe now, your cards will be <b>permanently lost</b>.</p>";
+    }
+  }catch(e){
+    html="<p>We couldn't verify backup status.</p>";
+  }
+  el.innerHTML=html;
+}
 $("forgotBtn").onclick=()=>{
-  $("resetType").value="";$("resetConfirm").disabled=true;
+  resetShowStep(1);
   $("resetModal").hidden=false;
 };
-$("resetCancel").onclick=()=>{$("resetModal").hidden=true;};
+$("resetStep1Next").onclick=()=>resetShowStep(2);
+$("resetStep1Cancel").onclick=()=>{$("resetModal").hidden=true;};
+$("resetStep2Next").onclick=()=>resetShowStep(3);
+$("resetStep2Cancel").onclick=()=>{$("resetModal").hidden=true;};
+$("resetStep3Cancel").onclick=()=>{$("resetModal").hidden=true;};
 $("resetType").oninput=e=>{$("resetConfirm").disabled=e.target.value.trim().toUpperCase()!=="RESET";};
 $("resetRestore").onclick=()=>{
   $("resetModal").hidden=true;
@@ -1041,9 +1120,9 @@ function updateCreditUI(){
     bar.hidden=false;
     const s=creditsState();
     const wl=Math.max(0,WEEKLY_FREE-s.used);
-    let t=`🎟️ <b>${wl}/${WEEKLY_FREE}</b> free shares left`;
-    if(s.bonus>0)t+=` &nbsp;·&nbsp; ✨ <b>${s.bonus}</b> bonus`;
-    t+=`<br><span style="font-size:11px">Used ${s.used} this week · resets Friday</span>`;
+    let t=`<span style="color:#4ade80">● Unlimited sharing — free forever</span>`;
+    t+=`<br><span style="font-size:11px">Tracked shares with analytics: <b>${s.used}/${WEEKLY_FREE}</b> used this week · resets Friday</span>`;
+    if(s.bonus>0)t+=`<br><span style="font-size:11px">✨ <b>${s.bonus}</b> bonus tracked shares</span>`;
     bar.innerHTML=t;
   }
   const card=$("sharePlanCard");
@@ -1058,7 +1137,7 @@ function updateCreditUI(){
       // Next Friday reset date
       const now=new Date(), d=new Date(now);
       d.setDate(d.getDate()+((5-d.getDay()+7)%7||7));
-      $("planFreeReset").textContent="Weekly limit resets "+d.toLocaleDateString("en-US",{month:"short",day:"numeric"})+" ("+left+" left)";
+      $("planFreeReset").textContent="Tracked limit resets "+d.toLocaleDateString("en-US",{month:"short",day:"numeric"})+" ("+left+" left)";
       const bUsed=s.bonusEarned>0?Math.min(100,Math.round((s.bonusEarned-s.bonus)/s.bonusEarned*100)):0;
       const bPct=s.bonusEarned>0?bUsed:0;
       $("planBonusSub").textContent=bPct+"% used ("+s.bonus+" shares left)";
@@ -1825,6 +1904,13 @@ function showFirstBackupModal(){
 
 
 /* ---------- WebAuthn biometric unlock ---------- */
+// Friendly name for the platform biometric: Face ID (iOS), Fingerprint (Android), Biometrics (other)
+function bioName(){
+  const ua = (navigator.userAgent || "") + " " + (navigator.vendor || "");
+  if(/iPhone|iPad|iPod/i.test(ua)) return "Face ID";
+  if(/Android/i.test(ua)) return "Fingerprint";
+  return "Biometrics";
+}
 const bioAvailable = () => window.PublicKeyCredential && 
   PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable && 
   PublicKeyCredential.isConditionalMediationAvailable !== undefined || 
@@ -1882,14 +1968,19 @@ async function bioUnlock(){
 function updateBioButtons(){
   const enrolled = localStorage.getItem("omni_bio_cred");
   const supported = !!window.PublicKeyCredential;
-  const unlockBtn = $("bioUnlockBtn"), enrollBtn = $("bioEnrollBtn");
+  const unlockBtn = $("bioUnlockBtn"), enrollBtn = $("bioEnrollBtn"), div = $("bioDivider");
   if(!unlockBtn || !enrollBtn) return;
-  if(!supported){ unlockBtn.hidden = true; enrollBtn.hidden = true; return; }
+  const name = bioName();
+  unlockBtn.textContent = "Unlock with " + name;
+  enrollBtn.textContent = "Set up " + name + " for faster unlock";
+  if(!supported){ unlockBtn.hidden = true; enrollBtn.hidden = true; if(div) div.hidden = true; return; }
   // Show unlock if enrolled and vault exists (returning user)
   // Show enroll if vault exists but not yet enrolled
   const hasVault = !!localStorage.getItem("omni_vault");
   unlockBtn.hidden = !(enrolled && hasVault);
   enrollBtn.hidden = !(!enrolled && hasVault);
+  // Divider only when the primary biometric button is the first thing shown
+  if(div) div.hidden = unlockBtn.hidden;
 }
 
 // Hook into lock screen display
@@ -2016,11 +2107,11 @@ async function vaultUpload(silent){
       await vaultPull();
       return false;
     }else{
-      if(!silent) syncMsg("Sync failed — try again", false);
+      if(!silent){ syncMsg("Sync failed — try again", false); if(!_netOffline) toast("Couldn't sync — will retry"); }
       return false;
     }
   }catch(e){
-    if(!silent) syncMsg("Sync failed — check connection", false);
+    if(!silent){ syncMsg("Sync failed — check connection", false); if(!_netOffline) toast("Couldn't sync — will retry"); }
     return false;
   }
 }
@@ -2051,6 +2142,7 @@ async function vaultPull(){
     return true;
   }catch(e){
     syncMsg("Sync failed — check connection", false);
+    if(!_netOffline) toast("Couldn't sync — will retry");
     return false;
   }
 }
@@ -2577,6 +2669,57 @@ $("qrDlBtn").onclick=()=>{
   toast("QR image saved — check your Photos ✓");
 };
 
+/* ---------- present mode: one-tap share from the home screen ---------- */
+let _presentPrevId=null;
+async function openPresentShare(){
+  if(!profiles.length){toast("Create a card first");return;}
+  const q=(typeof searchQ==="string"?searchQ:"").toLowerCase();
+  const list=profiles.filter(p=>!q||((p.label||"")+" "+(p.name||"")+" "+(p.org||"")).toLowerCase().includes(q));
+  let target=null;
+  if(typeof activeWallet==="number"&&activeWallet>=0&&activeWallet<list.length)target=list[activeWallet];
+  if(!target)target=list[0]||profiles[0];
+  if(!target)return;
+  _presentPrevId=curId;
+  curId=target.id;
+  buildShare();
+  const has=$("shareBox")&&!$("shareBox").hidden;
+  $("presentCardName").textContent="\u201c"+(target.label||target.name||"card")+"\u201d";
+  $("presentEmpty").hidden=has;
+  $("presentQr").innerHTML="";
+  ["presentShareSys","presentVcf","presentCopyLink"].forEach(id=>{$(id).style.display=has?"":"none";});
+  $("presentNfc").hidden=true;
+  if(has){
+    try{await $("linkBtn").onclick();}catch(e){}
+    if(!$("limitModal").hidden){closePresentShare();return;} // out of shares — limit modal explains
+    const qrHtml=$("qr").innerHTML;
+    if(qrHtml){
+      $("presentQr").innerHTML=qrHtml;
+      if("NDEFReader" in window)$("presentNfc").hidden=false;
+    }else{
+      $("presentQr").innerHTML='<p class="muted" style="text-align:center">Couldn\'t generate the QR code.</p>';
+    }
+  }
+  $("presentModal").hidden=false;
+}
+function closePresentShare(){
+  $("presentModal").hidden=true;
+  curId=_presentPrevId;_presentPrevId=null;
+}
+$("presentShareBtn").onclick=()=>{openPresentShare();};
+$("presentClose").onclick=closePresentShare;
+$("presentModal").addEventListener("click",e=>{if(e.target===$("presentModal"))closePresentShare();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("presentModal").hidden)closePresentShare();});
+$("presentShareSys").onclick=()=>{$("shareBtn").onclick();};
+$("presentVcf").onclick=()=>{$("vcfBtn").onclick();};
+$("presentCopyLink").onclick=async()=>{
+  if(_lastNfcUrl){
+    try{await navigator.clipboard.writeText(_lastNfcUrl);toast("Link copied \u2713");return;}
+    catch(e){}
+  }
+  prompt("Copy this OMNI link",_lastNfcUrl||"");
+};
+$("presentNfc").onclick=()=>{$("nfcWriteBtn").onclick();};
+
 /* ================= business card view ================= */
 const BIZ_TPLS=[["modern","Modern"],["classic","Classic"],["bold","Bold"],["minimal","Minimal"]];
 const BIZ_FIELDS=[
@@ -2655,15 +2798,15 @@ function showContact(d){
 </div>
 <p class="rcvhint">👆 Tap the card to flip it</p>
 <a class="rcvbtn" href="${href}" download="OMNI.vcf">📇 Save to Contacts</a>
-<div class="rcvlead">
-<h3>Send your contact back</h3>
-<p>Share your info with ${esc(d.name||"them")}.</p>
-<input id="leadName" placeholder="Your name">
-<input id="leadEmail" placeholder="Email" type="email">
-<input id="leadPhone" placeholder="Phone (optional)" type="tel">
-<button id="leadSend">Send contact</button>
+<details class="rcvlead" open>
+<summary style="cursor:pointer;font-size:16px;font-weight:700;margin-bottom:8px;list-style:none">💬 Share your info back</summary>
+<p>Want to send your contact info back to ${esc(d.name||"them")}?</p>
+<input id="leadName" placeholder="Your name *" autocomplete="name">
+<input id="leadEmail" placeholder="Email *" type="email" autocomplete="email">
+<input id="leadPhone" placeholder="Phone" type="tel" autocomplete="tel">
+<button id="leadSend">Send</button>
 <p class="lmsg" id="leadMsg"></p>
-</div><p class="rcvfoot"><a href="${PUBLIC_URL}">Get your own OMNI card →</a></p></div>`;
+</details><p class="rcvfoot"><a href="${PUBLIC_URL}">Get your own OMNI card →</a></p></div>`;
   const flip=()=>{document.getElementById("rcvFlip").classList.toggle("flipped");};
   document.getElementById("rcvFlip").onclick=flip;
   document.getElementById("rcvFlip").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();flip();}};
@@ -2682,11 +2825,13 @@ function showContact(d){
       var nm=document.getElementById("leadName").value.trim();
       var em=document.getElementById("leadEmail").value.trim();
       var ph=document.getElementById("leadPhone").value.trim();
-      if(!nm&&!em&&!ph){msg.textContent="Add your name, email, or phone.";msg.style.color="#e08080";return;}
+      if(!nm){msg.textContent="Please add your name.";msg.style.color="#e08080";return;}
+      if(!em&&!ph){msg.textContent="Please add your email or phone.";msg.style.color="#e08080";return;}
       msg.textContent="Sending…";msg.style.color="";
-      fetch(STATS_URL+"/api/lead",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({card_id:cardId,name:nm,email:em,phone:ph})})
+      var senderName=(d&&d.name)||"them";
+      fetch(STATS_URL+"/api/lead",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({card_id:cardId,name:nm,email:em,phone:ph,ts:Date.now()})})
       .then(function(r){return r.json();}).then(function(j){
-        if(j.ok){msg.textContent="✓ Sent!";msg.style.color="#7fd67f";sb.disabled=true;}
+        if(j.ok){msg.textContent="Sent! "+senderName+" will see your info.";msg.style.color="#7fd67f";sb.disabled=true;}
         else{msg.textContent="Couldn't send.";msg.style.color="#e08080";}
       }).catch(function(){msg.textContent="Check connection.";msg.style.color="#e08080";});
     };
@@ -2779,6 +2924,18 @@ function renderNudgesMemories(){
 /* safety net: save if page is hidden/closed with unsaved changes */
 document.addEventListener("visibilitychange",()=>{if(document.hidden)saveAll();});
 window.addEventListener("pagehide",()=>{saveAll();});
+/* connectivity toasts: offline/online transitions (non-intrusive, no spam) */
+let _netOffline=!navigator.onLine;
+window.addEventListener("offline",()=>{
+  _netOffline=true;
+  const ob=$("offlineBar");if(ob)ob.hidden=false;
+  toast("You're offline — your cards still work.");
+});
+window.addEventListener("online",()=>{
+  _netOffline=false;
+  const ob=$("offlineBar");if(ob)ob.hidden=true;
+  toast("Back online.");
+});
 /* init */
 (function init(){
   buildDots();
