@@ -284,6 +284,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <p>👆 <b>Share</b> via tap, QR, or straight to contacts</p>
     </div>
     <button id="welcomeGo" style="margin-top:12px;padding:14px 40px;font-size:17px">Get started</button>
+    <button class="forgot" id="welcomeRestoreBtn" style="margin-top:10px">☁️ Already use OMNI? Restore my cards</button>
   </div>
 </div>
 
@@ -325,12 +326,13 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     Remember PIN on this device
   </label>
   <button class="forgot" id="forgotBtn" hidden>Forgot PIN? Reset everything</button>
-  <button class="forgot" id="lockSyncBtn" style="margin-top:4px">☁️ Have a Sync ID? Link this device</button>
+  <button class="forgot" id="lockSyncBtn" style="margin-top:4px">☁️ Restore my cards from cloud</button>
   <div id="lockSyncForm" hidden style="margin-top:8px;width:100%;max-width:280px;">
     <div style="display:flex;gap:8px">
       <input id="lockSyncInput" placeholder="OMNI-XXXX-XXXX" autocomplete="off" autocapitalize="characters" style="flex:1;margin:0;font-size:14px" aria-label="Sync ID">
       <button class="small gray" id="lockSyncGo" style="flex:none;margin:0">Link</button>
     </div>
+    <p class="muted" style="font-size:12px;margin:6px 0 0">Find it on your other device:<br>Settings → Cloud Sync → your Sync ID</p>
     <p class="muted" id="lockSyncMsg" style="font-size:12px;margin-top:6px"></p>
   </div>
 </div>
@@ -839,6 +841,16 @@ async function pinDone(){
       if(profiles.length===0&&pendingCard){profiles.push(pendingCard);stat("cards");}
       sessionPin=pin;
       await vaultEncrypt(pin,profiles);
+      // Auto-enable cloud backup so cards survive logout/login/new device.
+      // Silent: no prompts. The Sync ID is shown later in Settings → Cloud Sync.
+      if(!syncEnabled()){
+        try{
+          const newId=genSyncId();
+          localStorage.setItem(SYNC_ID_KEY,newId);
+          vaultUpload(true).catch(()=>{});
+          adoptSyncInviteCode().catch(()=>{});
+        }catch(e){}
+      }
       pinFailReset();haptic(15);
       if(onboarding){
         onboarding=false;pendingCard=null;
@@ -892,6 +904,14 @@ $("welcomeGo").onclick=()=>{
   $("welcomeScreen").hidden=true;$("quickScreen").hidden=false;
   $("q_name").focus();
 };
+/* welcome-screen restore: jump to the lock screen with the cloud restore form open */
+$("welcomeRestoreBtn").onclick=()=>{
+  localStorage.setItem("omni_welcomed","1");
+  $("welcomeScreen").hidden=true;$("lockScreen").hidden=false;
+  $("lockSyncForm").hidden=false;
+  pinMsg("Enter your Sync ID to restore your cards");
+  try{$("lockSyncInput").focus();}catch(e){}
+};
 /* quick create: name + one contact method */
 let onboarding=false, pendingCard=null;
 function validContact(v){
@@ -918,6 +938,8 @@ async function doLock(){
   const has=hasVault()||hasLegacy();
   pinMsg(has?"Enter your PIN":"Set a 6-digit PIN");
   $("forgotBtn").hidden=!has;
+  // cloud restore is for fresh installs — hide it when this device already has cards
+  $("lockSyncBtn").hidden=has;$("lockSyncForm").hidden=true;
   const locked=pinLockedLeft();
   if(locked>0)pinMsg("Too many tries — wait "+locked+"s");
   $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("welcomeScreen").hidden=true;$("lockScreen").hidden=false;
@@ -956,6 +978,7 @@ $("resetRestore").onclick=()=>{
           pinTmp=null;pinBuf="";buildDots();
           pinMsg("Set a "+(localStorage.getItem("omni_pinlen")||"6")+"-digit PIN");
           $("forgotBtn").hidden=true;
+          $("lockSyncBtn").hidden=false; // no vault on disk yet — cloud restore stays available
           $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("welcomeScreen").hidden=true;$("lockScreen").hidden=false;
           updateGo();
         }
@@ -2032,6 +2055,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const eb = $("syncEnableBtn");
   if(eb) eb.onclick = async () => {
     if(!sessionPin){ syncMsg("Unlock the app first, then enable sync", false); return; }
+    if(syncEnabled()){ updateSyncUI(); syncMsg("Cloud Sync is already on — your Sync ID is shown above."); return; }
     const id = genSyncId();
     localStorage.setItem(SYNC_ID_KEY, id);
     syncMsg("Uploading…");
@@ -2129,6 +2153,7 @@ document.addEventListener("DOMContentLoaded", () => {
       buildDots(); updateGo();
       const has = hasVault() || hasLegacy();
       $("forgotBtn").hidden = !has;
+      $("lockSyncBtn").hidden = true; $("lockSyncForm").hidden = true; // linked — no longer a fresh install
       toast("☁️ Device linked — enter your PIN");
     }catch(e){
       if(msg){ msg.textContent = "Link failed — check connection"; msg.style.color = "#e08080"; }
@@ -2895,6 +2920,7 @@ async function tryRememberedPin(){
     $("lockScreen").hidden=false;
     if(has)pinMsg("Enter your PIN");
     $("forgotBtn").hidden=!has;
+    $("lockSyncBtn").hidden=has; // "Restore my cards from cloud" only on fresh installs
   }
   updateGo();
   // share credits: fetch flags, then process invite / purchase deep links

@@ -1,4 +1,4 @@
-const V="omni-v13";
+const V="omni-v14";
 self.addEventListener("install",e=>{self.skipWaiting();});
 self.addEventListener("activate",e=>{
   e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
