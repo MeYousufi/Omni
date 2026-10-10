@@ -1,7 +1,14 @@
-const V="omni-v14";
+const V="omni-v15";
 self.addEventListener("install",e=>{self.skipWaiting();});
 self.addEventListener("activate",e=>{
-  e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
+  e.waitUntil(
+    // Nuclear: wipe EVERYTHING cached by any older version, then force every
+    // open tab to reload fresh. Fixes clients stuck on stale code (2026-10-10).
+    caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k))))
+      .then(()=>self.clients.claim())
+      .then(()=>self.clients.matchAll({type:"window",includeUncontrolled:true}))
+      .then(clients=>{clients.forEach(c=>{try{c.navigate(c.url);}catch(e){}});})
+  );
 });
 self.addEventListener("fetch",e=>{
   const u=new URL(e.request.url);
