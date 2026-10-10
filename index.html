@@ -1573,7 +1573,7 @@ $("saveBtn2").onclick=async()=>{
   readFields();
   const p=getP();if(p&&p._draft){delete p._draft;stat("cards");}
   try{await saveAll();}
-  catch(e){toast("⚠️ Save failed — storage may be full");return;}
+  catch(e){toast("⚠️ Save failed — try removing the card cover photo, then save again");return;}
   fillDetail();haptic(10);toast("Saved on this device ✓");
 };
 $("dupBtn").onclick=async()=>{
@@ -2540,3 +2540,4 @@ if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch
 </script>
 </body>
 </html>
+
