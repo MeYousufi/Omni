@@ -371,7 +371,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <div id="memNudgeBox"></div>
   <div class="etabs" role="tablist">
     <button id="tabCards" class="on" role="tab">Cards</button>
-    <button id="tabTimeline" role="tab">Timeline</button>
   </div>
   <div id="cardsView">
   <div class="searchrow"><input id="searchBox" placeholder="Search cards..."></div>
@@ -380,11 +379,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <input type="file" id="importInput" accept="application/json" hidden>
   <button class="fab" id="fabPlus" aria-label="Create new card">+</button>
   </div><!-- /cardsView -->
-  <div id="timelineView" hidden>
-  </div>
 </div>
-<!-- encounter note modal -->
-
 <!-- DETAIL -->
 <div class="wrap" id="detailScreen" hidden>
   <div class="backrow"><button class="iconbtn" id="backBtn" aria-label="Back to cards">← Back</button></div>
@@ -2723,13 +2718,10 @@ let homeTab="cards";
 function switchHomeTab(t){
   homeTab=t;
   $("tabCards").classList.toggle("on",t==="cards");
-  $("tabTimeline").classList.toggle("on",t==="timeline");
   $("cardsView").hidden=t!=="cards";
-  $("timelineView").hidden=t!=="timeline";
   
 }
 $("tabCards").onclick=()=>switchHomeTab("cards");
-$("tabTimeline").onclick=()=>switchHomeTab("timeline");
 
 function encDateStr(ts){return new Date(ts).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});}
 function encTimeStr(ts){return new Date(ts).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});}
