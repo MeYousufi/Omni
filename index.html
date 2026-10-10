@@ -2479,10 +2479,10 @@ function closeNavMenu(){
 $("menuBtn").onclick=openNavMenu;
 $("navMenuClose").onclick=closeNavMenu;
 $("navMenuBackdrop").onclick=closeNavMenu;
-$("navDash").onclick=()=>{closeNavMenu();$("dashBtn").click();};
-$("navBackup").onclick=()=>{closeNavMenu();$("backupBtn").click();};
-$("navOwner").onclick=()=>{closeNavMenu();$("ownerBtn").click();};
-$("navLock").onclick=()=>{closeNavMenu();$("lockBtn").click();};
+$("navDash").onclick=()=>{closeNavMenu();$("dashBtn").onclick();};
+$("navBackup").onclick=()=>{closeNavMenu();$("backupBtn").onclick();};
+$("navOwner").onclick=()=>{closeNavMenu();$("ownerBtn").onclick();};
+$("navLock").onclick=()=>{closeNavMenu();$("lockBtn").onclick();};
 // Escape key closes the menu
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNavMenu();});
 
