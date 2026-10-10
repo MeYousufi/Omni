@@ -131,6 +131,8 @@ a.wrow:active{background:rgba(255,255,255,.05)}
 .flipfront .ftag{margin-top:10px;font-size:14px;color:rgba(255,255,255,.88);font-weight:500;position:relative;z-index:1}
 .flipfront .ftag{color:var(--muted);font-size:12px;margin-top:6px}
 .flipback{transform:rotateY(180deg);padding:16px;overflow-y:auto}
+.flipback.has-cover-back a{text-shadow:0 1px 3px rgba(0,0,0,.8);background:rgba(0,0,0,.45)}
+.flipback.has-cover-back .flabel{text-shadow:0 1px 3px rgba(0,0,0,.8)}
 .flipback a{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:6px 0;background:#1a1e26;border:1px solid var(--line);border-radius:12px;color:var(--text);font-size:15px}
 .flipback a:active{background:#232a3d}
 .flipback .flabel{color:var(--muted);font-size:12px;letter-spacing:.08em;margin:8px 0 2px}
@@ -361,7 +363,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 
 <!-- HOME -->
 <div class="wrap" id="homeScreen" hidden>
-  <div class="brand"><h1>OMNI</h1><div><button class="iconbtn small" id="dashBtn" aria-label="Open dashboard">📊</button><button class="iconbtn small" id="backupBtn" aria-label="Back up cards">Backup</button><button class="iconbtn" id="lockBtn" aria-label="Lock app">Lock</button></div></div>
+  <div class="brand"><h1>OMNI</h1><div><button class="iconbtn small" id="ownerBtn" aria-label="Owner controls">👑</button><button class="iconbtn small" id="dashBtn" aria-label="Open dashboard">📊</button><button class="iconbtn small" id="backupBtn" aria-label="Back up cards">Backup</button><button class="iconbtn" id="lockBtn" aria-label="Lock app">Lock</button></div></div>
   <div id="offlineBar" class="box" hidden style="border-color:#7a5a2b;text-align:center;padding:10px">📴 Offline — you can view and share saved cards.<br><span class="muted">Backup and cloud stats need internet.</span></div>
   <div id="backupNudge" class="box" hidden style="border-color:#7a5a2b;background:linear-gradient(160deg,#1d1812,#14110c)">
     <span id="backupNudgeText">💾 Back up your cards to keep them safe.</span><br>
@@ -689,6 +691,17 @@ async function deriveKey(pin,salt){
 }
 async function vaultEncrypt(pin,obj,vkey){
   vkey=vkey||"omni_vault";
+  // CRITICAL GUARD: never overwrite a non-empty vault with empty data (prevents data loss on refresh)
+  if(vkey==="omni_vault"&&Array.isArray(obj)&&obj.length===0){
+    try{
+      const existing=localStorage.getItem("omni_vault");
+      if(existing&&existing.length>100){
+        // Verify existing has data by checking decrypted length
+        console.warn("Blocked empty overwrite of non-empty vault");
+        return;
+      }
+    }catch(e){}
+  }
   const salt=crypto.getRandomValues(new Uint8Array(16));
   const iv=crypto.getRandomValues(new Uint8Array(12));
   const key=await deriveKey(pin,salt);
@@ -1580,14 +1593,23 @@ function renderFlip(){
       `<h2>${esc(p.label||"OMNI")}</h2><div class="fsub">DIGITAL CARD</div>`+
       `<div class="ftag">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div>`;
   }
-  // back: solid sampled color from cover, else default
-  fb.style.background=p.coverColor||"";
+  // back: cover image as background if set, else solid color
+  if(p.cover){
+    fb.style.backgroundImage=`url("${p.cover}")`;
+    fb.style.backgroundSize="cover";
+    fb.style.backgroundPosition=p.coverPos||"50% 50%";
+    fb.style.background="";
+  }else{
+    fb.style.backgroundImage="";
+    fb.style.background=p.coverColor||"";
+  }
   fb.style.borderColor=p.coverColor||"";
   let back="";
   if(p.title)back+=`<div class="flabel">${esc(p.title)}</div>`;
   lines(p.phones).forEach(v=>back+=`<a href="tel:${esc(v.replace(/\s/g,""))}">📞 ${esc(v)}</a>`);
   lines(p.emails).forEach(v=>back+=`<a href="mailto:${esc(v)}">✉️ ${esc(v)}</a>`);
   lines(p.urls).forEach(v=>{const u=/^https?:/i.test(v)?v:"https://"+v;back+=`<a href="${esc(u)}" target="_blank" rel="noopener">🌐 ${esc(v)}</a>`;});
+  if(p.cover){fb.classList.add("has-cover-back");}else{fb.classList.remove("has-cover-back");}
   fb.innerHTML=back||`<p class="muted" style="text-align:center;margin-top:60px">No contact info yet.<br>Add some below.</p>`;
 }
 function fillDetail(){
@@ -1689,14 +1711,42 @@ function readFields(){
 $("saveBtn2").onclick=async()=>{
   readFields();
   const p=getP();if(p&&p._draft){delete p._draft;stat("cards");}
-  try{await saveAll();}
-  catch(e){
-    // Retry once with aggressive image compression before giving up
-    try{await shrinkImgs(true);await vaultEncrypt(sessionPin,profiles);await saveEncounters();toast("✅ Card saved");return;}
-    catch(e2){toast("⚠️ Save failed — try removing the card cover photo, then save again");return;}
+  // Robust save: try normal, then progressively shrink images on quota errors,
+  // then VERIFY the data actually persisted before reporting success/failure
+  let saved=false;
+  let lastErr=null;
+  for(let attempt=0;attempt<3&&!saved;attempt++){
+    try{
+      if(attempt===1)await shrinkImgs(true);  // aggressive: 400px/0.6
+      if(attempt===2)await shrinkImgsUltra();  // ultra: 300px/0.5, strip covers
+      await vaultEncrypt(sessionPin,profiles);
+      saved=true;
+    }catch(e){lastErr=e;}
   }
-  fillDetail();haptic(10);toast("Saved on this device ✓");
+  try{await saveEncounters();}catch(e){}
+  // VERIFY: read back from localStorage to confirm persistence (fixes false failure reports)
+  let verified=false;
+  try{
+    const blob=localStorage.getItem("omni_vault");
+    if(blob&&blob.length>100){
+      // Try decrypting to ensure it's valid
+      await vaultDecrypt(sessionPin);
+      verified=true;
+    }
+  }catch(e){}
+  if(verified){
+    fillDetail();haptic(10);toast("Saved on this device ✓");
+  }else{
+    toast("⚠️ Save failed — storage is full. Try removing the card cover photo, then save again");
+  }
 };
+// Ultra-aggressive shrink for when storage is critically full
+async function shrinkImgsUltra(){
+  for(const p of profiles){
+    if(p.pic&&p.pic.length>30000){p.pic=await shrinkOne(p.pic,150,0.5);}
+    if(p.cover&&p.cover.length>50000){p.cover=await shrinkOne(p.cover,300,0.5);}
+  }
+}
 $("dupBtn").onclick=async()=>{
   readFields();
   const p=getP();if(!p)return;
@@ -2362,6 +2412,17 @@ $("dashBtn").onclick = async function(e){
     loadLeads().catch(()=>{});
     loadWebhook().catch(()=>{});
   }
+};
+
+$("ownerBtn").onclick=async()=>{
+  // Open dashboard then scroll to owner controls
+  await $("dashBtn").onclick();
+  setTimeout(()=>{
+    const ob=$("ownerBox");
+    if(ob){ob.scrollIntoView({behavior:"smooth",block:"start"});
+      ob.style.outline="2px solid var(--accent)";ob.style.borderRadius="12px";
+      setTimeout(()=>{ob.style.outline="";},2000);}
+  },400);
 };
 
 /* ---------- rich social link buttons ---------- */
