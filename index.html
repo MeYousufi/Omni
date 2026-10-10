@@ -2795,11 +2795,10 @@ $("encSave").onclick=async()=>{
   toast("Memory saved ✓");
 };
 
-/* prompt after a share completes */
+/* prompt after a share completes — disabled per owner request (2026-10-10):
+   no auto-popup; encounters are logged manually from the Timeline tab */
 function offerEncounterNote(shareType){
-  try{if(localStorage.getItem("omni_enc_noask")==="1")return;}catch(e){}
-  if(!$("encModal").hidden)return;
-  openEncModal(null,shareType);
+  return;
 }
 
 function renderTimeline(){
