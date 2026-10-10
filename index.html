@@ -2,12 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>OMNI — Your digital business card</title>
-<meta name="description" content="OMNI is your digital business card. One tap, always up to date. Share via QR, NFC, or link — free forever.">
-<meta name="theme-color" content="#07080c">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OMNI — Your card, always in your pocket</title>
+<meta name="description" content="OMNI is the digital business card that lives on your phone. One tap, always current.">
 <script>
-/* Preserve shared-card links: #s= (short link) and #c= (embedded data) belong to the app */
+// Preserve shared-card links: #s= and #c= belong to the app, not the landing page.
 (function(){
   var h = location.hash || "";
   if (h.indexOf("#s=") === 0 || h.indexOf("#c=") === 0) {
@@ -16,172 +15,281 @@
 })();
 </script>
 <style>
-  :root{
-    --bg:#07080c; --text:#f5f6f8; --muted:#9aa1ad;
-    --accent:#4f8cff; --line:#232839; --card:#12141b;
-  }
-  *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{
-    background:var(--bg); color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
-    -webkit-font-smoothing:antialiased; line-height:1.6;
-  }
-  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
-  /* ---------- hero ---------- */
-  .hero{
-    min-height:92vh; display:flex; flex-direction:column;
-    justify-content:center; align-items:flex-start;
-    padding:80px 0 60px; position:relative;
-  }
-  .hero::before{
-    content:""; position:absolute; top:-120px; left:50%; transform:translateX(-50%);
-    width:560px; height:380px; max-width:120vw;
-    background:radial-gradient(ellipse at center, rgba(79,140,255,.14), transparent 65%);
-    pointer-events:none;
-  }
-  .brand{
-    font-size:15px; font-weight:800; letter-spacing:.42em;
-    background:linear-gradient(135deg,#4f8cff,#8b5cf6);
-    -webkit-background-clip:text; background-clip:text;
-    -webkit-text-fill-color:transparent; color:transparent;
-    margin-bottom:28px;
-  }
-  .hero h1{
-    font-size:clamp(38px,8vw,64px); font-weight:800; line-height:1.08;
-    letter-spacing:-.02em; margin-bottom:20px;
-  }
-  .hero h1 .grad{
-    background:linear-gradient(135deg,#4f8cff,#8b5cf6);
-    -webkit-background-clip:text; background-clip:text;
-    -webkit-text-fill-color:transparent; color:transparent;
-  }
-  .hero p{color:var(--muted);font-size:18px;max-width:520px;margin-bottom:36px}
-  .cta{
-    display:inline-block; padding:16px 40px; border-radius:14px;
-    background:linear-gradient(135deg,#4f8cff,#8b5cf6);
-    color:#fff; font-size:17px; font-weight:700; text-decoration:none;
-    box-shadow:0 8px 32px rgba(79,140,255,.35);
-    transition:transform .15s ease, box-shadow .15s ease;
-  }
-  .cta:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(79,140,255,.45)}
-  .cta:active{transform:translateY(0)}
-  .cta-sub{margin-top:14px;font-size:14px;color:var(--muted)}
-  /* ---------- sections ---------- */
-  section{padding:72px 0;border-top:1px solid var(--line)}
-  .num{
-    font-size:13px; font-weight:700; letter-spacing:.3em;
-    color:var(--muted); margin-bottom:18px;
-  }
-  section h2{
-    font-size:clamp(28px,5.5vw,42px); font-weight:800;
-    letter-spacing:-.015em; line-height:1.15; margin-bottom:18px;
-  }
-  section p{color:var(--muted);font-size:17px;max-width:600px}
-  section p + p{margin-top:14px}
-  /* ---------- how it works steps ---------- */
-  .steps{display:grid;gap:12px;margin-top:28px}
-  .step{
-    background:var(--card); border:1px solid var(--line);
-    border-radius:16px; padding:20px 22px;
-  }
-  .step b{display:block;font-size:16px;margin-bottom:4px}
-  .step span{color:var(--muted);font-size:15px}
-  /* ---------- final CTA ---------- */
-  .final{text-align:center;padding:96px 0}
-  .final h2{margin-bottom:16px}
-  .final p{margin:0 auto 32px}
-  /* ---------- footer ---------- */
-  footer{
-    border-top:1px solid var(--line); padding:32px 0 48px;
-    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
-  }
-  footer .fbrand{
-    font-weight:800; letter-spacing:.3em; font-size:13px;
-    background:linear-gradient(135deg,#4f8cff,#8b5cf6);
-    -webkit-background-clip:text; background-clip:text;
-    -webkit-text-fill-color:transparent; color:transparent;
-  }
-  footer span{color:var(--muted);font-size:13px}
-  footer a{color:var(--muted);font-size:13px;text-decoration:none}
-  footer a:hover{color:var(--text)}
-  @media (max-width:480px){
-    .hero{min-height:80vh;padding:60px 0 48px}
-    section{padding:56px 0}
-  }
+:root{
+  --gold:#d4a94f; --gold-deep:#b8863a; --ink:#000; --coal:#0a0a0a;
+  --white:#fff; --gray:#9c9c9c; --line:rgba(212,169,79,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink); color:var(--white);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Inter,Helvetica,Arial,sans-serif;
+  overflow-x:hidden; -webkit-font-smoothing:antialiased;
+}
+::selection{background:rgba(212,169,79,.35);color:#fff}
+
+/* ============ PRELOADER ============ */
+#preloader{
+  position:fixed;inset:0;z-index:9999;background:#000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;
+  transition:opacity .9s ease, visibility .9s;
+}
+#preloader.done{opacity:0;visibility:hidden}
+#preloader .pl-word{
+  font-size:clamp(48px,12vw,110px);font-weight:800;letter-spacing:.28em;text-indent:.28em;color:#fff;
+}
+#preloader .pl-count{
+  font-size:15px;letter-spacing:.35em;text-indent:.35em;color:var(--gold);font-weight:600;
+}
+#preloader .pl-track{width:min(280px,60vw);height:2px;background:rgba(255,255,255,.1);overflow:hidden}
+#preloader .pl-bar{height:100%;width:0;background:linear-gradient(90deg,var(--gold-deep),var(--gold));transition:width .2s}
+
+/* ============ GOLD TEXT + SHIMMER ============ */
+.gold{
+  background:linear-gradient(100deg,#a67c33 0%,#d4a94f 25%,#f5e0a8 50%,#d4a94f 75%,#a67c33 100%);
+  background-size:220% auto;
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+  animation:shimmer 5s linear infinite;
+}
+@keyframes shimmer{to{background-position:220% center}}
+
+/* ============ SHARED ============ */
+.eyebrow{
+  font-size:12px;font-weight:700;letter-spacing:.42em;text-indent:.42em;color:var(--gold);
+  text-transform:uppercase;margin-bottom:26px;
+}
+.section{
+  position:relative;min-height:100vh;display:flex;align-items:center;
+  padding:120px clamp(24px,6vw,90px);overflow:hidden;
+}
+.section .inner{max-width:1080px;margin:0 auto;width:100%;position:relative;z-index:2}
+.headline{
+  font-size:clamp(44px,7.5vw,104px);font-weight:800;line-height:1.02;
+  letter-spacing:-.02em;color:#fff;margin-bottom:30px;
+}
+.body{font-size:clamp(16px,2vw,21px);line-height:1.65;color:var(--gray);max-width:620px;font-weight:400}
+.watermark{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:clamp(140px,26vw,420px);font-weight:900;letter-spacing:.05em;white-space:nowrap;
+  color:transparent;-webkit-text-stroke:1px rgba(212,169,79,.10);
+  pointer-events:none;user-select:none;z-index:1;
+}
+.divider{width:1px;height:70px;background:linear-gradient(180deg,transparent,var(--gold),transparent);margin:0 auto}
+
+/* reveal on scroll */
+.rv{opacity:0;transform:translateY(44px);transition:opacity 1s ease,transform 1s cubic-bezier(.16,1,.3,1)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.12s}.rv.d2{transition-delay:.24s}.rv.d3{transition-delay:.36s}
+
+/* ============ HERO ============ */
+.hero{
+  min-height:100svh;display:flex;flex-direction:column;justify-content:center;
+  padding:120px clamp(24px,6vw,90px) 90px;position:relative;overflow:hidden;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(212,169,79,.10), transparent 60%),
+    radial-gradient(900px 500px at 85% 110%, rgba(212,169,79,.06), transparent 60%),
+    #000;
+}
+.hero .inner{max-width:1080px;margin:0 auto;width:100%}
+.hero h1{
+  font-size:clamp(64px,13vw,150px);font-weight:800;line-height:.98;letter-spacing:-.03em;color:#fff;
+}
+.hero .sub{margin-top:34px;font-size:clamp(16px,2.2vw,22px);color:var(--gray);max-width:560px;line-height:1.6}
+.hero-cta{margin-top:44px;display:flex;gap:16px;flex-wrap:wrap}
+.btn-gold{
+  display:inline-block;padding:18px 44px;border-radius:999px;font-size:16px;font-weight:700;letter-spacing:.06em;
+  color:#0a0a0a;background:linear-gradient(135deg,#e8c876,#d4a94f 55%,#b8863a);
+  text-decoration:none;border:none;cursor:pointer;
+  box-shadow:0 8px 40px rgba(212,169,79,.28);
+  transition:transform .25s ease,box-shadow .25s ease;
+}
+.btn-gold:hover{transform:translateY(-3px);box-shadow:0 14px 52px rgba(212,169,79,.42)}
+.btn-ghost{
+  display:inline-block;padding:18px 44px;border-radius:999px;font-size:16px;font-weight:600;letter-spacing:.06em;
+  color:#fff;background:transparent;border:1px solid rgba(255,255,255,.22);text-decoration:none;
+  transition:border-color .25s,background .25s;
+}
+.btn-ghost:hover{border-color:var(--gold);background:rgba(212,169,79,.08)}
+.scroll-cue{
+  position:absolute;bottom:26px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  font-size:10px;letter-spacing:.5em;text-indent:.5em;color:var(--gold);font-weight:700;
+}
+.scroll-cue .line{width:1px;height:52px;background:linear-gradient(180deg,var(--gold),transparent);animation:drip 2.2s ease-in-out infinite}
+@keyframes drip{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* ============ STEPS ============ */
+.steps{display:grid;gap:0;margin-top:54px;max-width:680px}
+.step{
+  display:flex;gap:22px;align-items:baseline;padding:22px 0;border-top:1px solid rgba(255,255,255,.08);
+}
+.step:last-child{border-bottom:1px solid rgba(255,255,255,.08)}
+.step .n{font-size:13px;font-weight:800;color:var(--gold);letter-spacing:.2em;flex:none}
+.step .t{font-size:clamp(17px,2.2vw,21px);color:#fff;font-weight:600}
+.step .d{font-size:15px;color:var(--gray);margin-top:6px;line-height:1.55}
+
+/* ============ CTA FINALE ============ */
+.finale{
+  min-height:90vh;display:flex;align-items:center;justify-content:center;text-align:center;
+  padding:120px 24px;position:relative;overflow:hidden;
+  background:radial-gradient(1000px 500px at 50% 100%, rgba(212,169,79,.12), transparent 65%),#000;
+}
+.finale h2{font-size:clamp(48px,9vw,120px);font-weight:800;letter-spacing:-.02em;line-height:1;margin-bottom:28px}
+.finale p{color:var(--gray);font-size:clamp(16px,2.2vw,21px);max-width:520px;margin:0 auto 44px;line-height:1.6}
+.finale .fine{margin-top:34px;font-size:13px;color:#6d6d6d;letter-spacing:.08em}
+
+/* ============ FOOTER ============ */
+footer{
+  padding:44px clamp(24px,6vw,90px);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+footer .mark{font-weight:800;letter-spacing:.3em;font-size:14px;color:#fff}
+footer a{color:var(--gray);text-decoration:none;font-size:14px;letter-spacing:.05em}
+footer a:hover{color:var(--gold)}
+
+@media(max-width:640px){
+  .step{flex-direction:column;gap:8px}
+  .hero-cta .btn-gold,.hero-cta .btn-ghost{width:100%;text-align:center}
+}
 </style>
 </head>
 <body>
 
-<div class="wrap">
-  <!-- HERO -->
-  <header class="hero">
-    <div class="brand">OMNI</div>
-    <h1>Your card.<br><span class="grad">Always current.</span><br>One tap away.</h1>
-    <p>OMNI is your digital business card. Share it with a tap, a scan, or a link — and when your number changes, every card you've ever shared updates with it.</p>
-    <a class="cta" href="/app">Get your card</a>
-    <div class="cta-sub">Free. Unlimited sharing, forever.</div>
-  </header>
-
-  <!-- 001 -->
-  <section>
-    <div class="num">001 / THE PROBLEM</div>
-    <h2>Paper cards die in wallets.</h2>
-    <p>You print five hundred. You hand out forty. The rest gather dust in a drawer — and the forty you gave out go stale the moment your number changes.</p>
-    <p>Every meeting ends the same way: a card that leads nowhere.</p>
-  </section>
-
-  <!-- 002 -->
-  <section>
-    <div class="num">002 / WHY IT HAPPENS</div>
-    <h2>The moment is too fast for paper.</h2>
-    <p>You get about three seconds when you meet someone. That's not enough time to dig through a wallet, find a card, and hope it's still current — or to dictate a number into a phone while trying to make eye contact.</p>
-    <p>So the exchange never quite happens, and the connection is lost.</p>
-  </section>
-
-  <!-- 003 -->
-  <section>
-    <div class="num">003 / MEET OMNI</div>
-    <h2>One card. Always up to date.</h2>
-    <p>Update your number once and every card you've ever shared reflects it instantly. No reprints. No stale info. No wallet required.</p>
-    <p>You choose exactly what each person sees — share everything with a client, just a name with a stranger.</p>
-  </section>
-
-  <!-- 004 -->
-  <section>
-    <div class="num">004 / BUILT ON TRUST</div>
-    <h2>Your contacts stay yours.</h2>
-    <p>Your cards are encrypted on your device with a PIN only you know. We can't read them, sell them, or lose them in a breach — because we never have them.</p>
-  </section>
-
-  <!-- 005 -->
-  <section>
-    <div class="num">005 / HOW IT WORKS</div>
-    <h2>Open. Share. Done.</h2>
-    <p>However they want to receive it:</p>
-    <div class="steps">
-      <div class="step"><b>Show the QR code</b><span>They point their camera. That's it.</span></div>
-      <div class="step"><b>Tap with NFC</b><span>Hold phones together — your card transfers instantly.</span></div>
-      <div class="step"><b>Send a link</b><span>Text, email, or message it. Works without the app.</span></div>
-      <div class="step"><b>Save as .vcf</b><span>One tap drops you straight into their contacts.</span></div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section class="final">
-    <div class="num">GET STARTED</div>
-    <h2>Carry every card<br>you'll ever need.</h2>
-    <p>Set it up in under a minute. Share it for the rest of your life.</p>
-    <a class="cta" href="/app">Get your card</a>
-    <div class="cta-sub">Free. Unlimited sharing, forever.</div>
-  </section>
-
-  <footer>
-    <div class="fbrand">OMNI</div>
-    <span>Share only what you choose.</span>
-    <a href="/app">Open the app →</a>
-  </footer>
+<!-- PRELOADER -->
+<div id="preloader" aria-hidden="true">
+  <div class="pl-word">OMNI</div>
+  <div class="pl-track"><div class="pl-bar" id="plBar"></div></div>
+  <div class="pl-count"><span id="plCount">0</span>%</div>
 </div>
 
+<!-- HERO -->
+<header class="hero">
+  <div class="inner">
+    <div class="eyebrow rv in">Introducing Omni</div>
+    <h1 class="rv in d1">Your card,<br>always <span class="gold">in hand.</span></h1>
+    <p class="sub rv in d2">OMNI is the digital business card that lives on your phone. Update it once — everyone you ever shared it with sees the new you.</p>
+    <div class="hero-cta rv in d3">
+      <a class="btn-gold" href="/app">Get your card</a>
+      <a class="btn-ghost" href="#s1">See how it works</a>
+    </div>
+  </div>
+  <div class="scroll-cue" aria-hidden="true">SCROLL<span class="line"></span></div>
+</header>
+
+<!-- 001 THE PROBLEM -->
+<section class="section" id="s1">
+  <div class="watermark" aria-hidden="true">LOST</div>
+  <div class="inner">
+    <div class="eyebrow rv">001 / The Problem</div>
+    <h2 class="headline rv d1">Paper cards die<br>in <span class="gold">wallets.</span></h2>
+    <p class="body rv d2">You hand out a beautiful card. It goes into a pocket, then a drawer, then the trash. Your number changes, your title changes, your company rebrands — and every card you ever gave out is now a lie you can't take back.</p>
+  </div>
+</section>
+
+<!-- 002 WHY IT HAPPENS -->
+<section class="section" id="s2">
+  <div class="watermark" aria-hidden="true">FAST</div>
+  <div class="inner">
+    <div class="eyebrow rv">002 / Why It Happens</div>
+    <h2 class="headline rv d1">The moment is<br><span class="gold">too fast</span> for paper.</h2>
+    <p class="body rv d2">You meet someone between meetings, at a loud event, in a hallway. There's no time to dig through a wallet, no pen, no flat surface. So you promise to "send it later" — and later never comes. The connection cools before it starts.</p>
+  </div>
+</section>
+
+<!-- 003 MEET OMNI -->
+<section class="section" id="s3">
+  <div class="watermark" aria-hidden="true">TAP</div>
+  <div class="inner">
+    <div class="eyebrow rv">003 / Meet Omni</div>
+    <h2 class="headline rv d1">One tap.<br>Always <span class="gold">current.</span></h2>
+    <p class="body rv d2">Your OMNI card lives on your phone — a tap, a scan, a link. Change your number once and every person holding your card sees the update instantly. No reprints. No stale copies. No "sorry, that number's old."</p>
+    <div class="hero-cta rv d3"><a class="btn-gold" href="/app">Create my card</a></div>
+  </div>
+</section>
+
+<!-- 004 BUILT ON TRUST -->
+<section class="section" id="s4">
+  <div class="watermark" aria-hidden="true">SAFE</div>
+  <div class="inner">
+    <div class="eyebrow rv">004 / Built On Trust</div>
+    <h2 class="headline rv d1">Encrypted.<br>Yours. <span class="gold">Only.</span></h2>
+    <p class="body rv d2">Your card is locked on your device with your PIN — and a key we never see. No account to hack, no database to leak, no company reading your contacts. What you share is your choice, down to the field.</p>
+  </div>
+</section>
+
+<!-- 005 HOW IT WORKS -->
+<section class="section" id="s5">
+  <div class="watermark" aria-hidden="true">SHARE</div>
+  <div class="inner">
+    <div class="eyebrow rv">005 / How It Works</div>
+    <h2 class="headline rv d1">Open. Share.<br><span class="gold">Done.</span></h2>
+    <div class="steps">
+      <div class="step rv d1"><span class="n">A</span><div><div class="t">Open OMNI</div><div class="d">Your card is right there — front and back, exactly how you designed it.</div></div></div>
+      <div class="step rv d2"><span class="n">B</span><div><div class="t">Pick your moment</div><div class="d">Flash a QR code, tap an NFC tag, send a link, or drop a contact file.</div></div></div>
+      <div class="step rv d3"><span class="n">C</span><div><div class="t">They keep the live one</div><div class="d">Their copy updates whenever you do. You're never out of date again.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FINALE CTA -->
+<section class="finale">
+  <div class="watermark" aria-hidden="true">OMNI</div>
+  <div class="inner">
+    <div class="eyebrow rv">Your move</div>
+    <h2 class="rv d1">Stop handing out<br><span class="gold">the past.</span></h2>
+    <p class="rv d2">Build your OMNI card in under a minute. Free to start — and your first tap is on us.</p>
+    <div class="rv d3"><a class="btn-gold" href="/app">Get your card</a></div>
+    <div class="fine rv d3">No account needed to look around · Your data stays on your device</div>
+  </div>
+</section>
+
+<footer>
+  <div class="mark">OMNI</div>
+  <a href="/app">Open the app →</a>
+</footer>
+
+<script>
+// ---- Preloader: fake progress eased to real load ----
+(function(){
+  var bar = document.getElementById('plBar'),
+      count = document.getElementById('plCount'),
+      pre = document.getElementById('preloader'),
+      p = 0, target = 92, done = false;
+  var t = setInterval(function(){
+    if (p < target) {
+      p += Math.max(1, (target - p) * 0.08);
+      var v = Math.floor(p);
+      bar.style.width = v + '%';
+      count.textContent = v;
+    }
+  }, 40);
+  function finish(){
+    if (done) return; done = true;
+    clearInterval(t);
+    bar.style.width = '100%'; count.textContent = '100';
+    setTimeout(function(){ pre.classList.add('done'); }, 350);
+    setTimeout(function(){ pre.remove(); }, 1400);
+  }
+  if (document.readyState === 'complete') finish();
+  else window.addEventListener('load', function(){ target = 100; setTimeout(finish, 400); });
+  // safety: never trap the user
+  setTimeout(finish, 4000);
+})();
+
+// ---- Scroll reveal ----
+(function(){
+  var els = document.querySelectorAll('.rv');
+  if (!('IntersectionObserver' in window)) {
+    els.forEach(function(e){ e.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+  els.forEach(function(e){ io.observe(e); });
+})();
+</script>
 </body>
 </html>
