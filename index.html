@@ -2795,7 +2795,7 @@ function openEncModal(existing,shareType){
 }
 function closeEncModal(){$("encModal").hidden=true;editingEncId=null;}
 $("encSkip").onclick=()=>{
-  if($("encNoAsk").checked){try{localStorage.setItem("omni_enc_noask","1");}catch(e){}}
+  try{localStorage.setItem("omni_enc_noask","1");}catch(e){}
   closeEncModal();
 };
 $("encSave").onclick=async()=>{
@@ -2820,10 +2820,11 @@ $("encSave").onclick=async()=>{
   toast("Memory saved ✓");
 };
 
-/* prompt after a share completes — disabled per owner request (2026-10-10):
-   no auto-popup; encounters are logged manually from the Timeline tab */
+/* prompt after a share completes — one tap on Skip silences it forever (2026-10-10) */
 function offerEncounterNote(shareType){
-  return;
+  try{if(localStorage.getItem("omni_enc_noask")==="1")return;}catch(e){}
+  if(!$("encModal").hidden)return;
+  openEncModal(null,shareType);
 }
 
 function renderTimeline(){
