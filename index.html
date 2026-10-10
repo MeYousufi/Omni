@@ -154,7 +154,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .modal ul{margin:8px 0;padding-left:20px;color:var(--text)}
 .modal ul li{margin:4px 0}
 .modal input{margin:8px 0}
-#toast{position:fixed;bottom:calc(96px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(16px);background:#1c2130;border:1px solid var(--line);color:var(--text);padding:12px 22px;border-radius:14px;font-size:15px;opacity:0;transition:opacity .25s,transform .25s;z-index:200;pointer-events:none;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+#toast{position:fixed;bottom:calc(96px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(16px);background:#1c2130;border:1px solid var(--line);color:var(--text);padding:12px 22px;border-radius:14px;font-size:15px;opacity:0;transition:opacity .25s,transform .25s;z-index:200;pointer-events:none;white-space:normal;word-wrap:break-word;overflow-wrap:break-word;max-width:90vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.4)}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .stickybar button{flex:1;margin:0;padding:14px;font-size:16px}
 /* dashboard */
@@ -405,12 +405,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <div id="backPicker"></div>
   </div>
 
-  <div class="picwrap">
-    <div id="picShow"></div>
-    <input type="file" id="picInput" accept="image/*" hidden>
-    <button class="chg" id="picBtn">Choose picture</button>
-    <button class="chg" id="reposBtn">Reposition picture</button>
-  </div>
   <div class="picwrap" style="margin-top:4px">
     <div id="coverShow" style="width:100%;height:90px;border-radius:14px;overflow:hidden;background:#1a1e26;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;border:1px dashed var(--line)">No cover image</div>
     <input type="file" id="coverInput" accept="image/*" hidden>
@@ -475,6 +469,16 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <div class="backrow"><button class="iconbtn" id="dashBack">← Back</button></div>
   <div class="brand"><h1>Dashboard</h1></div>
   <div class="muted" style="letter-spacing:.08em;font-size:11px">HOW YOUR APP IS DOING</div>
+  <div class="box">
+    <h3 class="sec" style="margin-top:0">👤 Profile picture</h3>
+    <p class="muted">Your photo — shown on your cards.</p>
+    <div class="picwrap">
+      <div id="picShow"></div>
+      <input type="file" id="picInput" accept="image/*" hidden>
+      <button class="chg" id="picBtn">Choose picture</button>
+      <button class="chg" id="reposBtn">Reposition picture</button>
+    </div>
+  </div>
   <div class="box" id="cloudBox" hidden>
     <h3 class="sec" style="margin-top:0">🌍 All users</h3>
     <div class="statrow"><span>📱 App opens</span><b id="c_opens">0</b></div>
@@ -654,17 +658,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       </div>
       <p class="muted" id="syncMsg" style="text-align:center"></p>
     </div>
-  </div>
-  <div class="box">
-    <h3 class="sec" style="margin-top:0">🔐 Change PIN</h3>
-    <label class="chk" style="border-bottom:1px solid var(--line);margin-bottom:8px"><input type="checkbox" id="pin4chk" style="width:20px;height:20px"><span>Use 4-digit PIN <span class="muted">(weaker — only 10,000 combos)</span></span></label>
-    <div id="chpinForm" hidden>
-      <input id="chpin1" type="password" inputmode="numeric" maxlength="6" placeholder="New PIN (4 or 6 digits)" aria-label="New PIN">
-      <input id="chpin2" type="password" inputmode="numeric" maxlength="6" placeholder="Confirm new PIN" aria-label="Confirm new PIN">
-      <div><button class="small" id="chpinSave">Save new PIN</button><button class="small gray" id="chpinCancel">Cancel</button></div>
-      <p class="muted" id="chpinMsg"></p>
-    </div>
-    <button class="small gray" id="chpinBtn">Change PIN</button>
   </div>
 </div>
 
@@ -1369,34 +1362,6 @@ $("bpLater").onclick=()=>{
 };
 
 /* change PIN */
-$("pin4chk").checked=pinLen()===4;
-$("pin4chk").onchange=e=>{
-  localStorage.setItem("omni_pinlen",e.target.checked?"4":"6");
-  buildDots();
-  $("chpin1").setAttribute("maxlength",pinLen());
-  $("chpin2").setAttribute("maxlength",pinLen());
-  $("chpin1").placeholder="New "+pinLen()+"-digit PIN";
-  $("chpin2").placeholder="Confirm new PIN";
-};
-$("chpinBtn").onclick=()=>{$("chpinForm").hidden=false;$("chpinBtn").hidden=true;$("chpin1").value="";$("chpin2").value="";$("chpinMsg").textContent="";};
-$("chpinCancel").onclick=()=>{$("chpinForm").hidden=true;$("chpinBtn").hidden=false;};
-$("chpinSave").onclick=async()=>{
-  const a=$("chpin1").value.trim(),b=$("chpin2").value.trim();
-  // accept 4 or 6 digits — the entered length becomes the new setting
-  if(!/^\d{4}$/.test(a)&&!/^\d{6}$/.test(a)){$("chpinMsg").textContent="PIN must be 4 or 6 digits.";return;}
-  if(isObviousPin(a)){$("chpinMsg").textContent="Too obvious — pick a harder PIN.";return;}
-  if(a!==b){$("chpinMsg").textContent="PINs don't match.";return;}
-  if(!sessionPin){$("chpinMsg").textContent="Session expired — lock and unlock first.";return;}
-  try{await vaultEncrypt(a,profiles);}
-  catch(e){$("chpinMsg").textContent="Couldn't save new PIN — storage may be full.";return;}
-  sessionPin=a;
-  localStorage.setItem("omni_pinlen",String(a.length));
-  $("pin4chk").checked=a.length===4;
-  buildDots();
-  $("chpinMsg").textContent="PIN changed to "+a.length+" digits ✓";
-  $("chpin1").value="";$("chpin2").value="";
-  setTimeout(()=>{$("chpinForm").hidden=true;$("chpinBtn").hidden=false;},1500);
-};
 
 /* ---------- picture reposition ---------- */
 let reposDrag=null;
@@ -1470,7 +1435,22 @@ function contrastText(bgHex){
 }
 
 async function saveAll(){if(sessionPin){await shrinkImgs();await vaultEncrypt(sessionPin,profiles);await saveEncounters();}}
-async function shrinkImgs(){for(const p of profiles){for(const k of["pic","cover"]){const L=k=="pic"?60000:250000,M=k=="pic"?220:800;if(p[k]&&p[k].length>L){const I=new Image();await new Promise(r=>{I.onload=r;I.onerror=r;I.src=p[k];});if(I.width&&Math.max(I.width,I.height)>M){const s=M/Math.max(I.width,I.height),C=document.createElement("canvas");C.width=Math.round(I.width*s);C.height=Math.round(I.height*s);try{C.getContext("2d").drawImage(I,0,0,C.width,C.height);p[k]=C.toDataURL("image/jpeg",0.8);}catch(e){}}}}}}
+async function shrinkOne(dataUrl,maxPx,quality){
+  const I=new Image();
+  await new Promise(r=>{I.onload=r;I.onerror=r;I.src=dataUrl;});
+  if(!I.width||Math.max(I.width,I.height)<=maxPx)return dataUrl;
+  const s=maxPx/Math.max(I.width,I.height),C=document.createElement("canvas");
+  C.width=Math.round(I.width*s);C.height=Math.round(I.height*s);
+  try{C.getContext("2d").drawImage(I,0,0,C.width,C.height);return C.toDataURL("image/jpeg",quality);}catch(e){return dataUrl;}
+}
+async function shrinkImgs(aggressive){
+  for(const p of profiles){for(const k of["pic","cover"]){
+    // pic: 220px/0.8 ; cover: 600px/0.7 normal, 400px/0.6 aggressive fallback
+    const M=k=="pic"?220:(aggressive?400:600),Q=k=="pic"?0.8:(aggressive?0.6:0.7);
+    const L=k=="pic"?60000:150000;
+    if(p[k]&&p[k].length>L){p[k]=await shrinkOne(p[k],M,Q);}
+  }}
+}
 const lines=s=>(s||"").split("\n").map(x=>x.trim()).filter(Boolean);
 const getP=()=>profiles.find(p=>p.id===curId);
 const initials=n=>(n||"?").trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
@@ -1710,7 +1690,11 @@ $("saveBtn2").onclick=async()=>{
   readFields();
   const p=getP();if(p&&p._draft){delete p._draft;stat("cards");}
   try{await saveAll();}
-  catch(e){toast("⚠️ Save failed — try removing the card cover photo, then save again");return;}
+  catch(e){
+    // Retry once with aggressive image compression before giving up
+    try{await shrinkImgs(true);await vaultEncrypt(sessionPin,profiles);await saveEncounters();toast("✅ Card saved");return;}
+    catch(e2){toast("⚠️ Save failed — try removing the card cover photo, then save again");return;}
+  }
   fillDetail();haptic(10);toast("Saved on this device ✓");
 };
 $("dupBtn").onclick=async()=>{
