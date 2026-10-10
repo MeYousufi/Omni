@@ -198,16 +198,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .tlitem .tlmeta .gray{background:none;border:1px solid var(--line);color:var(--muted);box-shadow:none}
 .fudone{opacity:.55}
 .fudone h4{text-decoration:line-through}
-#encModal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
-#encModal .mbox{background:#14161c;border:1px solid var(--line);border-radius:18px;padding:22px;max-width:400px;width:100%}
-#encModal h2{margin:0 0 6px;font-size:20px}
-#encModal .msub{color:var(--muted);font-size:13px;margin:0 0 10px}
-#encModal label.fl{display:block;font-size:12px;color:var(--muted);margin:8px 0 2px}
-#encModal .mrow{display:flex;gap:8px;margin-top:14px}
-#encModal .mrow button{flex:1;padding:12px;border-radius:12px;font-size:15px}
-#encModal .mrow .gray{background:none;border:1px solid var(--line);color:var(--muted);box-shadow:none}
-#encModal .noask{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--muted)}
-#encModal .noask input{width:auto;margin:0}
 /* ---------- business card view ---------- */
 .bcard{width:100%;height:100%;border-radius:14px;overflow:hidden;position:relative;box-sizing:border-box;padding:18px;display:flex;flex-direction:column;justify-content:center;gap:2px}
 .bcard .bc-fields{display:flex;flex-direction:column;gap:2px;min-height:0;overflow:hidden}
@@ -391,30 +381,9 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <button class="fab" id="fabPlus" aria-label="Create new card">+</button>
   </div><!-- /cardsView -->
   <div id="timelineView" hidden>
-    <button id="addEncBtn" style="width:100%;padding:12px;margin:4px 0 8px">+ Log an encounter</button>
-    <div id="timelineBox"></div>
   </div>
 </div>
 <!-- encounter note modal -->
-<div id="encModal" hidden>
-  <div class="mbox">
-    <h2 id="encModalTitle">Who did you share with?</h2>
-    <p class="msub">Save a memory of this encounter. Everything stays encrypted on this device.</p>
-    <label class="fl" for="encName">Who did you meet?</label>
-    <input id="encName" placeholder="Their name" autocomplete="off">
-    <label class="fl" for="encWhere">Where?</label>
-    <input id="encWhere" placeholder="e.g. KCK Car Show" autocomplete="off">
-    <label class="fl" for="encAbout">What did you talk about?</label>
-    <textarea id="encAbout" rows="2" placeholder="Topics, interests, follow-up ideas..."></textarea>
-    <label class="fl" for="encFollow">Follow up on (optional)</label>
-    <input id="encFollow" type="date">
-    <div class="mrow">
-      <button id="encSave">Save memory</button>
-      <button id="encSkip" class="gray">Skip</button>
-    </div>
-    <label class="noask"><input type="checkbox" id="encNoAsk"> Don't ask after every share</label>
-  </div>
-</div>
 
 <!-- DETAIL -->
 <div class="wrap" id="detailScreen" hidden>
@@ -895,7 +864,7 @@ function unlock(){
   stat("opens");
   renderCards();
   renderNudgesMemories();
-  if(homeTab==="timeline")renderTimeline();
+  
   updateCreditUI();
   collectPendingInvites();
 }
@@ -2539,13 +2508,13 @@ $("moreShareBtn").onclick=()=>{
   $("moreShareBtn").setAttribute("aria-expanded",open?"true":"false");
   $("moreShareBtn").innerHTML=open?"More ways to share ▴":"More ways to share ▾";
 };
-$("vcfBtn").onclick=()=>{if(!consumeShare())return;stat("vcf");downloadVcf();offerEncounterNote("vcf");};
+$("vcfBtn").onclick=()=>{if(!consumeShare())return;stat("vcf");downloadVcf();};
 $("shareBtn").onclick=async()=>{if(!consumeShare())return;haptic(10);
   stat("share");
   const file=new File([vcard(chosen(),curPic())],"OMNI.vcf",{type:"text/vcard"});
-  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"OMNI"});offerEncounterNote("share");return;}}catch(e){}
-  try{if(navigator.share){await navigator.share({title:"OMNI",text:$("preview").textContent});offerEncounterNote("share");return;}}catch(e){}
-  downloadVcf();offerEncounterNote("vcf");
+  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"OMNI"});return;}}catch(e){}
+  try{if(navigator.share){await navigator.share({title:"OMNI",text:$("preview").textContent});return;}}catch(e){}
+  downloadVcf();
 };
 $("linkBtn").onclick=async()=>{
   if(!consumeShare())return;
@@ -2588,7 +2557,7 @@ $("linkBtn").onclick=async()=>{
   _lastNfcUrl = url;
   if($("nfcWriteBtn") && "NDEFReader" in window) $("nfcWriteBtn").hidden = false;
   if(!copied)prompt("Copy this OMNI link",url);
-  offerEncounterNote("link");
+  
 };
 $("qrDlBtn").onclick=()=>{
   const img=document.querySelector("#qr img"),cv=document.querySelector("#qr canvas");
@@ -2750,18 +2719,17 @@ async function renderRecipient(){
 renderRecipient();
 window.addEventListener("hashchange",renderRecipient);
 /* ================= encounter memory ================= */
-let homeTab="cards", editingEncId=null;
+let homeTab="cards";
 function switchHomeTab(t){
   homeTab=t;
   $("tabCards").classList.toggle("on",t==="cards");
   $("tabTimeline").classList.toggle("on",t==="timeline");
   $("cardsView").hidden=t!=="cards";
   $("timelineView").hidden=t!=="timeline";
-  if(t==="timeline")renderTimeline();
+  
 }
 $("tabCards").onclick=()=>switchHomeTab("cards");
 $("tabTimeline").onclick=()=>switchHomeTab("timeline");
-$("addEncBtn").onclick=()=>openEncModal(null,"manual");
 
 function encDateStr(ts){return new Date(ts).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});}
 function encTimeStr(ts){return new Date(ts).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});}
@@ -2781,74 +2749,6 @@ async function maybeLoc(){
   }catch(e){return null;}
 }
 
-function openEncModal(existing,shareType){
-  editingEncId=existing?existing.id:null;
-  $("encModalTitle").textContent=existing?"Edit memory":(shareType&&shareType!=="manual"?"Who did you share with?":"Log an encounter");
-  $("encName").value=existing?existing.contactName:"";
-  $("encWhere").value=existing?existing.where:"";
-  $("encAbout").value=existing?existing.talkedAbout:"";
-  const d=existing&&existing.followUp?new Date(existing.followUp):new Date(Date.now()+3*86400000);
-  $("encFollow").value=d.toISOString().slice(0,10);
-  $("encModal").dataset.sharetype=existing?existing.shareType:(shareType||"manual");
-  $("encModal").hidden=false;
-  setTimeout(()=>$("encName").focus(),50);
-}
-function closeEncModal(){$("encModal").hidden=true;editingEncId=null;}
-$("encSkip").onclick=()=>{
-  try{localStorage.setItem("omni_enc_noask","1");}catch(e){}
-  closeEncModal();
-};
-$("encSave").onclick=async()=>{
-  const name=$("encName").value.trim(),where=$("encWhere").value.trim(),about=$("encAbout").value.trim();
-  if(!name&&!where&&!about){toast("Add at least a name or a note");return;}
-  if($("encNoAsk").checked){try{localStorage.setItem("omni_enc_noask","1");}catch(e){}}
-  const fdate=$("encFollow").value;
-  const followUp=fdate?new Date(fdate+"T12:00:00").getTime():null;
-  if(editingEncId){
-    const e=encounters.find(x=>x.id===editingEncId);
-    if(e){e.contactName=name;e.where=where;e.talkedAbout=about;e.followUp=followUp;if(followUp)e.followUpDone=false;}
-  }else{
-    const loc=await maybeLoc();
-    encounters.push({id:"e"+Date.now()+Math.random().toString(36).slice(2,7),
-      ts:Date.now(),contactName:name,where:where,talkedAbout:about,
-      followUp:followUp,followUpDone:false,
-      shareType:$("encModal").dataset.sharetype||"manual",
-      cardId:curId,cardLabel:(getP()||{}).label||"",loc:loc});
-  }
-  await saveEncounters();
-  closeEncModal();renderTimeline();renderNudgesMemories();
-  toast("Memory saved ✓");
-};
-
-/* Auto-popup REMOVED per owner request (2026-10-10). The encounter modal is
-   available manually from the Timeline tab only. No storage flag needed. */
-function offerEncounterNote(shareType){
-  return;
-}
-
-function renderTimeline(){
-  const box=$("timelineBox");if(!box)return;
-  const list=[...encounters].sort((a,b)=>b.ts-a.ts);
-  if(!list.length){box.innerHTML=`<div class="empty">No encounters yet.<br><span class="muted">Share your card or tap "+ Log an encounter" to start your timeline.</span></div>`;return;}
-  box.innerHTML=list.map(e=>{
-    const fu=e.followUp?`<div class="muted" style="font-size:12px;margin-top:6px">⏰ Follow up ${e.followUpDone?"✓ done":encDateStr(e.followUp)}</div>`:"";
-    const loc=e.loc?` <span class="muted" style="font-size:12px">📍 ${e.loc.lat}, ${e.loc.lon}</span>`:"";
-    return `<div class="tlitem${e.followUp&&e.followUpDone?" fudone":""}">
-      <div class="tldate">${shareIcon(e.shareType)} ${encDateStr(e.ts)} · ${encTimeStr(e.ts)}${loc}</div>
-      <h4>${esc(e.contactName||"Someone")}</h4>
-      ${e.where?`<p>📍 ${esc(e.where)}</p>`:""}
-      ${e.talkedAbout?`<p>💬 ${esc(e.talkedAbout)}</p>`:""}
-      ${fu}
-      <div class="tlmeta">
-        <button data-enc-edit="${e.id}">Edit</button>
-        ${e.followUp&&!e.followUpDone?`<button data-enc-done="${e.id}">✓ Done</button>`:""}
-        <button class="gray" data-enc-del="${e.id}">Delete</button>
-      </div></div>`;
-  }).join("");
-  box.querySelectorAll("[data-enc-edit]").forEach(b=>b.onclick=()=>{const e=encounters.find(x=>x.id===b.dataset.encEdit);if(e)openEncModal(e);});
-  box.querySelectorAll("[data-enc-done]").forEach(b=>b.onclick=async()=>{const e=encounters.find(x=>x.id===b.dataset.encDone);if(e){e.followUpDone=true;await saveEncounters();renderTimeline();renderNudgesMemories();}});
-  box.querySelectorAll("[data-enc-del]").forEach(b=>b.onclick=async()=>{if(!confirm("Delete this memory?"))return;encounters=encounters.filter(x=>x.id!==b.dataset.encDel);await saveEncounters();renderTimeline();renderNudgesMemories();});
-}
 
 /* nudges + memories shown at top of home on unlock */
 function renderNudgesMemories(){
@@ -2875,8 +2775,8 @@ function renderNudgesMemories(){
     html+=`<div class="memcard"><h4>📸 6 months ago today</h4><p>You met <b>${esc(e.contactName||"someone")}</b>${e.where?" at "+esc(e.where):""}.</p></div>`;
   });
   box.innerHTML=html;
-  box.querySelectorAll("[data-nudge-done]").forEach(b=>b.onclick=async()=>{const e=encounters.find(x=>x.id===b.dataset.nudgeDone);if(e){e.followUpDone=true;await saveEncounters();renderNudgesMemories();renderTimeline();toast("Follow-up done ✓");}});
-  box.querySelectorAll("[data-nudge-snooze]").forEach(b=>b.onclick=async()=>{const e=encounters.find(x=>x.id===b.dataset.nudgeSnooze);if(e){e.followUp=Date.now()+3*86400000;await saveEncounters();renderNudgesMemories();renderTimeline();}});
+  box.querySelectorAll("[data-nudge-done]").forEach(b=>b.onclick=async()=>{const e=encounters.find(x=>x.id===b.dataset.nudgeDone);if(e){e.followUpDone=true;await saveEncounters();renderNudgesMemories();toast("Follow-up done ✓");}});
+  box.querySelectorAll("[data-nudge-snooze]").forEach(b=>b.onclick=async()=>{const e=encounters.find(x=>x.id===b.dataset.nudgeSnooze);if(e){e.followUp=Date.now()+3*86400000;await saveEncounters();renderNudgesMemories();}});
 }
 
 /* safety net: save if page is hidden/closed with unsaved changes */
