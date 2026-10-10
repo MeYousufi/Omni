@@ -2168,7 +2168,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       // Invalidate invite code (record kept for audit, marked deleted)
       try{await fetch(STATS_URL+"/api/account/delete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code,deviceId:myDeviceId()})});}catch(e){}
       // Delete cloud vault
-      if(sid){try{await fetch(STATS_URL+"/api/vault/delete?sync_id="+encodeURIComponent(sid),{method:"DELETE"});}catch(e){}}
+      if(sid){try{await fetch(STATS_URL+"/api/vault/delete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({sync_id:sid})});}catch(e){}}
     }catch(e){}
     try{Object.keys(localStorage).filter(k=>k.startsWith("omni_")).forEach(k=>localStorage.removeItem(k));}catch(e){}
     location.reload();
