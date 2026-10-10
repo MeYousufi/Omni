@@ -2820,11 +2820,10 @@ $("encSave").onclick=async()=>{
   toast("Memory saved ✓");
 };
 
-/* prompt after a share completes — one tap on Skip silences it forever (2026-10-10) */
+/* Auto-popup REMOVED per owner request (2026-10-10). The encounter modal is
+   available manually from the Timeline tab only. No storage flag needed. */
 function offerEncounterNote(shareType){
-  try{if(localStorage.getItem("omni_enc_noask")==="1")return;}catch(e){}
-  if(!$("encModal").hidden)return;
-  openEncModal(null,shareType);
+  return;
 }
 
 function renderTimeline(){
