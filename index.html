@@ -554,27 +554,10 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <p class="muted" id="changePinMsg" style="font-size:12px;margin-top:6px"></p>
     </div>
   </div>
-  <div class="box" id="diagBox">
-    <h3 class="sec" style="margin-top:0">🔍 Sync diagnostics</h3>
-    <p class="muted">If a browser won't unlock, run this in <b>both</b> browsers and compare the results.</p>
-    <button class="small" id="diagGo" style="width:100%">Run diagnostics</button>
-    <div id="diagOut" style="font-size:12px;margin-top:10px;font-family:monospace;white-space:pre-wrap;word-break:break-all"></div>
-    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
-      <p class="muted" style="font-size:13px">Test if a PIN unlocks this vault:</p>
-      <div style="display:flex;gap:8px">
-        <input id="testPinInput" type="password" inputmode="numeric" placeholder="Enter PIN to test" style="flex:1;margin:0" autocomplete="off">
-        <button class="small" id="testPinGo" style="flex:none;margin:0">Test</button>
-      </div>
-      <p id="testPinOut" style="font-size:13px;margin-top:6px"></p>
-    </div>
-    <div style="margin-top:12px">
-      <button class="small gray" id="wipeAndLink" style="width:100%">🗑️ Wipe this browser & link fresh</button>
-    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
-      <button class="small" id="deleteAccountBtn" style="width:100%;background:linear-gradient(135deg,#7a2d2d,#a03a3a)">Delete my OMNI account</button>
-      <p class="muted" style="font-size:11px;margin-top:4px">Permanently deletes your cloud data and invalidates your invite code. This cannot be undone.</p>
-    </div>
-      <p class="muted" style="font-size:11px;margin-top:4px">Clears everything here, then lets you enter a Sync ID to download a clean copy.</p>
-    </div>
+  <div class="box" id="accountBox">
+    <h3 class="sec" style="margin-top:0">🗑️ Delete account</h3>
+    <button class="small" id="deleteAccountBtn" style="width:100%;background:linear-gradient(135deg,#7a2d2d,#a03a3a)">Delete my OMNI account</button>
+    <p class="muted" style="font-size:11px;margin-top:4px">Permanently deletes your cloud data and invalidates your invite code. This cannot be undone.</p>
   </div>
   <div class="box" id="sigBox">
     <h3 class="sec" style="margin-top:0">✉️ Email signature</h3>
@@ -599,43 +582,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <p class="muted">Top up anytime — bonus shares never expire.</p>
     <button id="buySharesBtn" style="width:100%">Buy 100 shares — $3.99</button>
     <p class="muted" id="buyMsg" style="text-align:center"></p>
-  </div>
-  <div class="box" id="ownerBox">
-    <h3 class="sec" style="margin-top:0">👑 Owner controls</h3>
-    <p class="muted" style="font-size:12px;margin-top:0">Owner password is separate from your card PIN — it unlocks these controls only.</p>
-    <div id="ownerLocked">
-      <p class="muted">Restricted area.</p>
-      <button class="small gray" id="ownerUnlockBtn">Unlock</button>
-    </div>
-    <div id="ownerOpen" hidden>
-      <div style="margin-bottom:12px;padding:10px;border:1px solid var(--line);border-radius:12px">
-        <b style="font-size:14px">Change owner password</b>
-        <div id="chPwForm" hidden style="margin-top:8px">
-          <input id="chPwCur" type="password" placeholder="Current password" style="width:100%;margin:4px 0" autocomplete="current-password">
-          <input id="chPwNew" type="password" placeholder="New password (8+ characters)" style="width:100%;margin:4px 0" autocomplete="new-password">
-          <input id="chPwNew2" type="password" placeholder="Confirm new password" style="width:100%;margin:4px 0" autocomplete="new-password">
-          <div style="display:flex;gap:8px;margin-top:6px">
-            <button class="small" id="chPwGo" style="flex:1">Change</button>
-            <button class="small gray" id="chPwCancel" style="flex:1">Cancel</button>
-          </div>
-          <p class="muted" id="chPwMsg" style="font-size:12px;margin-top:6px"></p>
-        </div>
-        <button class="small gray" id="chPwBtn" style="width:100%;margin-top:8px">Change password</button>
-      </div>
-      <div class="togglerow"><span>🎟️ Share limits<br><span class="muted" style="font-size:12px">20 free shares / week</span></span><label class="switch"><input type="checkbox" id="tgLimits" aria-label="Toggle share limits"><span class="sl"></span></label></div>
-      <div class="togglerow"><span>💌 Invite system<br><span class="muted" style="font-size:12px">100 bonus shares per invite</span></span><label class="switch"><input type="checkbox" id="tgInvites" aria-label="Toggle invite system"><span class="sl"></span></label></div>
-      <div class="togglerow"><span>💳 Buy shares<br><span class="muted" style="font-size:12px">$3.99 per 100 shares</span></span><label class="switch"><input type="checkbox" id="tgBuy" aria-label="Toggle buy shares"><span class="sl"></span></label></div>
-      <h3 class="sec">👥 Users</h3>
-      <p style="font-size:32px;font-weight:800;margin:8px 0" id="ownerUserCount">—</p>
-      <p class="muted" style="font-size:12px" id="ownerUserSub">accounts created</p>
-      <button class="small" id="refreshUserCount">Refresh</button>
-      <h3 class="sec">🎁 Grant bonus shares</h3>
-      <p class="muted">Enter the user's invite code (they'll find it in Dashboard → Invite friends).</p>
-      <input id="grantCode" placeholder="Invite code (e.g. X7K2P9QA)" autocomplete="off" autocapitalize="characters" aria-label="User invite code">
-      <input id="grantAmt" type="number" min="1" max="10000" value="100" aria-label="Share amount">
-      <button class="small" id="grantBtn">Grant shares</button>
-      <p class="muted" id="grantMsg"></p>
-    </div>
   </div>
   <div class="box" id="syncBox">
     <h3 class="sec" style="margin-top:0">☁️ Cloud Sync</h3>
@@ -1250,44 +1196,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   };
 });
 $("ownerUnlockBtn").onclick=async()=>{
-  // Check if an owner password exists yet
-  let hasOwner = true;
-  try{
-    const r = await fetch(STATS_URL+"/api/owner/status");
-    hasOwner = (await r.json()).hasOwner;
-  }catch(e){ toast("Couldn't reach server"); return; }
-  if(!hasOwner){
-    const p1 = prompt("Create your owner password (8+ characters). Only you will know this:");
-    if(p1===null) return;
-    if(p1.length < 8){ alert("Password must be 8+ characters."); return; }
-    const p2 = prompt("Confirm owner password:");
-    if(p2!==p1){ alert("Passwords didn't match."); return; }
-    try{
-      const r = await fetch(STATS_URL+"/api/owner/setup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:p1})});
-      const j = await r.json();
-      if(j.ok && j.token){
-        OWNER_TOKEN = j.token;
-        try{sessionStorage.setItem("omni_owner_token", OWNER_TOKEN);}catch(e){}
-        try{localStorage.setItem("omni_owner_unlocked","1");}catch(e){}
-        renderCreditBoxes();toast("Owner password set — controls unlocked");
-      }else alert("Setup failed: "+(j.error||"unknown"));
-    }catch(e){ alert("Couldn't reach server."); }
-    return;
-  }
-  const pw = prompt("Enter owner password:");
-  if(pw===null) return;
-  try{
-    const r = await fetch(STATS_URL+"/api/owner/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pw})});
-    const j = await r.json();
-    if(j.ok && j.token){
-      OWNER_TOKEN = j.token;
-      try{sessionStorage.setItem("omni_owner_token", OWNER_TOKEN);}catch(e){}
-      try{localStorage.setItem("omni_owner_unlocked","1");}catch(e){}
-      renderCreditBoxes();toast("Owner controls unlocked");
-    }else if(j.needSetup){
-      alert("No owner password set yet — tap Unlock again to create one.");
-    }else alert("Wrong password.");
-  }catch(e){ alert("Couldn't reach server."); }
+  const ok=await ownerPasswordPrompt();
+  if(ok){renderCreditBoxes();toast("Owner controls unlocked");}
 };
 $("tgLimits").onchange=e=>setFlag("shareLimits",e.target.checked);
 $("tgInvites").onchange=e=>setFlag("invites",e.target.checked);
@@ -2260,75 +2170,7 @@ ${(p.urls||[]).map(x=>`<tr><td>🌐 <a href="${esc(x)}" style="color:#0a84ff">${
   };
 });
 
-// Sync diagnostics — compares local vs cloud vault
-async function runDiagnostics(){
-  const out=$("diagOut");
-  out.textContent="Running…";
-  const lines=[];
-  try{
-    // 1. Local vault
-    const lv=localStorage.getItem("omni_vault");
-    lines.push("LOCAL VAULT: "+(lv?("exists, "+lv.length+" chars"):"MISSING"));
-    if(lv){
-      const parts=lv.split(".");
-      lines.push("  format: "+parts.length+" parts "+(parts.length===3?"OK":"BROKEN"));
-    }
-    // 2. Sync ID
-    let sid="";try{sid=localStorage.getItem(SYNC_ID_KEY)||"";}catch(e){}
-    lines.push("SYNC ID: "+(sid||"none set"));
-    // 3. Cloud vault
-    if(sid){
-      try{
-        const r=await fetch(STATS_URL+"/api/vault/load?sync_id="+encodeURIComponent(sid));
-        if(r.status===404){lines.push("CLOUD: no vault found for this Sync ID");}
-        else{
-          const j=await r.json();
-          if(j.ok&&j.blob){
-            lines.push("CLOUD VAULT: exists, "+j.blob.length+" chars");
-            const dt=new Date(j.updated_at||0);
-            lines.push("  uploaded: "+dt.toLocaleString());
-            lines.push("  match local: "+(j.blob===lv?"YES ✓":"NO ✗"));
-          }else{lines.push("CLOUD: bad response");}
-        }
-      }catch(e){lines.push("CLOUD: fetch failed ("+e.message+")");}
-    }
-    // 4. PIN test (only if unlocked)
-    if(sessionPin&&lv){
-      try{
-        await vaultDecrypt(sessionPin);
-        lines.push("PIN TEST: session PIN decrypts local vault ✓");
-      }catch(e){lines.push("PIN TEST: session PIN FAILED to decrypt ✗");}
-    }else{
-      lines.push("PIN TEST: skipped (locked)");
-    }
-    // 5. Remembered PIN
-    let rp="";try{rp=localStorage.getItem("omni_remembered_pin")||"";}catch(e){}
-    lines.push("REMEMBERED PIN: "+(rp?"set":"not set"));
-  }catch(e){lines.push("ERROR: "+e.message);}
-  out.textContent=lines.join("\n");
-}
 document.addEventListener("DOMContentLoaded",()=>{
-  const dg=$("diagGo");
-  if(dg)dg.onclick=runDiagnostics;
-  // Direct PIN test — bypasses the PIN pad entirely
-  const tpg=$("testPinGo");
-  if(tpg)tpg.onclick=async()=>{
-    const out=$("testPinOut");
-    const pin=($("testPinInput").value||"").trim();
-    out.textContent="Testing…";out.style.color="";
-    try{
-      const lv=localStorage.getItem("omni_vault");
-      if(!lv){out.textContent="No vault here to test";out.style.color="#e08080";return;}
-      const parts=lv.split(".");
-      if(parts.length!==3){out.textContent="Vault is CORRUPTED (wrong format)";out.style.color="#e08080";return;}
-      const key=await deriveKey(pin,ub64(parts[0]));
-      const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:ub64(parts[1])},key,ub64(parts[2]));
-      const data=JSON.parse(td.decode(pt));
-      out.textContent="✓ PIN WORKS! Vault has "+(Array.isArray(data)?data.length:0)+" cards.";out.style.color="#7fd67f";
-    }catch(e){
-      out.textContent="✗ PIN does NOT unlock this vault ("+e.message+")";out.style.color="#e08080";
-    }
-  };
   // Delete my account — invalidates invite code, wipes cloud + local
   const dab=$("deleteAccountBtn");
   if(dab)dab.onclick=async()=>{
@@ -2344,15 +2186,6 @@ document.addEventListener("DOMContentLoaded",()=>{
       if(sid){try{await fetch(STATS_URL+"/api/vault/delete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({sync_id:sid})});}catch(e){}}
     }catch(e){}
     try{Object.keys(localStorage).filter(k=>k.startsWith("omni_")).forEach(k=>localStorage.removeItem(k));}catch(e){}
-    location.reload();
-  };
-  // Wipe and link fresh
-  const wl=$("wipeAndLink");
-  if(wl)wl.onclick=()=>{
-    if(!confirm("Wipe everything in THIS browser? Your cloud copy is safe."))return;
-    try{
-      Object.keys(localStorage).filter(k=>k.startsWith("omni_")).forEach(k=>localStorage.removeItem(k));
-    }catch(e){}
     location.reload();
   };
 });
@@ -2414,16 +2247,60 @@ $("dashBtn").onclick = async function(e){
   }
 };
 
+// Owner password prompt — returns true if successfully unlocked
+async function ownerPasswordPrompt(){
+  let hasOwner=true;
+  try{
+    const r=await fetch(STATS_URL+"/api/owner/status");
+    hasOwner=(await r.json()).hasOwner;
+  }catch(e){toast("Couldn't reach server");return false;}
+  if(!hasOwner){
+    const p1=prompt("Create your owner password (8+ characters). Only you will know this:");
+    if(p1===null)return false;
+    if(p1.length<8){alert("Password must be 8+ characters.");return false;}
+    const p2=prompt("Confirm owner password:");
+    if(p2!==p1){alert("Passwords didn't match.");return false;}
+    try{
+      const r=await fetch(STATS_URL+"/api/owner/setup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:p1})});
+      const j=await r.json();
+      if(j.ok&&j.token){
+        OWNER_TOKEN=j.token;
+        try{sessionStorage.setItem("omni_owner_token",OWNER_TOKEN);}catch(e){}
+        try{localStorage.setItem("omni_owner_unlocked","1");}catch(e){}
+        return true;
+      }else{alert("Setup failed: "+(j.error||"unknown"));return false;}
+    }catch(e){alert("Couldn't reach server.");return false;}
+  }
+  const pw=prompt("Enter owner password:");
+  if(pw===null)return false;
+  try{
+    const r=await fetch(STATS_URL+"/api/owner/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pw})});
+    const j=await r.json();
+    if(j.ok&&j.token){
+      OWNER_TOKEN=j.token;
+      try{sessionStorage.setItem("omni_owner_token",OWNER_TOKEN);}catch(e){}
+      try{localStorage.setItem("omni_owner_unlocked","1");}catch(e){}
+      return true;
+    }else if(j.needSetup){alert("No owner password set yet.");return false;}
+    else{alert("Wrong password.");return false;}
+  }catch(e){alert("Couldn't reach server.");return false;}
+}
+
 $("ownerBtn").onclick=async()=>{
-  // Open dashboard then scroll to owner controls
-  await $("dashBtn").onclick();
-  setTimeout(()=>{
-    const ob=$("ownerBox");
-    if(ob){ob.scrollIntoView({behavior:"smooth",block:"start"});
-      ob.style.outline="2px solid var(--accent)";ob.style.borderRadius="12px";
-      setTimeout(()=>{ob.style.outline="";},2000);}
-  },400);
+  // Ask for password directly (not via dashboard) — 2026-10-10
+  let unlocked=false;
+  try{unlocked=localStorage.getItem("omni_owner_unlocked")==="1"&&!!OWNER_TOKEN;}catch(e){}
+  if(!OWNER_TOKEN)unlocked=false;
+  if(!unlocked){
+    const ok=await ownerPasswordPrompt();
+    if(!ok)return;
+    toast("Owner controls unlocked");
+  }
+  renderCreditBoxes();
+  $("ownerModal").hidden=false;
 };
+$("ownerModalClose").onclick=()=>{$("ownerModal").hidden=true;};
+$("ownerModal").addEventListener("click",e=>{if(e.target===$("ownerModal"))$("ownerModal").hidden=true;});
 
 /* ---------- rich social link buttons ---------- */
 function socialButton(url){
@@ -2873,6 +2750,50 @@ async function tryRememberedPin(){
 /* ---------- PWA ---------- */
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}
 </script>
+
+<!-- OWNER MODAL (moved from dashboard per owner request 2026-10-10) -->
+<div id="ownerModal" hidden style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:10000;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto">
+  <div style="background:#14161c;border:1px solid var(--line);border-radius:18px;padding:22px;max-width:460px;width:100%;margin-top:40px;position:relative">
+    <button class="iconbtn small" id="ownerModalClose" aria-label="Close owner controls" style="position:absolute;top:12px;right:12px">✕</button>
+<div class="box" id="ownerBox">
+    <h3 class="sec" style="margin-top:0">👑 Owner controls</h3>
+    <p class="muted" style="font-size:12px;margin-top:0">Owner password is separate from your card PIN — it unlocks these controls only.</p>
+    <div id="ownerLocked">
+      <p class="muted">Restricted area.</p>
+      <button class="small gray" id="ownerUnlockBtn">Unlock</button>
+    </div>
+    <div id="ownerOpen" hidden>
+      <div style="margin-bottom:12px;padding:10px;border:1px solid var(--line);border-radius:12px">
+        <b style="font-size:14px">Change owner password</b>
+        <div id="chPwForm" hidden style="margin-top:8px">
+          <input id="chPwCur" type="password" placeholder="Current password" style="width:100%;margin:4px 0" autocomplete="current-password">
+          <input id="chPwNew" type="password" placeholder="New password (8+ characters)" style="width:100%;margin:4px 0" autocomplete="new-password">
+          <input id="chPwNew2" type="password" placeholder="Confirm new password" style="width:100%;margin:4px 0" autocomplete="new-password">
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <button class="small" id="chPwGo" style="flex:1">Change</button>
+            <button class="small gray" id="chPwCancel" style="flex:1">Cancel</button>
+          </div>
+          <p class="muted" id="chPwMsg" style="font-size:12px;margin-top:6px"></p>
+        </div>
+        <button class="small gray" id="chPwBtn" style="width:100%;margin-top:8px">Change password</button>
+      </div>
+      <div class="togglerow"><span>🎟️ Share limits<br><span class="muted" style="font-size:12px">20 free shares / week</span></span><label class="switch"><input type="checkbox" id="tgLimits" aria-label="Toggle share limits"><span class="sl"></span></label></div>
+      <div class="togglerow"><span>💌 Invite system<br><span class="muted" style="font-size:12px">100 bonus shares per invite</span></span><label class="switch"><input type="checkbox" id="tgInvites" aria-label="Toggle invite system"><span class="sl"></span></label></div>
+      <div class="togglerow"><span>💳 Buy shares<br><span class="muted" style="font-size:12px">$3.99 per 100 shares</span></span><label class="switch"><input type="checkbox" id="tgBuy" aria-label="Toggle buy shares"><span class="sl"></span></label></div>
+      <h3 class="sec">👥 Users</h3>
+      <p style="font-size:32px;font-weight:800;margin:8px 0" id="ownerUserCount">—</p>
+      <p class="muted" style="font-size:12px" id="ownerUserSub">accounts created</p>
+      <button class="small" id="refreshUserCount">Refresh</button>
+      <h3 class="sec">🎁 Grant bonus shares</h3>
+      <p class="muted">Enter the user's invite code (they'll find it in Dashboard → Invite friends).</p>
+      <input id="grantCode" placeholder="Invite code (e.g. X7K2P9QA)" autocomplete="off" autocapitalize="characters" aria-label="User invite code">
+      <input id="grantAmt" type="number" min="1" max="10000" value="100" aria-label="Share amount">
+      <button class="small" id="grantBtn">Grant shares</button>
+      <p class="muted" id="grantMsg"></p>
+    </div>
+  </div>
+  </div>
+</div>
 </body>
 </html>
 
