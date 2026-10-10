@@ -92,7 +92,7 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 .wdetail{position:absolute;left:0;right:0;background:#141824;border:1px solid var(--line);border-radius:18px;overflow:hidden;animation:slideup .25s ease}
 @keyframes slideup{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 .wdetail-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px;font-size:15px}
-.wclose{background:#232a3a;border:0;color:#fff;width:30px;height:30px;border-radius:50%;font-size:14px;cursor:pointer}
+.wclose{background:#232a3a;border:0;color:#fff;min-width:44px;min-height:44px;width:44px;height:44px;border-radius:50%;font-size:16px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
 .wrow{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid rgba(255,255,255,.06);color:inherit;text-decoration:none}
 .wrow .wico{font-size:20px;width:28px;text-align:center;flex:none}
 .wrow span b{display:block;font-size:13px;color:var(--muted);font-weight:600}
@@ -141,7 +141,7 @@ a.wrow:active{background:rgba(255,255,255,.05)}
 .picwrap{text-align:center;margin:8px 0}
 .picwrap img{width:110px;height:110px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);background:#1a1e26;box-shadow:0 0 20px var(--glow)}
 .picwrap .ph{width:110px;height:110px;border-radius:50%;background:#1a1e26;display:inline-flex;align-items:center;justify-content:center;font-size:38px;font-weight:800;color:#8ea6d8;border:2px dashed var(--line)}
-.picwrap .chg{display:block;margin:8px auto 0;background:#232838;font-size:13px;padding:8px 14px;box-shadow:none;border:1px solid var(--line)}
+.picwrap .chg{display:block;margin:8px auto 0;background:#232838;font-size:13px;padding:8px 14px;box-shadow:none;border:1px solid var(--line);min-height:44px}
 h3.sec{margin:18px 0 4px;font-size:15px}
 .rowbtns{display:flex;flex-wrap:wrap;gap:0}
 .colorrow{display:flex;align-items:center;gap:10px;margin-top:8px}
@@ -182,9 +182,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 #reposCircle img{width:100%;height:100%;object-fit:cover;pointer-events:none}
 #reposOverlay p{color:var(--muted);margin:18px 0}
 /* ---------- encounter memory ---------- */
-.etabs{display:flex;gap:8px;margin:12px 0 4px}
-.etabs button{flex:1;padding:11px;border-radius:12px;background:#14161c;border:1px solid var(--line);color:var(--muted);font-weight:700;font-size:15px}
-.etabs button.on{background:linear-gradient(135deg,#4f8cff,#a78bfa);color:#fff;border-color:transparent}
 .nudgecard{background:linear-gradient(160deg,#16241a,#10160f);border:1px solid #2d5a35;border-radius:14px;padding:12px 14px;margin:8px 0}
 .memcard{background:linear-gradient(160deg,#1c1830,#12101c);border:1px solid #4a3f6b;border-radius:14px;padding:12px 14px;margin:8px 0}
 .nudgecard h4,.memcard h4{margin:0 0 4px;font-size:14px}
@@ -253,14 +250,36 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .rcvfoot a{color:#9aa1ad}
 /* editor: template picker + preview */
 .tplpicker{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:6px 0}
-.tplbtn{padding:10px 4px;border-radius:10px;background:#0e1118;border:1px solid var(--line);color:var(--muted);font-size:13px;font-weight:600}
+.tplbtn{padding:10px 4px;border-radius:10px;background:#0e1118;border:1px solid var(--line);color:var(--muted);font-size:13px;font-weight:600;min-height:44px}
 .tplbtn.on{border-color:var(--accent);color:#fff;background:#16203a}
 .bizprev{margin:8px 0;display:flex;flex-direction:column;gap:8px}
 .bizprev .bcard{aspect-ratio:3.5/2}
 .bizprev .plabel{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
 #frontPicker,#backPicker{display:flex;flex-wrap:wrap;gap:4px 10px;margin:4px 0 8px}
-#frontPicker .chk,#backPicker .chk{display:inline-flex;align-items:center;gap:6px;background:#0e1118;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;cursor:pointer}
+#frontPicker .chk,#backPicker .chk{display:inline-flex;align-items:center;gap:6px;background:#0e1118;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;cursor:pointer;min-height:44px}
 #frontPicker .chk input,#backPicker .chk input{width:auto;margin:0}
+/* dashboard collapsible groups */
+.dashgroup{border:1px solid var(--line);border-radius:18px;margin:14px 0;background:linear-gradient(160deg,#10131b,#0c0e14);overflow:hidden}
+.dashgroup>summary{padding:16px 18px;font-size:17px;font-weight:700;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;user-select:none;-webkit-user-select:none}
+.dashgroup>summary::-webkit-details-marker{display:none}
+.dashgroup>summary::after{content:"›";font-size:26px;line-height:1;color:var(--muted);transform:rotate(90deg);transition:transform .2s}
+.dashgroup:not([open])>summary::after{transform:rotate(0deg)}
+.dashgroup[open]>summary{border-bottom:1px solid var(--line)}
+.dashgroup .box{margin:12px}
+.dashinsights{border-color:#2a3350}
+.advbadge{font-size:11px;font-weight:700;color:var(--accent);background:rgba(79,140,255,.12);border:1px solid rgba(79,140,255,.35);padding:4px 12px;border-radius:20px;letter-spacing:.08em}
+/* hamburger nav menu */
+.navmenu{position:fixed;inset:0;z-index:150}
+.navmenu[hidden]{display:none}
+.navmenu-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.6);opacity:0;transition:opacity .25s ease}
+.navmenu.open .navmenu-backdrop{opacity:1}
+.navmenu-panel{position:absolute;top:0;right:0;bottom:0;width:min(300px,85vw);background:#141824;border-left:1px solid var(--line);padding:16px;padding-top:calc(16px + env(safe-area-inset-top));transform:translateX(100%);transition:transform .28s ease;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+.navmenu.open .navmenu-panel{transform:translateX(0)}
+.navmenu-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.navmenu-title{font-size:17px;font-weight:700;letter-spacing:.04em}
+.navitem{display:flex;align-items:center;gap:12px;width:100%;background:#1c2130;border:1px solid var(--line);border-radius:12px;color:var(--text);padding:14px 16px;font-size:16px;min-height:52px;text-align:left;cursor:pointer}
+.navitem:active{background:#232a3d}
+.navicon{font-size:20px;width:28px;text-align:center;flex:none}
 </style>
 </head>
 <body>
@@ -313,10 +332,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <div class="pinpad" id="pinpad"></div>
   <button id="bioUnlockBtn" class="gray" hidden style="margin-top:12px;width:100%;max-width:280px;">🔓 Unlock with Biometrics</button>
   <button id="bioEnrollBtn" class="gray" hidden style="margin-top:8px;width:100%;max-width:280px;font-size:13px;">Enable Face ID / Touch ID</button>
-  <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:14px;color:#9aa1ad;cursor:pointer;max-width:280px;">
-    <input type="checkbox" id="rememberPin" style="width:18px;height:18px;accent-color:#0a84ff">
-    Remember PIN on this device
-  </label>
   <button class="forgot" id="forgotBtn" hidden>Forgot PIN? Reset everything</button>
   <button class="forgot" id="lockSyncBtn" style="margin-top:4px">☁️ Restore my cards from cloud</button>
   <div id="lockSyncForm" hidden style="margin-top:8px;width:100%;max-width:280px;">
@@ -353,7 +368,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <!-- OUT OF SHARES MODAL -->
 <div id="limitModal" class="modal" hidden role="dialog" aria-label="Out of shares">
   <div class="box">
-    <h3 class="sec" style="margin-top:0">🎟️ You're out of shares!</h3>
+    <h3 class="sec" style="margin-top:0">You're out of shares!</h3>
     <p class="muted">Your 20 free shares reset Friday. Get more now:</p>
     <div id="limitInviteWrap"><button id="limitInviteBtn" style="width:100%">💌 Invite a friend — earn 100 shares</button></div>
     <div id="limitBuyWrap"><button id="limitBuyBtn" style="width:100%;margin-top:8px">💳 Buy 100 shares — $3.99</button></div>
@@ -361,19 +376,31 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   </div>
 </div>
 
+<!-- NAV MENU (hamburger) -->
+<div id="navMenu" class="navmenu" hidden role="dialog" aria-label="App menu" aria-modal="true">
+  <div class="navmenu-backdrop" id="navMenuBackdrop"></div>
+  <aside class="navmenu-panel" aria-label="App menu">
+    <div class="navmenu-head">
+      <span class="navmenu-title">Menu</span>
+      <button class="iconbtn small" id="navMenuClose" aria-label="Close menu">✕</button>
+    </div>
+    <button class="navitem" id="navDash"><span class="navicon" aria-hidden="true">📊</span>Dashboard</button>
+    <button class="navitem" id="navBackup"><span class="navicon" aria-hidden="true">💾</span>Back up</button>
+    <button class="navitem" id="navOwner"><span class="navicon" aria-hidden="true">👑</span>Owner controls</button>
+    <button class="navitem" id="navLock"><span class="navicon" aria-hidden="true">🔒</span>Lock app</button>
+  </aside>
+</div>
+
 <!-- HOME -->
 <div class="wrap" id="homeScreen" hidden>
-  <div class="brand"><h1>OMNI</h1><div><button class="iconbtn small" id="ownerBtn" aria-label="Owner controls">👑</button><button class="iconbtn small" id="dashBtn" aria-label="Open dashboard">📊</button><button class="iconbtn small" id="backupBtn" aria-label="Back up cards">Backup</button><button class="iconbtn" id="lockBtn" aria-label="Lock app">Lock</button></div></div>
-  <div id="offlineBar" class="box" hidden style="border-color:#7a5a2b;text-align:center;padding:10px">📴 Offline — you can view and share saved cards.<br><span class="muted">Backup and cloud stats need internet.</span></div>
+  <div class="brand"><h1>OMNI</h1><div><button class="iconbtn" id="menuBtn" aria-label="Open menu" aria-haspopup="true">☰</button><span id="legacyHeaderBtns" style="display:none"><button class="iconbtn small" id="ownerBtn" aria-label="Owner controls">👑</button><button class="iconbtn small" id="dashBtn" aria-label="Open dashboard">📊</button><button class="iconbtn small" id="backupBtn" aria-label="Back up cards">Back up</button><button class="iconbtn" id="lockBtn" aria-label="Lock app">Lock</button></span></div></div>
+  <div id="offlineBar" class="box" hidden style="border-color:#7a5a2b;text-align:center;padding:10px">📴 Offline — you can view and share saved cards.<br><span class="muted">Backing up and cloud stats need internet.</span></div>
   <div id="backupNudge" class="box" hidden style="border-color:#7a5a2b;background:linear-gradient(160deg,#1d1812,#14110c)">
     <span id="backupNudgeText">💾 Back up your cards to keep them safe.</span><br>
     <button class="small" id="nudgeBackup" style="margin-top:8px">Back up now</button>
     <button class="small gray" id="nudgeDismiss">Later</button>
   </div>
   <div id="memNudgeBox"></div>
-  <div class="etabs" role="tablist">
-    <button id="tabCards" class="on" role="tab">Cards</button>
-  </div>
   <div id="cardsView">
   <div class="searchrow"><input id="searchBox" placeholder="Search cards..."></div>
   <div id="walletStack"></div>
@@ -387,6 +414,8 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <div class="backrow"><button class="iconbtn" id="backBtn" aria-label="Back to cards">← Back</button></div>
   <div class="brand"><h1 id="detailTitle">Card</h1></div>
 
+  <details class="dashgroup" id="dgPreview" open>
+    <summary><span>Card preview</span></summary>
   <!-- Showcase flip card -->
   <div class="flipwrap" id="flipCard" role="button" tabindex="0" aria-label="Contact card. Activate to flip.">
     <div class="flipinner" id="flipInner">
@@ -394,7 +423,10 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <div class="flipback" id="flipBack"></div>
     </div>
   </div>
-  <p class="muted" id="flipHint" style="text-align:center;font-size:13px;margin:6px 0 0">👆 Tap the card to flip it</p>
+  <p class="muted" id="flipHint" style="text-align:center;font-size:13px;margin:6px 0 12px">👆 Tap the card to flip it</p>
+  </details>
+  <details class="dashgroup" id="dgDesign">
+    <summary><span>Design</span></summary>
   <div class="box" id="bizBox">
     <h3 class="sec" style="margin-top:0">Business card view</h3>
     <div class="muted">How your card looks when someone opens your shared link — front and back.</div>
@@ -407,12 +439,16 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <div id="backPicker"></div>
   </div>
 
-  <div class="picwrap" style="margin-top:4px">
+  <div class="box">
+    <h3 class="sec" style="margin-top:0">Card cover</h3>
     <div id="coverShow" style="width:100%;height:90px;border-radius:14px;overflow:hidden;background:#1a1e26;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;border:1px dashed var(--line)">No cover image</div>
     <input type="file" id="coverInput" accept="image/*" hidden>
     <button class="chg" id="coverBtn">Choose card cover</button>
     <button class="chg" id="coverClear" hidden>Remove cover</button>
   </div>
+  </details>
+  <details class="dashgroup" id="dgInfo" open>
+    <summary><span>Contact info</span></summary>
   <div class="box">
     <input id="f_label" placeholder="Card name, e.g. Studio">
     <input id="f_name" placeholder="Name">
@@ -430,13 +466,12 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <button id="dupBtn" class="gray">Duplicate</button>
     </div>
   </div>
+  </details>
   <div class="stickybar">
     <button id="saveBtn2">Save card</button>
   </div>
-  <div class="box" style="border-color:#4a2b2b;margin-top:16px">
-    <h3 class="sec" style="margin-top:0;color:#e08080">Danger zone</h3>
-    <button id="delBtn" class="danger" style="width:100%;background:none;border:1px solid #4a2b2b;box-shadow:none">Delete this card</button>
-  </div>
+  <details class="dashgroup" id="dgShareCard">
+    <summary><span>Share</span></summary>
   <div class="box" id="shareBox" hidden>
     <h3 class="sec" style="margin-top:0">Share this card</h3>
     <div class="muted">Uncheck anything they should not get.</div>
@@ -456,6 +491,14 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     </div>
     <p class="muted">Standard system sharing (.vcf / AirDrop) is always free and unlimited. Share limits only apply to tracked cloud NFC / QR taps.</p>
   </div>
+  </details>
+  <details class="dashgroup" id="dgDanger">
+    <summary><span style="color:#e08080">Danger zone</span></summary>
+  <div class="box" style="border-color:#4a2b2b">
+    <h3 class="sec" style="margin-top:0;color:#e08080">Delete this card</h3>
+    <button id="delBtn" class="danger" style="width:100%;background:none;border:1px solid #4a2b2b;box-shadow:none">Delete this card</button>
+  </div>
+  </details>
 </div>
 
 <!-- REPOSITION OVERLAY -->
@@ -471,8 +514,10 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <div class="backrow"><button class="iconbtn" id="dashBack">← Back</button></div>
   <div class="brand"><h1>Dashboard</h1></div>
   <div class="muted" style="letter-spacing:.08em;font-size:11px">HOW YOUR APP IS DOING</div>
-  <div class="box">
-    <h3 class="sec" style="margin-top:0">👤 Profile picture</h3>
+    <details class="dashgroup" id="dgAccount" open>
+    <summary><span>My account</span></summary>
+<div class="box">
+    <h3 class="sec" style="margin-top:0">Profile picture</h3>
     <p class="muted">Your photo — shown on your cards.</p>
     <div class="picwrap">
       <div id="picShow"></div>
@@ -481,68 +526,9 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <button class="chg" id="reposBtn">Reposition picture</button>
     </div>
   </div>
-  <div class="box" id="cloudBox" hidden>
-    <h3 class="sec" style="margin-top:0">🌍 All users</h3>
-    <div class="statrow"><span>📱 App opens</span><b id="c_opens">0</b></div>
-    <div class="statrow"><span>📇 Cards created</span><b id="c_cards">0</b></div>
-    <div class="statrow"><span>📤 Total shares</span><b id="c_shares">0</b></div>
-    <div class="statrow sub"><span>— via Share</span><b id="c_share">0</b></div>
-    <div class="statrow sub"><span>— via Save .vcf</span><b id="c_vcf">0</b></div>
-    <div class="statrow sub"><span>— via NFC / QR link</span><b id="c_nfc">0</b></div>
-  </div>
-  <div class="box" id="chartBox" hidden>
-    <h3 class="sec" style="margin-top:0">📈 Opens — last 7 days</h3>
-    <div id="dailyBars"></div>
-  </div>
-  <p class="muted" id="cloudLoading" style="text-align:center">Loading cloud stats…</p>
-  <div class="box">
-    <h3 class="sec" style="margin-top:0">📱 This device</h3>
-    <div class="statrow"><span>App opens</span><b id="st_opens">0</b></div>
-    <div class="statrow"><span>Cards created</span><b id="st_cards">0</b></div>
-    <div class="statrow"><span>Total shares</span><b id="st_shares">0</b></div>
-    <div id="sharePlanCard" hidden style="background:#1e1e1e;border-radius:20px;padding:20px;margin:4px 0 12px;">
-      <div style="display:flex;justify-content:space-between;align-items:baseline;">
-        <span style="font-size:20px;font-weight:600;color:#fff;">Free shares</span>
-        <span id="planFreePct" style="font-size:15px;color:#9aa1ad;">0% used</span>
-      </div>
-      <div id="planFreeReset" style="font-size:14px;color:#9aa1ad;margin-top:4px;">Weekly limit resets Friday</div>
-      <div style="height:10px;background:#2c2c2e;border-radius:5px;margin-top:10px;overflow:hidden;">
-        <div id="planFreeBar" style="height:100%;width:0%;background:#0a84ff;border-radius:5px;transition:width .3s;"></div>
-      </div>
-      <div style="font-size:20px;font-weight:600;color:#fff;margin-top:18px;">Bonus shares</div>
-      <div id="planBonusSub" style="font-size:14px;color:#9aa1ad;margin-top:4px;">0 shares left</div>
-      <div style="font-size:14px;color:#9aa1ad;">Never expires</div>
-      <div style="height:10px;background:#2c2c2e;border-radius:5px;margin-top:10px;overflow:hidden;">
-        <div id="planBonusBar" style="height:100%;width:0%;background:#0a84ff;border-radius:5px;transition:width .3s;"></div>
-      </div>
-      <div style="border-top:1px solid #2c2c2e;margin-top:16px;padding-top:12px;">
-        <a href="#" id="planGetMore" style="color:#0a84ff;font-size:17px;text-decoration:none;">Get more shares</a>
-      </div>
-    </div>
-  <div class="box" id="analyticsBox" hidden>
-    <h3 class="sec" style="margin-top:0">📊 Card analytics</h3>
-    <p class="muted">Taps per card — last 14 days. Requires owner login.</p>
-    <div id="analyticsList"></div>
-  </div>
-  <div class="box" id="leadsBox" hidden>
-    <h3 class="sec" style="margin-top:0">📥 Leads</h3>
-    <p class="muted">Contacts sent back to you from shared links.</p>
-    <div id="leadsList"></div>
-  </div>
-  <div class="box" id="webhookBox" hidden>
-    <h3 class="sec" style="margin-top:0">🔗 Webhook <span class="muted" style="font-size:12px">(Zapier-ready)</span></h3>
-    <p class="muted">Get a POST on every tap and lead. Paste a Zapier webhook URL:</p>
-    <div style="display:flex;gap:8px">
-      <input id="webhookUrl" placeholder="https://hooks.zapier.com/..." style="flex:1;margin:0;font-size:13px" aria-label="Webhook URL">
-      <button class="small" id="webhookSave" style="flex:none">Save</button>
-    </div>
-    <p class="muted" id="webhookMsg" style="font-size:12px"></p>
-  </div>
-  <div class="box" id="pinBox">
-    <h3 class="sec" style="margin-top:0">🔐 Device PIN</h3>
-    <p class="muted" id="pinRememberStatus">PIN is not remembered on this device.</p>
+<div class="box" id="pinBox">
+    <h3 class="sec" style="margin-top:0">Device PIN</h3>
     <button class="small" id="changePinBtn" style="width:100%">Change PIN</button>
-    <button class="small gray" id="forgetPinBtn" style="width:100%;margin-top:8px">Forget remembered PIN</button>
     <div id="changePinForm" hidden style="margin-top:12px">
       <p class="muted" style="font-size:13px">Enter a new 6-digit PIN:</p>
       <input id="newPin1" type="password" inputmode="numeric" maxlength="6" placeholder="New PIN" style="width:100%;margin:4px 0" autocomplete="off">
@@ -554,8 +540,8 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <p class="muted" id="changePinMsg" style="font-size:12px;margin-top:6px"></p>
     </div>
   </div>
-  <div class="box" id="ownerBox">
-    <h3 class="sec" style="margin-top:0">👑 Owner controls</h3>
+<div class="box" id="ownerBox">
+    <h3 class="sec" style="margin-top:0">Owner controls</h3>
     <p class="muted" style="font-size:12px;margin-top:0">Owner password is separate from your card PIN — it unlocks these controls only.</p>
     <div id="ownerLocked">
       <p class="muted">Restricted area.</p>
@@ -579,11 +565,11 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <div class="togglerow"><span>🎟️ Share limits<br><span class="muted" style="font-size:12px">20 free shares / week</span></span><label class="switch"><input type="checkbox" id="tgLimits" aria-label="Toggle share limits"><span class="sl"></span></label></div>
       <div class="togglerow"><span>💌 Invite system<br><span class="muted" style="font-size:12px">100 bonus shares per invite</span></span><label class="switch"><input type="checkbox" id="tgInvites" aria-label="Toggle invite system"><span class="sl"></span></label></div>
       <div class="togglerow"><span>💳 Buy shares<br><span class="muted" style="font-size:12px">$3.99 per 100 shares</span></span><label class="switch"><input type="checkbox" id="tgBuy" aria-label="Toggle buy shares"><span class="sl"></span></label></div>
-      <h3 class="sec">👥 Users</h3>
+      <h3 class="sec">Users</h3>
       <p style="font-size:32px;font-weight:800;margin:8px 0" id="ownerUserCount">—</p>
       <p class="muted" style="font-size:12px" id="ownerUserSub">accounts created</p>
       <button class="small" id="refreshUserCount">Refresh</button>
-      <h3 class="sec">🎁 Grant bonus shares</h3>
+      <h3 class="sec">Grant bonus shares</h3>
       <p class="muted">Enter the user's invite code (they'll find it in Dashboard → Invite friends).</p>
       <input id="grantCode" placeholder="Invite code (e.g. X7K2P9QA)" autocomplete="off" autocapitalize="characters" aria-label="User invite code">
       <input id="grantAmt" type="number" min="1" max="10000" value="100" aria-label="Share amount">
@@ -591,37 +577,8 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <p class="muted" id="grantMsg"></p>
     </div>
   </div>
-  <div class="box" id="accountBox">
-    <h3 class="sec" style="margin-top:0">🗑️ Delete account</h3>
-    <button class="small" id="deleteAccountBtn" style="width:100%;background:linear-gradient(135deg,#7a2d2d,#a03a3a)">Delete my OMNI account</button>
-    <p class="muted" style="font-size:11px;margin-top:4px">Permanently deletes your cloud data and invalidates your invite code. This cannot be undone.</p>
-  </div>
-  <div class="box" id="sigBox">
-    <h3 class="sec" style="margin-top:0">✉️ Email signature</h3>
-    <p class="muted">Generate a branded signature from your first card.</p>
-    <button class="small gray" id="sigGen" style="width:100%">Generate signature</button>
-    <div id="sigPreview" hidden style="margin-top:12px;padding:12px;background:#fff;border-radius:12px;color:#000;"></div>
-    <button class="small" id="sigCopy" hidden style="width:100%;margin-top:8px">Copy HTML</button>
-  </div>
-  </div>
-  <div class="box" id="inviteBox" hidden>
-    <h3 class="sec" style="margin-top:0">💌 Invite friends</h3>
-    <p class="muted">Share your invite link — you both get <b>100 bonus shares</b>. Bonus shares never expire.</p>
-    <div class="statrow"><span>✨ Bonus shares</span><b id="bonusBal">0</b></div>
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <input id="inviteLink" readonly style="flex:1;margin:0" aria-label="Your invite link">
-      <button class="small" id="copyInvite" style="flex:none">Copy</button>
-    </div>
-    <button class="small gray" id="shareInviteBtn" style="width:100%;margin-top:8px">Share invite link…</button>
-  </div>
-  <div class="box" id="buyBox" hidden>
-    <h3 class="sec" style="margin-top:0">💳 Buy shares</h3>
-    <p class="muted">Top up anytime — bonus shares never expire.</p>
-    <button id="buySharesBtn" style="width:100%">Buy 100 shares — $3.99</button>
-    <p class="muted" id="buyMsg" style="text-align:center"></p>
-  </div>
-  <div class="box" id="syncBox">
-    <h3 class="sec" style="margin-top:0">☁️ Cloud Sync</h3>
+<div class="box" id="syncBox">
+    <h3 class="sec" style="margin-top:0">Cloud Sync</h3>
     <p class="muted" id="syncStatus">Keep your cards safe and in sync across all your browsers and devices. Your data stays encrypted — only your PIN can unlock it.</p>
     <div id="syncOff">
       <button class="small" id="syncEnableBtn" style="width:100%">Enable Cloud Sync</button>
@@ -644,6 +601,99 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <p class="muted" id="syncMsg" style="text-align:center"></p>
     </div>
   </div>
+<div class="box" id="accountBox">
+    <h3 class="sec" style="margin-top:0">Delete account</h3>
+    <button class="small" id="deleteAccountBtn" style="width:100%;background:linear-gradient(135deg,#7a2d2d,#a03a3a)">Delete my OMNI account</button>
+    <p class="muted" style="font-size:11px;margin-top:4px">Permanently deletes your cloud data and invalidates your invite code. This cannot be undone.</p>
+  </div>
+  </details>
+  <details class="dashgroup" id="dgSharing">
+    <summary><span>Sharing</span></summary>
+<div id="sharePlanCard" hidden style="background:#1e1e1e;border-radius:20px;padding:20px;margin:4px 0 12px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;">
+        <span style="font-size:20px;font-weight:600;color:#fff;">Free shares</span>
+        <span id="planFreePct" style="font-size:15px;color:#9aa1ad;">0% used</span>
+      </div>
+      <div id="planFreeReset" style="font-size:14px;color:#9aa1ad;margin-top:4px;">Weekly limit resets Friday</div>
+      <div style="height:10px;background:#2c2c2e;border-radius:5px;margin-top:10px;overflow:hidden;">
+        <div id="planFreeBar" style="height:100%;width:0%;background:#0a84ff;border-radius:5px;transition:width .3s;"></div>
+      </div>
+      <div style="font-size:20px;font-weight:600;color:#fff;margin-top:18px;">Bonus shares</div>
+      <div id="planBonusSub" style="font-size:14px;color:#9aa1ad;margin-top:4px;">0 shares left</div>
+      <div style="font-size:14px;color:#9aa1ad;">Never expires</div>
+      <div style="height:10px;background:#2c2c2e;border-radius:5px;margin-top:10px;overflow:hidden;">
+        <div id="planBonusBar" style="height:100%;width:0%;background:#0a84ff;border-radius:5px;transition:width .3s;"></div>
+      </div>
+      <div style="border-top:1px solid #2c2c2e;margin-top:16px;padding-top:12px;">
+        <a href="#" id="planGetMore" style="color:#0a84ff;font-size:17px;text-decoration:none;">Get more shares</a>
+      </div>
+    </div>
+<div class="box" id="inviteBox" hidden>
+    <h3 class="sec" style="margin-top:0">Invite friends</h3>
+    <p class="muted">Share your invite link — you both get <b>100 bonus shares</b>. Bonus shares never expire.</p>
+    <div class="statrow"><span>✨ Bonus shares</span><b id="bonusBal">0</b></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input id="inviteLink" readonly style="flex:1;margin:0" aria-label="Your invite link">
+      <button class="small" id="copyInvite" style="flex:none">Copy</button>
+    </div>
+    <button class="small gray" id="shareInviteBtn" style="width:100%;margin-top:8px">Share invite link…</button>
+  </div>
+<div class="box" id="buyBox" hidden>
+    <h3 class="sec" style="margin-top:0">Buy shares</h3>
+    <p class="muted">Top up anytime — bonus shares never expire.</p>
+    <button id="buySharesBtn" style="width:100%">Buy 100 shares — $3.99</button>
+    <p class="muted" id="buyMsg" style="text-align:center"></p>
+  </div>
+<div class="box" id="sigBox">
+    <h3 class="sec" style="margin-top:0">Email signature</h3>
+    <p class="muted">Generate a branded signature from your first card.</p>
+    <button class="small gray" id="sigGen" style="width:100%">Generate signature</button>
+    <div id="sigPreview" hidden style="margin-top:12px;padding:12px;background:#fff;border-radius:12px;color:#000;"></div>
+    <button class="small" id="sigCopy" hidden style="width:100%;margin-top:8px">Copy HTML</button>
+  </div>
+  </details>
+  <details class="dashgroup dashinsights" id="dgInsights">
+    <summary><span>Insights</span><span class="advbadge">ADVANCED</span></summary>
+<div class="box" id="cloudBox" hidden>
+    <h3 class="sec" style="margin-top:0">All users</h3>
+    <div class="statrow"><span>📱 App opens</span><b id="c_opens">0</b></div>
+    <div class="statrow"><span>📇 Cards created</span><b id="c_cards">0</b></div>
+    <div class="statrow"><span>📤 Total shares</span><b id="c_shares">0</b></div>
+    <div class="statrow sub"><span>— via Share</span><b id="c_share">0</b></div>
+    <div class="statrow sub"><span>— via Save .vcf</span><b id="c_vcf">0</b></div>
+    <div class="statrow sub"><span>— via NFC / QR link</span><b id="c_nfc">0</b></div>
+  </div>
+<div class="box" id="chartBox" hidden>
+    <h3 class="sec" style="margin-top:0">Opens — last 7 days</h3>
+    <div id="dailyBars"></div>
+  </div>
+    <p class="muted" id="cloudLoading" style="text-align:center">Loading cloud stats…</p>
+<div class="box">
+    <h3 class="sec" style="margin-top:0">This device</h3>
+    <div class="statrow"><span>App opens</span><b id="st_opens">0</b></div>
+    <div class="statrow"><span>Cards created</span><b id="st_cards">0</b></div>
+    <div class="statrow"><span>Total shares</span><b id="st_shares">0</b></div>
+  </div>
+<div class="box" id="analyticsBox" hidden>
+    <h3 class="sec" style="margin-top:0">Card analytics</h3>
+    <p class="muted">Taps per card — last 14 days. Requires owner login.</p>
+    <div id="analyticsList"></div>
+  </div>
+<div class="box" id="leadsBox" hidden>
+    <h3 class="sec" style="margin-top:0">Leads</h3>
+    <p class="muted">Contacts sent back to you from shared links.</p>
+    <div id="leadsList"></div>
+  </div>
+<div class="box" id="webhookBox" hidden>
+    <h3 class="sec" style="margin-top:0">Webhook <span class="muted" style="font-size:12px">(Zapier-ready)</span></h3>
+    <p class="muted">Get a POST on every tap and lead. Paste a Zapier webhook URL:</p>
+    <div style="display:flex;gap:8px">
+      <input id="webhookUrl" placeholder="https://hooks.zapier.com/..." style="flex:1;margin:0;font-size:13px" aria-label="Webhook URL">
+      <button class="small" id="webhookSave" style="flex:none">Save</button>
+    </div>
+    <p class="muted" id="webhookMsg" style="font-size:12px"></p>
+  </div>
+  </details>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -777,8 +827,13 @@ function pinMsg(t){$("lockMsg").textContent=t;}
 })();
 function updateGo(){
   // highlight GO when 4+ digits entered and vault exists (unknown length)
+  // actually disable it (not just dim) when it shouldn't be tappable
   const go=[...$("pinpad").children].find(b=>b.textContent==="GO");
-  if(go)go.style.opacity=(hasVault()||hasLegacy())&&pinBuf.length>=4?"1":"0.35";
+  if(go){
+    const enabled=(hasVault()||hasLegacy())&&pinBuf.length>=4;
+    go.style.opacity=enabled?"1":"0.35";
+    go.disabled=!enabled;
+  }
 }
 async function pinDone(){
   const locked=pinLockedLeft();
@@ -819,12 +874,6 @@ async function pinDone(){
       sessionPin=pin;pinFailReset();haptic(15);
       // remember working PIN length for this device
       if(!localStorage.getItem("omni_pinlen"))localStorage.setItem("omni_pinlen",String(pin.length));
-      // "Remember PIN on this device" — store for auto-unlock
-      try{
-        const rp=$("rememberPin");
-        if(rp&&rp.checked)localStorage.setItem("omni_remembered_pin",pin);
-        else localStorage.removeItem("omni_remembered_pin");
-      }catch(e){}
       unlock();return;
     }
     // legacy plaintext migration: verify against old hash, then encrypt
@@ -1532,7 +1581,7 @@ function openDetail(id,toShare){
   curId=id;
   $("homeScreen").hidden=true;$("detailScreen").hidden=false;
   fillDetail();window.scrollTo(0,0);
-  if(toShare)setTimeout(()=>{const s=$("shareBox");if(s&&!s.hidden)s.scrollIntoView({behavior:"smooth",block:"center"});},120);
+  if(toShare)setTimeout(()=>{const s=$("shareBox");if(s&&!s.hidden){const d=$("dgShareCard");if(d)d.open=true;s.scrollIntoView({behavior:"smooth",block:"center"});}},120);
 }
 $("backBtn").onclick=async()=>{
   // drop unsaved draft cards (created via + but never saved)
@@ -2261,19 +2310,9 @@ document.addEventListener("DOMContentLoaded",()=>{
     location.reload();
   };
 });
-// PIN remember status + forget button
-function updatePinBox(){
-  const st=$("pinRememberStatus"), btn=$("forgetPinBtn");
-  if(!st)return;
-  let rem=null;try{rem=localStorage.getItem("omni_remembered_pin");}catch(e){}
-  st.textContent=rem?"✓ PIN is remembered on this device — you'll be unlocked automatically.":"PIN is not remembered on this device.";
-  if(btn)btn.style.display=rem?"":"none";
-}
+// PIN box status (remember-PIN feature removed for security)
+function updatePinBox(){}
 document.addEventListener("DOMContentLoaded",()=>{
-  const fb=$("forgetPinBtn");
-  if(fb)fb.onclick=()=>{try{localStorage.removeItem("omni_remembered_pin");}catch(e){}
-    const cb=$("rememberPin");if(cb)cb.checked=false;
-    updatePinBox();toast("PIN forgotten on this device");};
   // Change PIN flow — re-encrypts vault with new PIN (requires unlocked session)
   const cpb=$("changePinBtn"), cpf=$("changePinForm");
   if(cpb&&cpf)cpb.onclick=()=>{cpf.hidden=!cpf.hidden;if(!cpf.hidden)$("newPin1").focus();};
@@ -2292,8 +2331,6 @@ document.addEventListener("DOMContentLoaded",()=>{
       // Re-encrypt the current profiles with the new PIN
       await vaultEncrypt(p1,profiles);
       sessionPin=p1;
-      // Update remembered PIN if enabled
-      try{if(localStorage.getItem("omni_remembered_pin"))localStorage.setItem("omni_remembered_pin",p1);}catch(e){}
       try{localStorage.setItem("omni_pinlen","6");}catch(e){}
       msg.textContent="✓ PIN changed! Syncing…";msg.style.color="#7fd67f";
       // Push the re-encrypted vault to cloud
@@ -2320,15 +2357,42 @@ $("dashBtn").onclick = async function(e){
 };
 
 $("ownerBtn").onclick=async()=>{
-  // Open dashboard then scroll to owner controls
+  // Open dashboard, expand My account group, then scroll to owner controls
   await $("dashBtn").onclick();
   setTimeout(()=>{
+    const g=$("dgAccount");if(g)g.open=true;
     const ob=$("ownerBox");
     if(ob){ob.scrollIntoView({behavior:"smooth",block:"start"});
       ob.style.outline="2px solid var(--accent)";ob.style.borderRadius="12px";
       setTimeout(()=>{ob.style.outline="";},2000);}
   },400);
 };
+
+/* ---------- hamburger nav menu ---------- */
+let _menuTimer=null;
+function openNavMenu(){
+  const m=$("navMenu");if(!m)return;
+  clearTimeout(_menuTimer);
+  if(m.classList.contains("open"))return;
+  m.hidden=false;
+  void m.offsetWidth; // force reflow so the slide transition runs
+  m.classList.add("open");
+}
+function closeNavMenu(){
+  const m=$("navMenu");if(!m||m.hidden)return;
+  m.classList.remove("open");
+  clearTimeout(_menuTimer);
+  _menuTimer=setTimeout(()=>{m.hidden=true;},300);
+}
+$("menuBtn").onclick=openNavMenu;
+$("navMenuClose").onclick=closeNavMenu;
+$("navMenuBackdrop").onclick=closeNavMenu;
+$("navDash").onclick=()=>{closeNavMenu();$("dashBtn").click();};
+$("navBackup").onclick=()=>{closeNavMenu();$("backupBtn").click();};
+$("navOwner").onclick=()=>{closeNavMenu();$("ownerBtn").click();};
+$("navLock").onclick=()=>{closeNavMenu();$("lockBtn").click();};
+// Escape key closes the menu
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNavMenu();});
 
 /* ---------- rich social link buttons ---------- */
 function socialButton(url){
@@ -2664,15 +2728,6 @@ async function renderRecipient(){
 renderRecipient();
 window.addEventListener("hashchange",renderRecipient);
 /* ================= encounter memory ================= */
-let homeTab="cards";
-function switchHomeTab(t){
-  homeTab=t;
-  $("tabCards").classList.toggle("on",t==="cards");
-  $("cardsView").hidden=t!=="cards";
-  
-}
-$("tabCards").onclick=()=>switchHomeTab("cards");
-
 function encDateStr(ts){return new Date(ts).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});}
 function encTimeStr(ts){return new Date(ts).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});}
 function shareIcon(t){return t==="nfc"?"📲":t==="qr"?"🔳":t==="link"?"🔗":t==="vcf"?"📇":"🤝";}
@@ -2724,36 +2779,9 @@ function renderNudgesMemories(){
 /* safety net: save if page is hidden/closed with unsaved changes */
 document.addEventListener("visibilitychange",()=>{if(document.hidden)saveAll();});
 window.addEventListener("pagehide",()=>{saveAll();});
-/* Auto-unlock with remembered PIN */
-async function tryRememberedPin(){
-  try{
-    const rp=localStorage.getItem("omni_remembered_pin");
-    if(!rp||!hasVault())return false;
-    profiles=await vaultDecrypt(rp);
-    await loadEncounters(rp);
-    sessionPin=rp;pinFailReset();
-    // keep the checkbox checked
-    const cb=$("rememberPin");if(cb)cb.checked=true;
-    unlock();return true;
-  }catch(e){
-    // remembered PIN no longer valid (vault changed) — clear it
-    try{localStorage.removeItem("omni_remembered_pin");}catch(e2){}
-    return false;
-  }
-}
 /* init */
 (function init(){
   buildDots();
-  // Try auto-unlock before showing lock screen
-  setTimeout(async()=>{
-    if($("lockScreen")&&!$("lockScreen").hidden){
-      const ok=await tryRememberedPin();
-      if(!ok){
-        // Pre-check the box if they had it enabled before
-        try{if(localStorage.getItem("omni_remembered_pin"))$("rememberPin").checked=true;}catch(e){}
-      }
-    }
-  },300);
   const welcomed=localStorage.getItem("omni_welcomed");
   const has=hasVault()||hasLegacy();
   if(!welcomed&&!has){
