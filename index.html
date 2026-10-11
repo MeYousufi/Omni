@@ -747,7 +747,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <summary><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4"/><path d="M5 12v8h14v-8"/><path d="M12 8v12"/><path d="M12 8s-4.5 0-5.5-2.5C5.7 3.7 8 3 9 4.5 10 6 12 8 12 8z"/><path d="M12 8s4.5 0 5.5-2.5C18.3 3.7 16 3 15 4.5 14 6 12 8 12 8z"/></svg></span><span>Invite friends</span></summary>
 <div class="box" id="inviteBox" hidden>
     <h3 class="sec" style="margin-top:0">Invite friends</h3>
-    <p class="muted">Share your invite link — they get <b>7 days of Pro free</b>, you earn <b><span id="inviteTokenRate">100</span> tokens</b> per friend. Tokens buy premium card designs.</p>
+    <p class="muted">Share your invite link — you'll earn <b><span id="inviteTokenRate">100</span> tokens</b> per friend plus access to 7 cards. Tokens can buy premium card designs. Your friend earns a free Pro trial.</p>
     <div class="statrow"><span>🪙 Your tokens</span><b id="bonusBal">0</b></div>
     <div style="display:flex;gap:8px;margin-top:10px">
       <input id="inviteLink" readonly style="flex:1;margin:0" aria-label="Your invite code">
@@ -1937,10 +1937,15 @@ async function saveAll(){
   _saving=true;
   try{
     try{await shrinkImgs();}catch(e){lastSaveStep="shrink";throw e;}
-    // Pre-check size: if vault JSON is huge, shrink aggressively BEFORE encrypt
+    // Pre-encrypt size loop: keep shrinking until vault is small enough for iOS crypto
     try{
-      const size=JSON.stringify(packVault()).length;
-      if(size>3500000){await shrinkImgs(true);}
+      for(let pass=0;pass<4;pass++){
+        const size=JSON.stringify(packVault()).length;
+        if(size<1500000)break;
+        // progressively more aggressive: smaller dims + lower quality each pass
+        const q=[true,2,3,4][pass]||4;
+        await shrinkImgs(q);
+      }
     }catch(e){}
     let blob=null;
     try{blob=await vaultEncryptBlob(sessionPin,packVault());}
@@ -2015,20 +2020,28 @@ async function shrinkOne(dataUrl,maxPx,quality){
   C.width=Math.round(I.width*s);C.height=Math.round(I.height*s);
   try{C.getContext("2d").drawImage(I,0,0,C.width,C.height);return C.toDataURL("image/jpeg",quality);}catch(e){return dataUrl;}
 }
-async function shrinkImgs(aggressive){
+async function shrinkImgs(level){
+  // level: 0/undefined=normal, 1=true=aggressive, 2+=ultra (progressively smaller)
+  const ultra=(typeof level==="number"&&level>=2);
+  const ultra2=(typeof level==="number"&&level>=3);
+  const ultra3=(typeof level==="number"&&level>=4);
+  const aggressive=!!level;
   for(const p of profiles){for(const k of["pic","cover"]){
-    // pic: 600px/0.9 ; cover: 1200px/0.85 normal, 800px/0.8 aggressive fallback
-    const M=k=="pic"?600:(aggressive?800:1200),Q=k=="pic"?0.9:(aggressive?0.8:0.85);
-    const L=k=="pic"?250000:600000;
+    // pic: 600px/0.9 normal → 400px/0.7 ultra → 250px/0.55 ultra3
+    // cover: 1200px/0.85 normal → 800px/0.8 aggressive → 500px/0.65 ultra → 350px/0.5 ultra3
+    let M,Q;
+    if(k==="pic"){M=ultra3?250:(ultra?400:600);Q=ultra3?0.55:(ultra?0.7:0.9);}
+    else{M=ultra3?350:(ultra2?500:(aggressive?800:1200));Q=ultra3?0.5:(ultra2?0.65:(aggressive?0.8:0.85));}
+    const L=k==="pic"?250000:600000;
     if(p[k]&&p[k].length>L){p[k]=await shrinkOne(p[k],M,Q);}
   }}
   // user profile pic + cover: preserve quality, only shrink if huge
   try{
     if(userProfile&&userProfile.pic&&userProfile.pic.length>400000){
-      userProfile.pic=await shrinkOne(userProfile.pic,800,0.9);
+      userProfile.pic=await shrinkOne(userProfile.pic,ultra3?250:(ultra?400:800),ultra3?0.55:(ultra?0.7:0.9));
     }
     if(userProfile&&userProfile.cover&&userProfile.cover.length>600000){
-      userProfile.cover=await shrinkOne(userProfile.cover,1200,0.85);
+      userProfile.cover=await shrinkOne(userProfile.cover,ultra3?350:(ultra2?500:1200),ultra3?0.5:(ultra2?0.65:0.85));
     }
   }catch(e){}
 }
