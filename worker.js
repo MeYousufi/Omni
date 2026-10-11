@@ -580,7 +580,6 @@ export default {
       }
 
       /* ============ SUBSCRIPTIONS & PAYMENTS (2026-10-11) ============ */
-      // POST /api/checkout/subscription {tier, deviceCode, syncId} -> {url}
       if (p === "/api/checkout/subscription" && req.method === "POST") {
         const {tier, deviceCode, syncId} = await req.json().catch(()=>({}));
         if (!["pro","premium"].includes(tier)) return json({error:"Invalid tier"},400);
@@ -598,7 +597,6 @@ export default {
         if (!sr.ok) return json({error:sj.error?.message||"Stripe error"},500);
         return json({url:sj.url});
       }
-      // POST /api/checkout/tokens {pack:0|1|2, syncId} -> {url}
       if (p === "/api/checkout/tokens" && req.method === "POST") {
         const {pack, syncId} = await req.json().catch(()=>({}));
         const packs=[{t:1700,e:"STRIPE_TOKENS_1700_PRICE_ID"},{t:3500,e:"STRIPE_TOKENS_3500_PRICE_ID"},{t:9000,e:"STRIPE_TOKENS_9000_PRICE_ID"}];
@@ -616,7 +614,6 @@ export default {
         if(!sr.ok) return json({error:sj.error?.message||"Stripe error"},500);
         return json({url:sj.url});
       }
-      // POST /api/stripe/webhook
       if (p === "/api/stripe/webhook" && req.method === "POST") {
         const sig=req.headers.get("stripe-signature");
         if(!sig) return json({error:"No signature"},400);
@@ -635,7 +632,6 @@ export default {
         }
         return json({received:true});
       }
-      // GET /api/subscription/status?syncId=...
       if (p === "/api/subscription/status" && req.method === "GET") {
         const syncId=url.searchParams.get("syncId");
         if(!syncId) return json({error:"Sync ID required"},400);
@@ -653,7 +649,6 @@ export default {
         if(sub.currentPeriodEnd&&Date.now()>sub.currentPeriodEnd&&sub.status==="active")sub.status="expired";
         return json({...sub,tokens});
       }
-      // POST /api/trial/start {syncId}
       if (p === "/api/trial/start" && req.method === "POST") {
         const {syncId}=await req.json().catch(()=>({}));
         if(!syncId) return json({error:"Sync ID required"},400);
@@ -663,7 +658,6 @@ export default {
         await kv.put(`trial:${syncId}`,JSON.stringify({startedAt:Date.now()}));
         return json({started:true,daysLeft:7});
       }
-      // POST /api/referral/redeem {code, syncId, deviceId}
       if (p === "/api/referral/redeem" && req.method === "POST") {
         const {code,syncId,deviceId}=await req.json().catch(()=>({}));
         if(!code||!syncId) return json({error:"Code and Sync ID required"},400);
@@ -684,6 +678,25 @@ export default {
         else{const tk=parseInt(await kv.get(`tokens:${inviter.syncId}`)||"0");
           await kv.put(`tokens:${inviter.syncId}`,String(tk+100));reward={type:"tokens",amount:100};}
         return json({success:true,reward});
+      }
+      /* ============ NATIVE IAP VERIFICATION ============ */
+      if (p === "/api/iap/verify" && req.method === "POST") {
+        const {platform, productId, receipt, transactionId, syncId, tier, tokens, restore} = await req.json().catch(()=>({}));
+        if(!productId||!syncId) return json({error:"Missing fields"},400);
+        if(transactionId){
+          const seen=await kv.get(`iap_txn:${transactionId}`);
+          if(seen&&!restore) return json({ok:true,duplicate:true});
+        }
+        // NOTE: Verify receipt with Apple/Google servers in production
+        if(tier&&["pro","premium"].includes(tier)){
+          await kv.put(`sub:${syncId}`,JSON.stringify({tier,status:"active",platform,productId,transactionId,
+            currentPeriodEnd:Date.now()+30*86400000,updatedAt:Date.now()}));
+        }else if(tokens){
+          const k=`tokens:${syncId}`,cur=parseInt(await kv.get(k)||"0");
+          await kv.put(k,String(cur+parseInt(tokens)));
+        }
+        if(transactionId) await kv.put(`iap_txn:${transactionId}`,JSON.stringify({syncId,at:Date.now()}),{expirationTtl:90*86400});
+        return json({ok:true});
       }
 
       return json({ error: "not found" }, 404);

@@ -1886,17 +1886,22 @@ function showUpgrade(title,sub){
 }
 $("upgradeClose").onclick=()=>{$("upgradeModal").hidden=true;};
 $("restorePurchases").onclick=async()=>{
-  // In native app: triggers StoreKit/Play Billing restore. In web: checks cloud for prior purchase.
+  // Native: StoreKit/Play Billing restore. Web: check cloud for prior purchase.
   try{
-    if(window.Capacitor&&window.Capacitor.isNativePlatform()){
+    if(window.OMNI_NATIVE&&window.omniRestorePurchases){
       toast("Checking App Store for purchases…");
-      // Native IAP restore will be wired via Capacitor plugin
+      const r=await window.omniRestorePurchases();
+      if(r.ok&&r.restored.length){
+        toast(`Restored ${r.restored.length} purchase(s) ✓`);
+        await syncSubscriptionStatus();
+      }else if(r.ok){toast("No prior purchases found");}
+      else{toast("Restore failed: "+(r.error||"try again"));}
       return;
     }
     // Web fallback: check if cloud has a plan grant
     toast("Checking for prior purchases…");
-    await new Promise(r=>setTimeout(r,1500));
-    toast("No prior purchases found");
+    await syncSubscriptionStatus();
+    toast(userPlan.tier!=="free"?`Plan restored: ${PLAN_DEFS[userPlan.tier].name} ✓`:"No prior purchases found");
   }catch(e){toast("Restore failed — try again");}
 };
 $("planUpgradeBtn").onclick=()=>showUpgrade("Plans","Unlimited sharing on every plan.");
@@ -1924,6 +1929,24 @@ function renderPlanBox(){
 /* Stripe subscriptions — worker endpoint pending; falls back gracefully */
 async function subscribePlan(tier){
   const btn=event&&event.target;
+  // Native IAP (App Store / Play Store)
+  if(window.OMNI_NATIVE&&window.omniPurchaseSubscription){
+    try{
+      if(btn){btn.disabled=true;btn.textContent="Opening App Store…";}
+      if(window.omniHaptic)await window.omniHaptic('MEDIUM');
+      const r=await window.omniPurchaseSubscription(tier);
+      if(r.ok){
+        userPlan.tier=tier;userPlan.trialEndsAt=0;
+        await saveAll();renderPlanBox();
+        if(window.omniNotify)await window.omniNotify();
+        toast(`Welcome to ${PLAN_DEFS[tier].name}! ✓`);
+        await syncSubscriptionStatus();
+      }else{toast("Purchase failed: "+(r.error||"cancelled"));}
+    }catch(e){toast("Purchase unavailable right now");}
+    finally{if(btn){btn.disabled=false;btn.textContent="Choose "+PLAN_DEFS[tier].name+" — $"+PLAN_DEFS[tier].price+"/mo";}}
+    return;
+  }
+  // Web fallback (Stripe)
   try{
     if(btn){btn.disabled=true;btn.textContent="Opening checkout…";}
     const r=await fetch(STATS_URL+"/api/checkout/subscription",{method:"POST",headers:{"Content-Type":"application/json"},
@@ -2000,6 +2023,20 @@ function applyTemplate(id){
 }
 async function buyTokens(i){
   const pack=TOKEN_PACKS[i];if(!pack)return;
+  // Native IAP (App Store / Play Store)
+  if(window.OMNI_NATIVE&&window.omniPurchaseTokens){
+    try{
+      if(window.omniHaptic)await window.omniHaptic('MEDIUM');
+      const r=await window.omniPurchaseTokens(i);
+      if(r.ok){
+        if(window.omniNotify)await window.omniNotify();
+        toast(`+${r.tokens} tokens added! ✓`);
+        await syncSubscriptionStatus();
+      }else{toast("Purchase failed: "+(r.error||"cancelled"));}
+    }catch(e){toast("Purchase unavailable right now");}
+    return;
+  }
+  // Web fallback (Stripe)
   toast("Token purchases aren't live yet — coming soon");
 }
 // Vault format v2: {v:2, profiles:[...], userProfile:{...}}
