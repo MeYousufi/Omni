@@ -611,9 +611,16 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
         </div>
         <button class="small gray" id="chPwBtn" style="width:100%;margin-top:8px">Change password</button>
       </div>
-      <div class="togglerow"><span>Share limits<br><span class="muted" style="font-size:12px">20 tracked shares / week</span></span><label class="switch"><input type="checkbox" id="tgLimits" aria-label="Toggle share limits"><span class="sl"></span></label></div>
-      <div class="togglerow"><span>💌 Invite system<br><span class="muted" style="font-size:12px">100 bonus shares per invite</span></span><label class="switch"><input type="checkbox" id="tgInvites" aria-label="Toggle invite system"><span class="sl"></span></label></div>
-      <div class="togglerow"><span>💳 Buy shares<br><span class="muted" style="font-size:12px">$3.99 per 100 shares</span></span><label class="switch"><input type="checkbox" id="tgBuy" aria-label="Toggle buy shares"><span class="sl"></span></label></div>
+      <h3 class="sec">Plans & pricing</h3>
+      <p class="muted" style="font-size:12px">Adjust live — changes apply app-wide on next open.</p>
+      <div class="togglerow"><span>Pro price ($/mo)</span><input id="setProPrice" type="number" min="0.99" max="999" step="0.01" style="width:90px" aria-label="Pro monthly price"></div>
+      <div class="togglerow"><span>Premium price ($/mo)</span><input id="setPremPrice" type="number" min="0.99" max="999" step="0.01" style="width:90px" aria-label="Premium monthly price"></div>
+      <div class="togglerow"><span>Tokens per invite</span><input id="setTokensPerInvite" type="number" min="1" max="10000" style="width:90px" aria-label="Tokens earned per invite"></div>
+      <div class="togglerow"><span>Aurora template (🪙)</span><input id="setTplAurora" type="number" min="1" max="100000" style="width:90px" aria-label="Aurora template token price"></div>
+      <div class="togglerow"><span>Obsidian Gold (🪙)</span><input id="setTplObsidian" type="number" min="1" max="100000" style="width:90px" aria-label="Obsidian template token price"></div>
+      <div class="togglerow"><span>Royale template (🪙)</span><input id="setTplRoyale" type="number" min="1" max="100000" style="width:90px" aria-label="Royale template token price"></div>
+      <button class="small" id="savePricingBtn" style="width:100%;margin:4px 0 12px">Save pricing</button>
+      <p class="muted" id="pricingMsg" style="font-size:12px"></p>
       <h3 class="sec">Test plans</h3>
       <p class="muted" style="font-size:12px">Grant a plan on this device (testing only, no charge).</p>
       <div style="display:flex;gap:8px">
@@ -712,7 +719,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <summary><span>Sharing</span></summary>
 <div class="box" id="inviteBox" hidden>
     <h3 class="sec" style="margin-top:0">Invite friends</h3>
-    <p class="muted">Share your invite link — they get <b>7 days of Pro free</b>, you earn <b>100 tokens</b> per friend. Tokens buy premium card designs.</p>
+    <p class="muted">Share your invite link — they get <b>7 days of Pro free</b>, you earn <b><span id="inviteTokenRate">100</span> tokens</b> per friend. Tokens buy premium card designs.</p>
     <div class="statrow"><span>🪙 Your tokens</span><b id="bonusBal">0</b></div>
     <div style="display:flex;gap:8px;margin-top:10px">
       <input id="inviteLink" readonly style="flex:1;margin:0" aria-label="Your invite link">
@@ -1281,26 +1288,25 @@ async function handleInviteParam(){
   try{claimed=localStorage.getItem("omni_invite_claimed");self=localStorage.getItem("omni_invite_code");}catch(e){}
   if(claimed)return;
   if(self&&code===self)return;
-  if(!FLAGS.invites)return;
   await claimInvite(code);
 }
 async function collectPendingInvites(){
-  if(!FLAGS.invites)return;
   try{
     const r=await fetch(STATS_URL+"/api/invite/pending?code="+encodeURIComponent(myInviteCode()),{cache:"no-store"});
     if(!r.ok)return;
     const j=await r.json();
     if(j&&j.pending>0){
-      // Inviter rewards: first successful share bumps free cards 3→7, after that 100 tokens each
+      // Inviter rewards: first successful share bumps free cards 3→7, after that tokens each
+      const tpi=tokensPerInvite();
       let msg="";
       if(!userPlan.sharedOnce){
         userPlan.sharedOnce=true;
         msg="🎉 Your cards bumped to 7 — a friend joined!";
         const extra=Math.max(0,j.pending-1);
-        if(extra>0){userPlan.tokens=(userPlan.tokens||0)+extra*100;msg+=` +${extra*100} tokens`;}
+        if(extra>0){userPlan.tokens=(userPlan.tokens||0)+extra*tpi;msg+=` +${extra*tpi} tokens`;}
       }else{
-        userPlan.tokens=(userPlan.tokens||0)+j.pending*100;
-        msg=`🎉 +${j.pending*100} tokens — a friend joined!`;
+        userPlan.tokens=(userPlan.tokens||0)+j.pending*tpi;
+        msg=`🎉 +${j.pending*tpi} tokens — a friend joined!`;
       }
       await saveAll();
       toast(msg);
@@ -1349,16 +1355,15 @@ async function handlePurchaseReturn(){
 
 /* ---------- owner controls ---------- */
 function renderCreditBoxes(){
-  const inv=!!FLAGS.invites;
-  try{$("inviteBox").hidden=!inv;}catch(e){}
+  // Invite system is core to the token/trial model — always visible
+  try{$("inviteBox").hidden=false;}catch(e){}
   const bb=$("buyBox");if(bb)bb.hidden=true;
-  if(inv){
-    try{
-      $("inviteLink").value=inviteLink();
-      $("bonusBal").textContent=(userPlan.tokens||0)+" 🪙";
-      $("inviteBonusAmt").textContent="100";
-    }catch(e){}
-  }
+  try{
+    $("inviteLink").value=inviteLink();
+    $("bonusBal").textContent=(userPlan.tokens||0)+" 🪙";
+    const ib=$("inviteBonusAmt");if(ib)ib.textContent=tokensPerInvite();
+    const itr=$("inviteTokenRate");if(itr)itr.textContent=tokensPerInvite();
+  }catch(e){}
   let unlocked=false;
   try{unlocked=localStorage.getItem("omni_owner_unlocked")==="1"&&!!OWNER_TOKEN;}catch(e){}
   // Token lives in sessionStorage; require re-login each browser session for security
@@ -1366,26 +1371,56 @@ function renderCreditBoxes(){
   $("ownerLocked").hidden=unlocked;
   $("ownerOpen").hidden=!unlocked;
   if(unlocked){
-    $("tgLimits").checked=!!FLAGS.shareLimits;
-    $("tgInvites").checked=inv;
-    $("tgBuy").checked=buy;
-    fillNumbers();
+    fillPricing();
     try{$("tgLockPhoto").checked=lockPhotoEnabled();}catch(e){}
   }
 }
+function fillPricing(){
+  const set=(id,val)=>{try{const el=$(id);if(el)el.value=val;}catch(e){}};
+  set("setProPrice",proPrice());
+  set("setPremPrice",premiumPrice());
+  set("setTokensPerInvite",tokensPerInvite());
+  set("setTplAurora",templateCost("aurora"));
+  set("setTplObsidian",templateCost("obsidian"));
+  set("setTplRoyale",templateCost("royale"));
+}
+$("savePricingBtn").onclick=async()=>{
+  const msg=$("pricingMsg");
+  const num=(id,def)=>{const v=parseFloat(($(id)||{}).value);return Number.isFinite(v)&&v>0?v:def;};
+  const vals={
+    proPrice:num("setProPrice",4.99),
+    premiumPrice:num("setPremPrice",9.99),
+    tokensPerInvite:Math.round(num("setTokensPerInvite",100)),
+    tpl_aurora:Math.round(num("setTplAurora",700)),
+    tpl_obsidian:Math.round(num("setTplObsidian",1500)),
+    tpl_royale:Math.round(num("setTplRoyale",3000))
+  };
+  msg.textContent="Saving…";
+  const res=await setFlags(vals);
+  if(res.ok){
+    msg.textContent="Pricing updated — applies app-wide.";
+    fillPricing();renderCreditBoxes();renderTokenShop();renderPlanBox();
+  }else{
+    msg.textContent="Couldn't save: "+(res.error||"network error");
+  }
+};
 async function setFlag(name,on,el){
+  const res=await setFlags({[name]:!!on});
+  if(!res.ok&&el)el.checked=!!FLAGS[name];
+  if(!res.ok)toast("Couldn't save — check connection");
+}
+async function setFlags(vals){
   try{
-    const r=await fetch(STATS_URL+"/api/flags",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({owner_token:OWNER_TOKEN,flags:{[name]:!!on}})});
+    const r=await fetch(STATS_URL+"/api/flags",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({owner_token:OWNER_TOKEN,flags:vals})});
     const j=await r.json();
     if(j&&j.ok){
       FLAGS=Object.assign({},FLAGS,j.flags);
       try{localStorage.setItem("omni_flags",JSON.stringify({f:FLAGS,at:Date.now()}));}catch(e){}
-      updateCreditUI();renderCreditBoxes();toast("Saved ✓");
-    }else{
-      if(el)el.checked=!!FLAGS[name];
-      toast("Couldn't save — check connection");
+      updateCreditUI();renderCreditBoxes();
+      return{ok:true};
     }
-  }catch(e){if(el)el.checked=!!FLAGS[name];toast("Couldn't reach server");}
+    return{ok:false,error:"server rejected"};
+  }catch(e){return{ok:false,error:"network error"};}
 }
 // Change owner password
 document.addEventListener("DOMContentLoaded",()=>{
@@ -1419,9 +1454,7 @@ $("ownerUnlockBtn").onclick=async()=>{await ownerAuth();};
 $("grantFreeBtn").onclick=()=>ownerGrantPlan("free");
 $("grantProBtn").onclick=()=>ownerGrantPlan("pro");
 $("grantPremBtn").onclick=()=>ownerGrantPlan("premium");
-$("tgLimits").onchange=e=>setFlag("shareLimits",e.target.checked,e.target);
-$("tgInvites").onchange=e=>setFlag("invites",e.target.checked,e.target);
-$("tgBuy").onchange=e=>setFlag("buyShares",e.target.checked,e.target);
+/* owner flag toggles (legacy share toggles removed; pricing managed above) */
 const _snb=$("saveNumbersBtn");if(_snb)_snb.onclick=()=>{toast("Removed — plans replace share numbers");};
 $("tgLockPhoto").onchange=e=>{
   try{
@@ -1625,6 +1658,19 @@ const PLAN_DEFS={
   pro:{name:"Pro",price:4.99},
   premium:{name:"Premium",price:9.99}
 };
+/* owner-adjustable pricing (worker flags, with local defaults) */
+function flagNum(k,def){
+  const v=FLAGS[k];
+  const n=typeof v==="number"?v:parseFloat(v);
+  return Number.isFinite(n)&&n>0?n:def;
+}
+function proPrice(){return flagNum("proPrice",4.99);}
+function premiumPrice(){return flagNum("premiumPrice",9.99);}
+function tokensPerInvite(){return Math.round(flagNum("tokensPerInvite",100));}
+function templateCost(id){
+  const defaults={aurora:700,obsidian:1500,royale:3000};
+  return Math.round(flagNum("tpl_"+id,defaults[id]||1000));
+}
 let userPlan={tier:"free",trialEndsAt:0,tokens:0,sharedOnce:false,templates:[]};
 function effectiveTier(){
   if(userPlan.tier==="premium")return "premium";
@@ -1658,17 +1704,18 @@ function checkTrialExpired(){
 /* ---------- plans UI ---------- */
 function planCardHTML(tier){
   const d=PLAN_DEFS[tier], cur=effectiveTier()===tier;
+  const price=tier==="pro"?proPrice():tier==="premium"?premiumPrice():0;
   const feats=tier==="free"
     ? ["Unlimited shares","3 cards (7 after first invite)","Profile picture + logo"]
     : tier==="pro"
     ? ["Unlimited shares","12 cards","Everything allowed","All premium templates","Email signature"]
     : ["Unlimited shares","Unlimited cards","Advanced analytics","Custom branding","Priority support"];
   return `<div style="border:1px solid ${cur?"#0a84ff":"var(--line)"};border-radius:14px;padding:14px;background:${cur?"#0a84ff18":"transparent"}">
-    <div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:17px">${d.name}</b><b style="font-size:17px">${d.price?"$"+d.price+"/mo":"Free"}</b></div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:17px">${d.name}</b><b style="font-size:17px">${price?"$"+price+"/mo":"Free"}</b></div>
     <div style="font-size:13px;color:var(--muted);margin:8px 0">${feats.map(f=>"✓ "+f).join("<br>")}</div>
     ${cur?`<div style="color:#0a84ff;font-weight:700">Current plan</div>`
       : tier==="free"?`<div class="muted" style="font-size:12px">Included</div>`
-      : `<button class="small" style="width:100%" onclick="subscribePlan('${tier}')">Choose ${d.name} — $${d.price}/mo</button>`}
+      : `<button class="small" style="width:100%" onclick="subscribePlan('${tier}')">Choose ${d.name} — $${price}/mo</button>`}
   </div>`;
 }
 function showUpgrade(title,sub){
@@ -1726,10 +1773,11 @@ async function ownerGrantPlan(tier){
 }
 /* ---------- premium templates + token shop ---------- */
 const PREMIUM_TEMPLATES=[
-  {id:"aurora",name:"Aurora",cost:700,desc:"Shifting gradient glow",color:"#8b5cf6",coverColor:"#1e1b4b"},
-  {id:"obsidian",name:"Obsidian Gold",cost:1500,desc:"Black + gold luxury",color:"#d4af37",coverColor:"#0a0a0a"},
-  {id:"royale",name:"Royale",cost:3000,desc:"Signature flagship design",color:"#0a84ff",coverColor:"#0d1b2a"}
+  {id:"aurora",name:"Aurora",desc:"Shifting gradient glow",color:"#8b5cf6",coverColor:"#1e1b4b"},
+  {id:"obsidian",name:"Obsidian Gold",desc:"Black + gold luxury",color:"#d4af37",coverColor:"#0a0a0a"},
+  {id:"royale",name:"Royale",desc:"Signature flagship design",color:"#0a84ff",coverColor:"#0d1b2a"}
 ];
+function templateDef(id){const t=PREMIUM_TEMPLATES.find(x=>x.id===id);if(t)t.cost=templateCost(id);return t;}
 const TOKEN_PACKS=[
   {tokens:1700,price:1.99},
   {tokens:3500,price:3.99},
@@ -1740,7 +1788,8 @@ function renderTokenShop(){
   try{
     const tb=tokenBalance();
     $("shopTokens").textContent=tb===Infinity?"∞":tb;
-    $("shopList").innerHTML=PREMIUM_TEMPLATES.map(t=>{
+    $("shopList").innerHTML=PREMIUM_TEMPLATES.map(t0=>{
+      const t=templateDef(t0.id);
       const owned=ownedTemplates().includes(t.id)||tb===Infinity;
       return `<div style="border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0">
         <div style="display:flex;justify-content:space-between;align-items:baseline"><b>${t.name}</b><b>🪙 ${t.cost}</b></div>
@@ -1755,7 +1804,7 @@ function renderTokenShop(){
   }catch(e){}
 }
 async function buyTemplate(id){
-  const t=PREMIUM_TEMPLATES.find(x=>x.id===id);if(!t)return;
+  const t=templateDef(id);if(!t)return;
   const tb=tokenBalance();
   if(tb!==Infinity&&(userPlan.tokens||0)<t.cost){
     showUpgrade("Not enough tokens",`"${t.name}" costs 🪙 ${t.cost}. Earn tokens by inviting friends, or get unlimited tokens with Pro.`);
@@ -1771,7 +1820,7 @@ async function buyTemplate(id){
   toast(`"${t.name}" applied ✓`);
 }
 function applyTemplate(id){
-  const t=PREMIUM_TEMPLATES.find(x=>x.id===id);if(!t)return;
+  const t=templateDef(id);if(!t)return;
   const p=getP();
   if(!p){toast("Select a card first");return;}
   p.color=t.color;p.coverColor=t.coverColor;p.templateId=id;
@@ -2055,6 +2104,12 @@ function renderProfileCover(){
 $("profileCoverBtn").onclick=()=>$("profileCoverInput").click();
 $("profileCoverInput").onchange=e=>{
   const f=e.target.files[0];if(!f)return;
+  // instant preview while processing
+  try{
+    const previewUrl=URL.createObjectURL(f);
+    const el=$("profileCoverShow");
+    if(el)el.innerHTML=`<img src="${previewUrl}" style="object-position:50% 50%" alt="">`;
+  }catch(err){}
   const r=new FileReader();
   r.onload=()=>{
     const img=new Image();
@@ -2067,6 +2122,10 @@ $("profileCoverInput").onchange=e=>{
       userProfile.coverPos="50% 50%";
       await saveAll();
       renderProfileCover();
+      try{
+        const el2=$("profileCoverShow").querySelector("img");
+        if(el2){el2.onload=()=>renderProfileCover();}
+      }catch(err2){}
       toast("Cover photo saved");
     };
     img.src=r.result;
@@ -2137,6 +2196,11 @@ $("coverInput").onchange=e=>{
 $("coverClear").onclick=()=>{const p=getP();if(!p)return;p.cover="";p.coverColor="";renderCover();renderFlip();};
 $("picInput").onchange=e=>{
   const f=e.target.files[0];if(!f)return;
+  // instant preview while processing
+  try{
+    const previewUrl=URL.createObjectURL(f);
+    $("picShow").innerHTML=`<img src="${previewUrl}" style="object-position:50% 50%" alt="">`;
+  }catch(err){}
   const r=new FileReader();
   r.onload=()=>{
     const img=new Image();
@@ -2148,6 +2212,11 @@ $("picInput").onchange=e=>{
       userProfile.pic=c.toDataURL("image/jpeg",0.92);
       await saveAll();
       renderPic();
+      // belt-and-suspenders: re-render once the img element confirms load (iOS timing)
+      try{
+        const el=$("picShow").querySelector("img");
+        if(el){el.onload=()=>renderPic();}
+      }catch(err2){}
       try{cacheLockBg();}catch(err){}
       toast("Profile picture saved");
     };
