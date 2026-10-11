@@ -484,7 +484,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <div class="backrow"><button class="iconbtn" id="backBtn" aria-label="Back to cards">← Back</button></div>
   <div class="brand"><h1 id="detailTitle">Card</h1></div>
 
-  <details class="dashgroup" id="dgPreview" open>
+  <details class="dashgroup" id="dgPreview">
     <summary><span>Card preview</span></summary>
   <!-- Showcase flip card -->
   <div class="flipwrap" id="flipCard" role="button" tabindex="0" aria-label="Contact card. Activate to flip.">
@@ -518,7 +518,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <button class="chg" id="coverClear" hidden>Remove cover</button>
   </div>
   </details>
-  <details class="dashgroup" id="dgInfo" open>
+  <details class="dashgroup" id="dgInfo">
     <summary><span>Contact info</span></summary>
   <div class="box">
     <input id="f_label" placeholder="Card name, e.g. Studio">
@@ -709,7 +709,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <div class="backrow"><button class="iconbtn" id="dashBack">← Back</button></div>
   <div class="brand"><h1>Dashboard</h1></div>
   <div class="muted" style="letter-spacing:.08em;font-size:11px">HOW YOUR APP IS DOING</div>
-    <details class="dashgroup" id="dgAccount" open>
+    <details class="dashgroup" id="dgAccount">
     <summary><span>My account</span></summary>
 <div class="box" id="planBox">
     <h3 class="sec" style="margin-top:0">Your plan</h3>
@@ -767,6 +767,45 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <h3 class="sec" style="margin-top:0">Get tokens</h3>
     <p class="muted">Earn 🪙 100 per friend who joins, or buy a pack.</p>
     <div id="packList"></div>
+  </div>
+  </details>
+  <details class="dashgroup" id="dgData">
+    <summary><span>🔒 Data controls</span></summary>
+<div class="box">
+    <h3 class="sec" style="margin-top:0">Your data</h3>
+    <div class="statrow"><span>Cloud Sync</span><b id="dataSyncStatus">—</b></div>
+    <div class="statrow"><span>Local backup</span><b id="dataLocalStatus">—</b></div>
+    <button class="small" id="dataExportBtn" style="width:100%;margin-top:8px">Export my data</button>
+    <p class="muted" style="font-size:12px;margin-top:6px">Downloads an encrypted backup file. Only your PIN can open it.</p>
+  </div>
+  </details>
+  <details class="dashgroup" id="dgReport">
+    <summary><span>⚠️ Report an issue</span></summary>
+<div class="box">
+    <h3 class="sec" style="margin-top:0">What's wrong?</h3>
+    <textarea id="issueText" placeholder="Describe the issue…" style="width:100%;min-height:90px;margin:4px 0" aria-label="Issue description"></textarea>
+    <button class="small" id="issueSendBtn" style="width:100%">Send report</button>
+    <p class="muted" style="font-size:12px;margin-top:6px">App version and device info are attached automatically.</p>
+  </div>
+  </details>
+  <details class="dashgroup" id="dgHelp">
+    <summary><span>❓ Help & support</span></summary>
+<div class="box">
+    <h3 class="sec" style="margin-top:0">FAQ</h3>
+    <details style="margin:8px 0"><summary style="font-size:14px">How do I share my card?</summary><p class="muted" style="font-size:13px">Tap "Share my card" on the home screen, or open a card and use the Share button. The other person gets your contact details instantly.</p></details>
+    <details style="margin:8px 0"><summary style="font-size:14px">How do invites work?</summary><p class="muted" style="font-size:13px">Share your invite code from Dashboard → Sharing. Your friend gets 7 days of Pro free, and you earn 100 tokens per friend.</p></details>
+    <details style="margin:8px 0"><summary style="font-size:14px">What are tokens for?</summary><p class="muted" style="font-size:13px">Tokens unlock premium card designs (Aurora, Obsidian Gold, Royale) under Dashboard → Sharing → Premium designs.</p></details>
+    <details style="margin:8px 0"><summary style="font-size:14px">Is my data private?</summary><p class="muted" style="font-size:13px">Yes. Everything is encrypted on your phone with your PIN before it's stored or synced. We can't read your data.</p></details>
+    <div class="statrow" style="margin-top:8px"><span>App version</span><b id="helpAppVer">1.0</b></div>
+  </div>
+  </details>
+  <details class="dashgroup" id="dgLegal">
+    <summary><span>🛡️ Legal info</span></summary>
+<div class="box">
+    <h3 class="sec" style="margin-top:0">Privacy Policy</h3>
+    <p class="muted" style="font-size:13px">OMNI encrypts all your data on your device with your PIN before storage or sync. We never see, sell, or share your personal information. Analytics are anonymous and aggregate only. You can export or delete your data at any time from Data controls.</p>
+    <h3 class="sec" style="margin-top:12px">Terms of Service</h3>
+    <p class="muted" style="font-size:13px">OMNI is provided as-is. You're responsible for keeping your PIN safe — if you forget it and have no backup, your data can't be recovered. Subscriptions are billed via Apple/Google. Tokens have no cash value. We may update these terms; continued use means you accept them.</p>
   </div>
   </details>
 </div>
@@ -1521,8 +1560,33 @@ $("dashBtn").onclick=async()=>{
   renderCreditBoxes();
   renderPlanBox();
   renderTokenShop();
+  // Data controls status
+  try{
+    $("dataSyncStatus").textContent=syncEnabled()?"On ✓":"Off";
+    $("dataLocalStatus").textContent=localStorage.getItem("omni_vault")?"Saved ✓":"—";
+  }catch(e){}
 };
 $("dashBack").onclick=()=>{$("dashScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
+/* ---------- data controls / report / help ---------- */
+$("dataExportBtn").onclick=async()=>{
+  try{
+    const blob=await vaultEncryptBlob(sessionPin,packVault());
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([blob],{type:"text/plain"}));
+    a.download="omni-backup.txt";a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+    toast("Backup exported ✓");
+  }catch(e){toast("Export failed — try again");}
+};
+$("issueSendBtn").onclick=()=>{
+  const txt=$("issueText").value.trim();
+  if(!txt){toast("Describe the issue first");return;}
+  const ver=$("helpAppVer").textContent||"1.0";
+  const body=encodeURIComponent(txt+"\n\n---\nApp v"+ver+" | "+navigator.userAgent);
+  location.href="mailto:hello@omni-tap.com?subject="+encodeURIComponent("OMNI Issue Report")+"&body="+body;
+  $("issueText").value="";
+  toast("Opening email…");
+};
 
 /* backup prompt after onboarding */
 $("bpNow").onclick=async()=>{
@@ -1854,10 +1918,25 @@ async function saveAll(){
       try{if(syncEnabled()){vaultUpload(true).catch(()=>{});}}catch(e){}
       return true;
     }
-    // Phone storage failed — cloud is the fallback
-    if(!syncEnabled())return false;
-    try{if(await vaultUploadBlob(blob))return true;}catch(e){}
-    return await cloudHasVault();
+    // Phone storage failed — cloud is the fallback (auto-setup sync if needed)
+    let sid=syncId();
+    if(!sid){
+      try{sid=genSyncId();localStorage.setItem(SYNC_ID_KEY,sid);}catch(e){/* storage broken, use in-memory */}
+      if(!sid)sid=genSyncId();
+    }
+    try{
+      const r=await fetch(STATS_URL+"/api/vault/save",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({sync_id:sid,blob,updated_at:Date.now()})
+      });
+      const j=await r.json();
+      if(j.ok){
+        try{localStorage.setItem(SYNC_LAST_KEY,String(Date.now()));}catch(e){}
+        try{localStorage.setItem(SYNC_ID_KEY,sid);}catch(e){}
+        return true;
+      }
+    }catch(e){}
+    return false;
   }
   catch(e){return false;}
   finally{_saving=false;}
