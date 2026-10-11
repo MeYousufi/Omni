@@ -1839,6 +1839,8 @@ async function saveAll(){
       }else throw e;
     }
     await saveEncounters();
+    // Auto-sync to Cloudflare in background (silent, best-effort)
+    try{if(syncEnabled()){vaultUpload(true).catch(()=>{});}}catch(e){}
     return true;
   }
   catch(e){return false;}
