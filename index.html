@@ -1573,8 +1573,11 @@ $("reposDone").onclick=async()=>{
   }
   $("reposOverlay").hidden=true;renderPic();renderFlip();renderCover();
   toast("Saved ✓");
-  // back to main menu
-  $("profileScreen").hidden=true;$("homeScreen").hidden=false;renderCards();window.scrollTo(0,0);
+  if(reposMode==="cover"){
+    // card cover: back to main menu
+    $("profileScreen").hidden=true;$("homeScreen").hidden=false;renderCards();window.scrollTo(0,0);
+  }
+  // profile pic/cover: stay on Profile tab (already there)
 };
 $("reposCancel").onclick=()=>{$("reposOverlay").hidden=true;};
 
