@@ -1668,11 +1668,11 @@ $("reposCircle").addEventListener("pointercancel",()=>{reposDrag=null;});
 $("reposDone").onclick=async()=>{
   const pos=$("reposImg").style.objectPosition;
   if(reposMode==="cover"){
-    const p=getP();if(p){p.coverPos=pos;await saveAll();}
+    const p=getP();if(p){p.coverPos="50% 50%";if(p.cover){try{p.cover=await cropVisible(p.cover,pos,900,300);}catch(e){}}await saveAll();}
   }else if(reposMode==="profileCover"){
-    userProfile.coverPos=pos;await saveAll();
+    userProfile.coverPos="50% 50%";if(userProfile.cover){try{userProfile.cover=await cropVisible(userProfile.cover,pos,900,300);}catch(e){}}await saveAll();
   }else{
-    userProfile.picPos=pos;await saveAll();
+    userProfile.picPos="50% 50%";if(userProfile.pic){try{userProfile.pic=await cropVisible(userProfile.pic,pos,400,400);}catch(e){}}await saveAll();
   }
   $("reposOverlay").hidden=true;renderPic();renderFlip();renderCover();
   toast("Saved ✓");
@@ -2019,6 +2019,27 @@ async function shrinkOne(dataUrl,maxPx,quality){
   const s=maxPx/Math.max(I.width,I.height),C=document.createElement("canvas");
   C.width=Math.round(I.width*s);C.height=Math.round(I.height*s);
   try{C.getContext("2d").drawImage(I,0,0,C.width,C.height);return C.toDataURL("image/jpeg",quality);}catch(e){return dataUrl;}
+}
+/* Crop to visible portion (Naweed's fix): keep only what object-position shows */
+async function cropVisible(dataUrl,posStr,targetW,targetH){
+  const I=new Image();
+  await new Promise(r=>{I.onload=r;I.onerror=r;I.src=dataUrl;});
+  if(!I.width)return dataUrl;
+  try{
+    const parts=(posStr||"50% 50%").split(" ");
+    const px=parseFloat(parts[0])||50, py=parseFloat(parts[1])||50;
+    // scale to cover target
+    const scale=Math.max(targetW/I.width,targetH/I.height);
+    const SW=I.width*scale, SH=I.height*scale;
+    // offset in scaled coords
+    const ox=(SW-targetW)*(px/100), oy=(SH-targetH)*(py/100);
+    // map back to original coords
+    const sx=ox/scale, sy=oy/scale, sw=targetW/scale, sh=targetH/scale;
+    const C=document.createElement("canvas");
+    C.width=targetW;C.height=targetH;
+    C.getContext("2d").drawImage(I,sx,sy,sw,sh,0,0,targetW,targetH);
+    return C.toDataURL("image/jpeg",0.85);
+  }catch(e){return dataUrl;}
 }
 async function shrinkImgs(level){
   // level: 0/undefined=normal, 1=true=aggressive, 2+=ultra (progressively smaller)
