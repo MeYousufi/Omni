@@ -404,16 +404,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 </div>
 
 <!-- TRACKED SHARES USED-UP MODAL -->
-<div id="limitModal" class="modal" hidden role="dialog" aria-label="Tracked shares used up">
-  <div class="box">
-    <h3 class="sec" style="margin-top:0">Tracked shares used up</h3>
-    <p class="muted">You've used your 20 tracked shares this week (resets Friday). QR and .vcf sharing still work unlimited — or get more tracked shares:</p>
-    <div id="limitInviteWrap"><button id="limitInviteBtn" style="width:100%">💌 Invite a friend — earn 100 tracked shares</button></div>
-    <div id="limitBuyWrap"><button id="limitBuyBtn" style="width:100%;margin-top:8px">💳 Buy 100 tracked shares — $3.99</button></div>
-    <button id="limitClose" class="gray" style="width:100%;margin-top:8px">Not now</button>
-  </div>
-</div>
-
 <!-- NAV MENU (hamburger) -->
 <div id="navMenu" class="navmenu" hidden role="dialog" aria-label="App menu" aria-modal="true">
   <div class="navmenu-backdrop" id="navMenuBackdrop"></div>
@@ -442,6 +432,14 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <button id="presentCopyLink" class="gray" style="width:100%;margin-top:8px">Copy link</button>
     <button id="presentNfc" class="gray" style="width:100%;margin-top:8px" hidden>Write to NFC tag</button>
     <button id="presentClose" class="gray" style="width:100%;margin-top:8px">Close</button>
+  </div>
+</div>
+<div id="upgradeModal" class="modal" hidden role="dialog" aria-label="Upgrade your plan">
+  <div class="box">
+    <h3 class="sec" style="margin-top:0" id="upgradeTitle">Upgrade</h3>
+    <p class="muted" id="upgradeSub" style="font-size:13px"></p>
+    <div id="planCards2" style="display:flex;flex-direction:column;gap:10px;margin:12px 0"></div>
+    <button id="upgradeClose" class="gray" style="width:100%">Not now</button>
   </div>
 </div>
 
@@ -616,13 +614,13 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <div class="togglerow"><span>Share limits<br><span class="muted" style="font-size:12px">20 tracked shares / week</span></span><label class="switch"><input type="checkbox" id="tgLimits" aria-label="Toggle share limits"><span class="sl"></span></label></div>
       <div class="togglerow"><span>💌 Invite system<br><span class="muted" style="font-size:12px">100 bonus shares per invite</span></span><label class="switch"><input type="checkbox" id="tgInvites" aria-label="Toggle invite system"><span class="sl"></span></label></div>
       <div class="togglerow"><span>💳 Buy shares<br><span class="muted" style="font-size:12px">$3.99 per 100 shares</span></span><label class="switch"><input type="checkbox" id="tgBuy" aria-label="Toggle buy shares"><span class="sl"></span></label></div>
-      <h3 class="sec">Numbers</h3>
-      <div class="togglerow"><span>Free tracked shares / week</span><input id="numWeeklyFree" type="number" min="1" max="10000" style="width:90px" aria-label="Free tracked shares per week"></div>
-      <div class="togglerow"><span>Invite bonus shares</span><input id="numInviteBonus" type="number" min="1" max="10000" style="width:90px" aria-label="Invite bonus shares"></div>
-      <div class="togglerow"><span>Share pack size</span><input id="numSharePack" type="number" min="1" max="10000" style="width:90px" aria-label="Share pack size"></div>
-      <div class="togglerow"><span>Share pack price ($)</span><input id="numSharePrice" type="number" min="0.01" max="1000" step="0.01" style="width:90px" aria-label="Share pack price"></div>
-      <button class="small" id="saveNumbersBtn" style="width:100%;margin:4px 0 12px">Save numbers</button>
-      <p class="muted" id="numbersMsg" style="font-size:12px"></p>
+      <h3 class="sec">Test plans</h3>
+      <p class="muted" style="font-size:12px">Grant a plan on this device (testing only, no charge).</p>
+      <div style="display:flex;gap:8px">
+        <button class="small gray" id="grantFreeBtn" style="flex:1">Free</button>
+        <button class="small" id="grantProBtn" style="flex:1">Pro</button>
+        <button class="small" id="grantPremBtn" style="flex:1">Premium</button>
+      </div>
       <div class="togglerow"><span>Lock screen photo<br><span class="muted" style="font-size:12px">Profile photo behind the PIN pad</span></span><label class="switch"><input type="checkbox" id="tgLockPhoto" aria-label="Toggle lock screen photo"><span class="sl"></span></label></div>
       <div style="margin:8px 0 12px"><button class="small" id="lockPhotoBtn">Change lock screen photo</button><input type="file" id="lockPhotoInput" accept="image/*" hidden></div>
       <h3 class="sec">Users</h3>
@@ -682,6 +680,14 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <div class="muted" style="letter-spacing:.08em;font-size:11px">HOW YOUR APP IS DOING</div>
     <details class="dashgroup" id="dgAccount" open>
     <summary><span>My account</span></summary>
+<div class="box" id="planBox">
+    <h3 class="sec" style="margin-top:0">Your plan</h3>
+    <div class="statrow"><span>Plan</span><b id="planName">Free</b></div>
+    <div class="statrow"><span>Cards</span><b id="planCards">0 / 3</b></div>
+    <div class="statrow"><span>🪙 Tokens</span><b id="planTokens">0</b></div>
+    <div id="planTrial" class="muted" style="font-size:12px;margin-top:4px" hidden></div>
+    <button class="small" id="planUpgradeBtn" style="width:100%;margin-top:8px">View plans</button>
+  </div>
 <div class="box" id="pinBox">
     <h3 class="sec" style="margin-top:0">Device PIN</h3>
     <button class="small" id="changePinBtn" style="width:100%">Change PIN</button>
@@ -704,52 +710,36 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   </details>
   <details class="dashgroup" id="dgSharing">
     <summary><span>Sharing</span></summary>
-<div id="sharePlanCard" hidden style="background:#1e1e1e;border-radius:20px;padding:20px;margin:4px 0 12px;">
-      <div style="display:flex;justify-content:space-between;align-items:baseline;">
-        <span style="font-size:20px;font-weight:600;color:#fff;">Tracked shares</span>
-        <span id="planFreePct" style="font-size:15px;color:#9aa1ad;">0% used</span>
-      </div>
-      <div style="margin-top:6px;font-size:13px;color:#4ade80;">● Unlimited QR &amp; .vcf sharing — free forever</div>
-      <div id="planFreeReset" style="font-size:14px;color:#9aa1ad;margin-top:4px;">Tracked limit resets Friday</div>
-      <div style="height:10px;background:#2c2c2e;border-radius:5px;margin-top:10px;overflow:hidden;">
-        <div id="planFreeBar" style="height:100%;width:0%;background:#0a84ff;border-radius:5px;transition:width .3s;"></div>
-      </div>
-      <div style="font-size:20px;font-weight:600;color:#fff;margin-top:18px;">Bonus shares</div>
-      <div id="planBonusSub" style="font-size:14px;color:#9aa1ad;margin-top:4px;">0 shares left</div>
-      <div style="font-size:14px;color:#9aa1ad;">Never expires</div>
-      <div style="height:10px;background:#2c2c2e;border-radius:5px;margin-top:10px;overflow:hidden;">
-        <div id="planBonusBar" style="height:100%;width:0%;background:#0a84ff;border-radius:5px;transition:width .3s;"></div>
-      </div>
-      <div style="border-top:1px solid #2c2c2e;margin-top:16px;padding-top:12px;">
-        <a href="#" id="planGetMore" style="color:#0a84ff;font-size:17px;text-decoration:none;">Get more shares</a>
-      </div>
-    </div>
 <div class="box" id="inviteBox" hidden>
     <h3 class="sec" style="margin-top:0">Invite friends</h3>
-    <p class="muted">Share your invite link — you both get <b><span id="inviteBonusAmt">100</span> bonus shares</b>. Bonus shares never expire.</p>
-    <div class="statrow"><span>✨ Bonus shares</span><b id="bonusBal">0</b></div>
+    <p class="muted">Share your invite link — they get <b>7 days of Pro free</b>, you earn <b>100 tokens</b> per friend. Tokens buy premium card designs.</p>
+    <div class="statrow"><span>🪙 Your tokens</span><b id="bonusBal">0</b></div>
     <div style="display:flex;gap:8px;margin-top:10px">
       <input id="inviteLink" readonly style="flex:1;margin:0" aria-label="Your invite link">
       <button class="small" id="copyInvite" style="flex:none">Copy</button>
     </div>
     <button class="small gray" id="shareInviteBtn" style="width:100%;margin-top:8px">Share invite link…</button>
   </div>
-<div class="box" id="buyBox" hidden>
-    <h3 class="sec" style="margin-top:0">Buy shares</h3>
-    <p class="muted">Top up anytime — bonus shares never expire.</p>
-    <button id="buySharesBtn" style="width:100%">Buy 100 shares — $3.99</button>
-    <p class="muted" id="buyMsg" style="text-align:center"></p>
-  </div>
 <div class="box" id="sigBox">
-    <h3 class="sec" style="margin-top:0">Email signature</h3>
-    <p class="muted">Generate a branded signature from your first card.</p>
+    <h3 class="sec" style="margin-top:0">Email signature <span class="advbadge">PRO</span></h3>
+    <p class="muted">Generate a branded signature from your profile.</p>
     <button class="small gray" id="sigGen" style="width:100%">Generate signature</button>
     <div id="sigPreview" hidden style="margin-top:12px;padding:12px;background:#fff;border-radius:12px;color:#000;"></div>
     <button class="small" id="sigCopy" hidden style="width:100%;margin-top:8px">Copy HTML</button>
   </div>
+<div class="box" id="shopBox">
+    <h3 class="sec" style="margin-top:0">Premium designs</h3>
+    <div class="statrow"><span>🪙 Your tokens</span><b id="shopTokens">0</b></div>
+    <div id="shopList"></div>
+  </div>
+<div class="box" id="tokenBox">
+    <h3 class="sec" style="margin-top:0">Get tokens</h3>
+    <p class="muted">Earn 🪙 100 per friend who joins, or buy a pack.</p>
+    <div id="packList"></div>
+  </div>
   </details>
   <details class="dashgroup dashinsights" id="dgInsights">
-    <summary><span>Insights</span><span class="advbadge">ADVANCED</span></summary>
+    <summary id="dgInsightsSum"><span>Insights</span><span class="advbadge">PREMIUM</span></summary>
 <div class="box" id="cloudBox" hidden>
     <h3 class="sec" style="margin-top:0">All users</h3>
     <div class="statrow"><span>📱 App opens</span><b id="c_opens">0</b></div>
@@ -1012,6 +1002,7 @@ function unlock(){
   $("lockScreen").hidden=true;
   $("homeScreen").hidden=false;
   stat("opens");
+  checkTrialExpired();
   renderCards();
   renderNudgesMemories();
   
@@ -1164,27 +1155,10 @@ function stat(k){
 }
 function getStats(){try{return JSON.parse(localStorage.getItem("omni_stats")||"{}");}catch(e){return{};}}
 
-/* ---------- share credits (v1) ---------- */
-let WEEKLY_FREE=20, INVITE_BONUS=100, SHARE_PACK=100, SHARE_PRICE=3.99;
-function numSetting(k,def){
-  const v=FLAGS[k];
-  const n=typeof v==="number"?v:parseFloat(v);
-  return Number.isFinite(n)&&n>0?n:def;
-}
+/* ---------- share credits: retired, replaced by subscription plans ---------- */
+function numSetting(k,def){return def;}
 function applyNumSettings(){
-  WEEKLY_FREE=numSetting("weeklyFree",20);
-  INVITE_BONUS=numSetting("inviteBonus",100);
-  SHARE_PACK=numSetting("sharePack",100);
-  SHARE_PRICE=numSetting("sharePrice",3.99);
-  // refresh price/share-count labels
-  try{
-    const price="$"+SHARE_PRICE.toFixed(2);
-    const bl=$("buySharesBtn");if(bl)bl.textContent=`Buy ${SHARE_PACK} shares — ${price}`;
-    const lb=$("limitBuyBtn");if(lb)lb.textContent=`💳 Buy ${SHARE_PACK} tracked shares — ${price}`;
-    const tg=$("tgBuy");if(tg){const row=tg.closest(".togglerow");if(row){const m=row.querySelector(".muted");if(m)m.textContent=`${price} per ${SHARE_PACK} shares`;}}
-    const ti=$("tgInvites");if(ti){const row=ti.closest(".togglerow");if(row){const m=row.querySelector(".muted");if(m)m.textContent=`${INVITE_BONUS} bonus shares per invite`;}}
-    const tl=$("tgLimits");if(tl){const row=tl.closest(".togglerow");if(row){const m=row.querySelector(".muted");if(m)m.textContent=`${WEEKLY_FREE} tracked shares / week`;}}
-  }catch(e){}
+  // retired: share numbers replaced by subscription plans
 }
 let FLAGS={shareLimits:false,invites:false,buyShares:false};
 function fridayWeekId(d){
@@ -1192,15 +1166,8 @@ function fridayWeekId(d){
   x.setDate(x.getDate()-((x.getDay()-5+7)%7));
   return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");
 }
-function creditsState(){
-  let c={};
-  try{c=JSON.parse(localStorage.getItem("omni_credits")||"{}");}catch(e){}
-  const wid=fridayWeekId(new Date());
-  if(c.weekId!==wid){c={weekId:wid,used:0,bonus:(c&&c.bonus)||0};try{localStorage.setItem("omni_credits",JSON.stringify(c));}catch(e){}}
-  c.used=c.used||0;c.bonus=c.bonus||0;c.bonusEarned=c.bonusEarned||0;
-  return c;
-}
-function saveCredits(c){try{localStorage.setItem("omni_credits",JSON.stringify(c));}catch(e){}}
+function creditsState(){return{used:0,bonus:0,bonusEarned:0};}
+function saveCredits(c){/* retired */}
 async function loadFlags(){
   try{
     const r=await fetch(STATS_URL+"/api/flags",{cache:"no-store"});
@@ -1211,58 +1178,24 @@ async function loadFlags(){
   applyNumSettings();
 }
 function updateCreditUI(){
-  const bar=$("creditBar");if(!bar)return;
-  if(!FLAGS.shareLimits){bar.hidden=true;}
-  else{
-    bar.hidden=false;
-    const s=creditsState();
-    const wl=Math.max(0,WEEKLY_FREE-s.used);
-    let t=`<span style="color:#4ade80">● Unlimited sharing — free forever</span>`;
-    t+=`<br><span style="font-size:11px">Tracked shares with analytics: <b>${s.used}/${WEEKLY_FREE}</b> used this week · resets Friday</span>`;
-    if(s.bonus>0)t+=`<br><span style="font-size:11px">✨ <b>${s.bonus}</b> bonus tracked shares</span>`;
-    bar.innerHTML=t;
-  }
-  const card=$("sharePlanCard");
-  if(card){
-    card.hidden=!FLAGS.shareLimits;
-    if(FLAGS.shareLimits){
-      const s=creditsState();
-      const usedPct=Math.min(100,Math.round(s.used/WEEKLY_FREE*100));
-      const left=Math.max(0,WEEKLY_FREE-s.used);
-      $("planFreePct").textContent=usedPct+"% used";
-      $("planFreeBar").style.width=usedPct+"%";
-      // Next Friday reset date
-      const now=new Date(), d=new Date(now);
-      d.setDate(d.getDate()+((5-d.getDay()+7)%7||7));
-      $("planFreeReset").textContent="Tracked limit resets "+d.toLocaleDateString("en-US",{month:"short",day:"numeric"})+" ("+left+" left)";
-      const bUsed=s.bonusEarned>0?Math.min(100,Math.round((s.bonusEarned-s.bonus)/s.bonusEarned*100)):0;
-      const bPct=s.bonusEarned>0?bUsed:0;
-      $("planBonusSub").textContent=bPct+"% used ("+s.bonus+" shares left)";
-      $("planBonusBar").style.width=Math.min(100,Math.max(4,s.bonus>0?(s.bonus/Math.max(s.bonusEarned,s.bonus)*100):0))+"%";
-    }
-  }
+  try{const bar=$("creditBar");if(bar)bar.hidden=true;}catch(e){}
 }
-/* returns true if the share may proceed, false if blocked (limit modal shown) */
-function consumeShare(){
-  if(!FLAGS.shareLimits)return true;
-  const s=creditsState();
-  if(WEEKLY_FREE-s.used>0){s.used++;saveCredits(s);updateCreditUI();return true;}
-  if(s.bonus>0){s.bonus--;saveCredits(s);updateCreditUI();return true;}
-  showLimitModal();
-  return false;
+// retired: share credits replaced by subscription plans — always hide the bar
+function updateCreditUI(){
+  try{const bar=$("creditBar");if(bar)bar.hidden=true;}catch(e){}
 }
+/* sharing is unlimited on all plans — always allow */
+function consumeShare(){return true;}
 function showLimitModal(){
-  $("limitInviteWrap").style.display=FLAGS.invites?"":"none";
-  $("limitBuyWrap").style.display=FLAGS.buyShares?"":"none";
-  $("limitModal").hidden=false;
+  // retired: sharing is unlimited on all plans
 }
-$("limitClose").onclick=()=>{$("limitModal").hidden=true;};
+const _lc=$("limitClose");if(_lc)_lc.onclick=()=>{const m=$("limitModal");if(m)m.hidden=true;};
 document.addEventListener("DOMContentLoaded",()=>{
   const gm=$("planGetMore");
   if(gm)gm.onclick=e=>{e.preventDefault();showLimitModal();};
 });
-$("limitInviteBtn").onclick=()=>{$("limitModal").hidden=true;copyInviteLink();};
-$("limitBuyBtn").onclick=()=>{$("limitModal").hidden=true;buyShares();};
+const _lib=$("limitInviteBtn");if(_lib)_lib.onclick=()=>{const m=$("limitModal");if(m)m.hidden=true;copyInviteLink();};
+const _lbb=$("limitBuyBtn");if(_lbb)_lbb.onclick=()=>{const m=$("limitModal");if(m)m.hidden=true;buyShares();};
 
 /* ---------- invites ---------- */
 function myDeviceId(){
@@ -1317,9 +1250,18 @@ async function claimInvite(code){
     if(j&&j.ok){
       try{localStorage.setItem("omni_invite_claimed","1");}catch(e){}
       try{localStorage.setItem("omni_invite_claimed_by",code);}catch(e){}
-      const s=creditsState();s.bonus+=INVITE_BONUS;s.bonusEarned+=INVITE_BONUS;saveCredits(s);updateCreditUI();
+      // Invitee reward: 7-day Pro trial (one per account)
+      let trial=false;
+      try{
+        if(!localStorage.getItem("omni_trial_used")){
+          userPlan.trialEndsAt=Date.now()+7*86400000;
+          localStorage.setItem("omni_trial_used","1");
+          trial=true;
+        }
+      }catch(e){}
+      await saveAll();
       ping("invite_claimed");
-      setTimeout(()=>toast(`🎉 +${INVITE_BONUS} bonus shares — welcome!`),1200);
+      setTimeout(()=>toast(trial?"🎉 7 days of Pro — on us!":"🎉 Welcome!"),1200);
       // Re-register with inviter attribution
       registerInviteCode(myInviteCode());
     }else if(j&&j.error==="code_invalid_account_deleted"){
@@ -1348,8 +1290,19 @@ async function collectPendingInvites(){
     if(!r.ok)return;
     const j=await r.json();
     if(j&&j.pending>0){
-      const s=creditsState();s.bonus+=j.pending;s.bonusEarned+=j.pending;saveCredits(s);updateCreditUI();
-      toast(`🎉 +${j.pending} bonus shares — a friend joined!`);
+      // Inviter rewards: first successful share bumps free cards 3→7, after that 100 tokens each
+      let msg="";
+      if(!userPlan.sharedOnce){
+        userPlan.sharedOnce=true;
+        msg="🎉 Your cards bumped to 7 — a friend joined!";
+        const extra=Math.max(0,j.pending-1);
+        if(extra>0){userPlan.tokens=(userPlan.tokens||0)+extra*100;msg+=` +${extra*100} tokens`;}
+      }else{
+        userPlan.tokens=(userPlan.tokens||0)+j.pending*100;
+        msg=`🎉 +${j.pending*100} tokens — a friend joined!`;
+      }
+      await saveAll();
+      toast(msg);
     }
   }catch(e){}
 }
@@ -1361,7 +1314,7 @@ async function copyInviteLink(){
 $("copyInvite").onclick=copyInviteLink;
 $("shareInviteBtn").onclick=async()=>{
   const l=inviteLink();
-  try{if(navigator.share){await navigator.share({title:"OMNI",text:"Get OMNI — we both earn 100 bonus shares!",url:l});return;}}catch(e){}
+  try{if(navigator.share){await navigator.share({title:"OMNI",text:"Get OMNI — you get 7 days of Pro free!",url:l});return;}}catch(e){}
   copyInviteLink();
 };
 
@@ -1376,7 +1329,7 @@ async function buyShares(){
     if(msg)msg.textContent="";toast((j&&j.error)||"Checkout unavailable right now");
   }catch(e){if(msg)msg.textContent="";toast("Couldn't reach checkout — check connection");}
 }
-$("buySharesBtn").onclick=buyShares;
+const _bsb=$("buySharesBtn");if(_bsb)_bsb.onclick=buyShares;
 async function handlePurchaseReturn(){
   let sid="";
   try{
@@ -1387,25 +1340,23 @@ async function handlePurchaseReturn(){
     const ns=q.toString();history.replaceState(null,"",location.pathname+(ns?"?"+ns:"")+location.hash);
   }catch(e){return;}
   if(!sid)return;
+  // retired: share purchases replaced by subscription plans + token packs
   try{
-    const r=await fetch(STATS_URL+"/api/purchase/verify?session_id="+encodeURIComponent(sid),{cache:"no-store"});
-    const j=await r.json();
-    if(j&&(j.credited||j.already)){
-      if(j.credited){const _sh=j.shares||SHARE_PACK;const s=creditsState();s.bonus+=_sh;s.bonusEarned+=_sh;saveCredits(s);updateCreditUI();}
-      setTimeout(()=>toast(`🎉 +${j.shares||SHARE_PACK} bonus shares added!`),1200);
-    }else setTimeout(()=>toast("Payment not confirmed yet"),1200);
+    const ns2="";history.replaceState(null,"",location.pathname+location.hash);
   }catch(e){}
 }
 
 /* ---------- owner controls ---------- */
 function renderCreditBoxes(){
-  const inv=!!FLAGS.invites, buy=!!FLAGS.buyShares;
-  $("inviteBox").hidden=!inv;
-  $("buyBox").hidden=!buy;
+  const inv=!!FLAGS.invites;
+  try{$("inviteBox").hidden=!inv;}catch(e){}
+  const bb=$("buyBox");if(bb)bb.hidden=true;
   if(inv){
-    $("inviteLink").value=inviteLink();
-    $("bonusBal").textContent=creditsState().bonus;
-    try{$("inviteBonusAmt").textContent=INVITE_BONUS;}catch(e){}
+    try{
+      $("inviteLink").value=inviteLink();
+      $("bonusBal").textContent=(userPlan.tokens||0)+" 🪙";
+      $("inviteBonusAmt").textContent="100";
+    }catch(e){}
   }
   let unlocked=false;
   try{unlocked=localStorage.getItem("omni_owner_unlocked")==="1"&&!!OWNER_TOKEN;}catch(e){}
@@ -1434,28 +1385,6 @@ async function setFlag(name,on,el){
       toast("Couldn't save — check connection");
     }
   }catch(e){if(el)el.checked=!!FLAGS[name];toast("Couldn't reach server");}
-}
-/* owner-adjustable numbers (weekly free, invite bonus, pack size, pack price) */
-async function setNumbers(vals){
-  try{
-    const r=await fetch(STATS_URL+"/api/flags",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({owner_token:OWNER_TOKEN,flags:vals})});
-    const j=await r.json();
-    if(j&&j.ok){
-      FLAGS=Object.assign({},FLAGS,j.flags);
-      try{localStorage.setItem("omni_flags",JSON.stringify({f:FLAGS,at:Date.now()}));}catch(e){}
-      applyNumSettings();updateCreditUI();renderCreditBoxes();fillNumbers();
-      const m=$("numbersMsg");if(m){m.textContent="Saved ✓";m.style.color="#4ade80";}
-      toast("Numbers saved ✓");
-    }else{const m=$("numbersMsg");if(m){m.textContent="Couldn't save — check connection";m.style.color="#e08080";}}
-  }catch(e){const m=$("numbersMsg");if(m){m.textContent="Couldn't reach server";m.style.color="#e08080";}}
-}
-function fillNumbers(){
-  try{
-    $("numWeeklyFree").value=WEEKLY_FREE;
-    $("numInviteBonus").value=INVITE_BONUS;
-    $("numSharePack").value=SHARE_PACK;
-    $("numSharePrice").value=SHARE_PRICE.toFixed(2);
-  }catch(e){}
 }
 // Change owner password
 document.addEventListener("DOMContentLoaded",()=>{
@@ -1486,19 +1415,13 @@ document.addEventListener("DOMContentLoaded",()=>{
   };
 });
 $("ownerUnlockBtn").onclick=async()=>{await ownerAuth();};
+$("grantFreeBtn").onclick=()=>ownerGrantPlan("free");
+$("grantProBtn").onclick=()=>ownerGrantPlan("pro");
+$("grantPremBtn").onclick=()=>ownerGrantPlan("premium");
 $("tgLimits").onchange=e=>setFlag("shareLimits",e.target.checked,e.target);
 $("tgInvites").onchange=e=>setFlag("invites",e.target.checked,e.target);
 $("tgBuy").onchange=e=>setFlag("buyShares",e.target.checked,e.target);
-$("saveNumbersBtn").onclick=()=>{
-  const m=$("numbersMsg");if(m){m.textContent="Saving…";m.style.color="";}
-  const vals={
-    weeklyFree:Math.max(1,parseInt($("numWeeklyFree").value)||20),
-    inviteBonus:Math.max(1,parseInt($("numInviteBonus").value)||100),
-    sharePack:Math.max(1,parseInt($("numSharePack").value)||100),
-    sharePrice:Math.max(0.01,parseFloat($("numSharePrice").value)||3.99)
-  };
-  setNumbers(vals);
-};
+const _snb=$("saveNumbersBtn");if(_snb)_snb.onclick=()=>{toast("Removed — plans replace share numbers");};
 $("tgLockPhoto").onchange=e=>{
   try{
     if(e.target.checked){localStorage.setItem("omni_lockphoto","1");cacheLockBg();}
@@ -1574,6 +1497,8 @@ $("dashBtn").onclick=async()=>{
   // share credits: refresh flags + boxes
   try{await loadFlags();}catch(e){}
   renderCreditBoxes();
+  renderPlanBox();
+  renderTokenShop();
   // cloud stats: hidden until loaded
   $("cloudBox").hidden=true;$("chartBox").hidden=true;$("cloudLoading").hidden=false;
   try{
@@ -1693,19 +1618,184 @@ let curId=null, searchQ="";
 
 /* ---------- user profile (USER-level, independent of cards) ---------- */
 let userProfile={pic:null,picPos:"50% 50%",name:"",phone:"",email:"",cover:"",coverPos:"50% 50%"};
+/* ---------- subscription plans ---------- */
+const PLAN_DEFS={
+  free:{name:"Free",price:0},
+  pro:{name:"Pro",price:4.99},
+  premium:{name:"Premium",price:9.99}
+};
+let userPlan={tier:"free",trialEndsAt:0,tokens:0,sharedOnce:false,templates:[]};
+function effectiveTier(){
+  if(userPlan.trialEndsAt&&userPlan.trialEndsAt>Date.now())return "pro";
+  return userPlan.tier||"free";
+}
+function isTrialing(){return userPlan.trialEndsAt>Date.now();}
+function trialDaysLeft(){return userPlan.trialEndsAt?Math.max(0,Math.ceil((userPlan.trialEndsAt-Date.now())/86400000)):0;}
+function cardLimit(){
+  const t=effectiveTier();
+  if(t==="premium")return Infinity;
+  if(t==="pro")return 12;
+  return userPlan.sharedOnce?7:3;
+}
+function tokenBalance(){return effectiveTier()==="pro"||effectiveTier()==="premium"?Infinity:(userPlan.tokens||0);}
+function hasFeature(f){
+  const t=effectiveTier();
+  if(t==="premium")return true;
+  if(t==="pro")return f!=="analytics"&&f!=="branding"&&f!=="priority";
+  return false;
+}
+function checkTrialExpired(){
+  if(userPlan.trialEndsAt&&userPlan.trialEndsAt<=Date.now()){
+    userPlan.trialEndsAt=0;
+    saveAll().catch(()=>{});
+    toast("Your Pro trial ended — you're on Free now");
+    return true;
+  }
+  return false;
+}
+/* ---------- plans UI ---------- */
+function planCardHTML(tier){
+  const d=PLAN_DEFS[tier], cur=effectiveTier()===tier;
+  const feats=tier==="free"
+    ? ["Unlimited shares","3 cards (7 after first invite)","Profile picture + logo"]
+    : tier==="pro"
+    ? ["Unlimited shares","12 cards","Everything allowed","All premium templates","Email signature"]
+    : ["Unlimited shares","Unlimited cards","Advanced analytics","Custom branding","Priority support"];
+  return `<div style="border:1px solid ${cur?"#0a84ff":"var(--line)"};border-radius:14px;padding:14px;background:${cur?"#0a84ff18":"transparent"}">
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:17px">${d.name}</b><b style="font-size:17px">${d.price?"$"+d.price+"/mo":"Free"}</b></div>
+    <div style="font-size:13px;color:var(--muted);margin:8px 0">${feats.map(f=>"✓ "+f).join("<br>")}</div>
+    ${cur?`<div style="color:#0a84ff;font-weight:700">Current plan</div>`
+      : tier==="free"?`<div class="muted" style="font-size:12px">Included</div>`
+      : `<button class="small" style="width:100%" onclick="subscribePlan('${tier}')">Choose ${d.name} — $${d.price}/mo</button>`}
+  </div>`;
+}
+function showUpgrade(title,sub){
+  $("upgradeTitle").textContent=title||"Upgrade your plan";
+  $("upgradeSub").textContent=sub||"";
+  $("planCards2").innerHTML=["free","pro","premium"].map(planCardHTML).join("");
+  $("upgradeModal").hidden=false;
+}
+$("upgradeClose").onclick=()=>{$("upgradeModal").hidden=true;};
+$("planUpgradeBtn").onclick=()=>showUpgrade("Plans","Unlimited sharing on every plan.");
+// Premium gate for advanced analytics
+document.addEventListener("DOMContentLoaded",()=>{
+  const dg=$("dgInsights"), sm=$("dgInsightsSum");
+  if(dg&&sm)sm.addEventListener("click",e=>{
+    if(!hasFeature("analytics")){
+      e.preventDefault();
+      showUpgrade("Advanced analytics is Premium","Deep insights, custom branding, and priority support come with Premium.");
+    }
+  });
+});
+function renderPlanBox(){
+  try{
+    const t=effectiveTier(), d=PLAN_DEFS[t];
+    $("planName").textContent=d.name+(isTrialing()?` (trial — ${trialDaysLeft()}d left)`:"");
+    const lim=cardLimit(), n=profiles.filter(p=>!p._draft).length;
+    $("planCards").textContent=lim===Infinity?`${n} cards`:`${n} / ${lim} cards`;
+    const tb=tokenBalance();
+    $("planTokens").textContent=tb===Infinity?"∞":tb;
+    const pt=$("planTrial");
+    if(isTrialing()){pt.hidden=false;pt.textContent=`Pro trial ends in ${trialDaysLeft()} day(s) — upgrade to keep Pro features.`;}
+    else pt.hidden=true;
+  }catch(e){}
+}
+/* Stripe subscriptions — worker endpoint pending; falls back gracefully */
+async function subscribePlan(tier){
+  const btn=event&&event.target;
+  try{
+    if(btn){btn.disabled=true;btn.textContent="Opening checkout…";}
+    const r=await fetch(STATS_URL+"/api/checkout/subscription",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({tier,deviceCode:myInviteCode(),syncId:(()=>{try{return localStorage.getItem("omni_sync_id")||"";}catch(e){return"";}})()})});
+    const j=await r.json();
+    if(j&&j.url){location.href=j.url;return;}
+    throw new Error(j.error||"unavailable");
+  }catch(e){
+    toast("Subscriptions aren't live yet — coming soon");
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent="Choose "+PLAN_DEFS[tier].name+" — $"+PLAN_DEFS[tier].price+"/mo";}
+  }
+}
+/* owner testing: grant a plan without Stripe */
+async function ownerGrantPlan(tier){
+  userPlan.tier=tier;userPlan.trialEndsAt=0;
+  await saveAll();renderPlanBox();
+  toast(`Plan set to ${PLAN_DEFS[tier].name} (owner grant)`);
+}
+/* ---------- premium templates + token shop ---------- */
+const PREMIUM_TEMPLATES=[
+  {id:"aurora",name:"Aurora",cost:700,desc:"Shifting gradient glow",color:"#8b5cf6",coverColor:"#1e1b4b"},
+  {id:"obsidian",name:"Obsidian Gold",cost:1500,desc:"Black + gold luxury",color:"#d4af37",coverColor:"#0a0a0a"},
+  {id:"royale",name:"Royale",cost:3000,desc:"Signature flagship design",color:"#0a84ff",coverColor:"#0d1b2a"}
+];
+const TOKEN_PACKS=[
+  {tokens:1700,price:1.99},
+  {tokens:3500,price:3.99},
+  {tokens:9000,price:9.99}
+];
+function ownedTemplates(){return (userPlan.templates||[]);}
+function renderTokenShop(){
+  try{
+    const tb=tokenBalance();
+    $("shopTokens").textContent=tb===Infinity?"∞":tb;
+    $("shopList").innerHTML=PREMIUM_TEMPLATES.map(t=>{
+      const owned=ownedTemplates().includes(t.id)||tb===Infinity;
+      return `<div style="border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><b>${t.name}</b><b>🪙 ${t.cost}</b></div>
+        <div class="muted" style="font-size:12px">${t.desc}</div>
+        ${owned?`<div style="color:#4ade80;font-size:13px;margin-top:6px">Owned — applies to your selected card</div><button class="small" style="width:100%;margin-top:6px" onclick="applyTemplate('${t.id}')">Apply to selected card</button>`
+        :`<button class="small" style="width:100%;margin-top:6px" onclick="buyTemplate('${t.id}')">Buy for 🪙 ${t.cost}</button>`}
+      </div>`;
+    }).join("");
+    $("packList").innerHTML=TOKEN_PACKS.map((p,i)=>
+      `<button class="small" style="width:100%;margin:4px 0" onclick="buyTokens(${i})">🪙 ${p.tokens.toLocaleString()} — $${p.price}</button>`
+    ).join("");
+  }catch(e){}
+}
+async function buyTemplate(id){
+  const t=PREMIUM_TEMPLATES.find(x=>x.id===id);if(!t)return;
+  const tb=tokenBalance();
+  if(tb!==Infinity&&(userPlan.tokens||0)<t.cost){
+    showUpgrade("Not enough tokens",`"${t.name}" costs 🪙 ${t.cost}. Earn tokens by inviting friends, or get unlimited tokens with Pro.`);
+    return;
+  }
+  const p=getP();
+  if(!p){toast("Select a card first");return;}
+  if(tb!==Infinity){userPlan.tokens-=t.cost;}
+  if(!userPlan.templates)userPlan.templates=[];
+  if(!userPlan.templates.includes(id))userPlan.templates.push(id);
+  p.color=t.color;p.coverColor=t.coverColor;p.templateId=id;
+  await saveAll();renderTokenShop();renderPlanBox();renderCards();renderFlip();
+  toast(`"${t.name}" applied ✓`);
+}
+function applyTemplate(id){
+  const t=PREMIUM_TEMPLATES.find(x=>x.id===id);if(!t)return;
+  const p=getP();
+  if(!p){toast("Select a card first");return;}
+  p.color=t.color;p.coverColor=t.coverColor;p.templateId=id;
+  saveAll().then(()=>{renderCards();renderFlip();toast(`"${t.name}" applied ✓`);});
+}
+async function buyTokens(i){
+  const pack=TOKEN_PACKS[i];if(!pack)return;
+  toast("Token purchases aren't live yet — coming soon");
+}
 // Vault format v2: {v:2, profiles:[...], userProfile:{...}}
 // Old vaults store just the profiles array — unpackVault handles both.
-function packVault(){return{v:2,profiles:profiles,userProfile:userProfile};}
+function packVault(){return{v:2,profiles:profiles,userProfile:userProfile,plan:userPlan};}
 function unpackVault(data){
   if(data&&typeof data==="object"&&!Array.isArray(data)&&data.v===2){
     profiles=Array.isArray(data.profiles)?data.profiles:[];
     userProfile=(data.userProfile&&typeof data.userProfile==="object")
       ? {pic:data.userProfile.pic||null,picPos:data.userProfile.picPos||"50% 50%",name:data.userProfile.name||"",phone:data.userProfile.phone||"",email:data.userProfile.email||"",cover:data.userProfile.cover||"",coverPos:data.userProfile.coverPos||"50% 50%"}
-      : {pic:null,picPos:"50% 50%",name:""};
+      : {pic:null,picPos:"50% 50%",name:"",phone:"",email:"",cover:"",coverPos:"50% 50%"};
+    userPlan=(data.plan&&typeof data.plan==="object")
+      ? {tier:data.plan.tier||"free",trialEndsAt:data.plan.trialEndsAt||0,tokens:data.plan.tokens||0,sharedOnce:!!data.plan.sharedOnce,templates:Array.isArray(data.plan.templates)?data.plan.templates:[]}
+      : {tier:"free",trialEndsAt:0,tokens:0,sharedOnce:false,templates:[]};
   }else{
     // legacy: vault holds the profiles array directly
     profiles=Array.isArray(data)?data:[];
     userProfile={pic:null,picPos:"50% 50%",name:"",phone:"",email:"",cover:"",coverPos:"50% 50%"};
+    userPlan={tier:"free",trialEndsAt:0,tokens:0,sharedOnce:false,templates:[]};
   }
   // migration: adopt first card's picture as the user photo if none set
   if(!userProfile.pic&&profiles.length&&profiles[0].pic){
@@ -1861,6 +1951,12 @@ $("emptyCreate").onclick=()=>$("fabPlus").click();
 $("searchBox").oninput=e=>{searchQ=e.target.value;renderCards();};
 
 $("fabPlus").onclick=()=>{
+  const lim=cardLimit();
+  const real=profiles.filter(p=>!p._draft).length;
+  if(real>=lim){
+    showUpgrade(`You've reached your ${lim} card limit`,`Upgrade to ${effectiveTier()==="free"?"Pro":"Premium"} for ${effectiveTier()==="free"?"12 cards":"unlimited cards"}.`);
+    return;
+  }
   const p={id:Date.now(),label:"",name:"",org:"",phones:"",emails:"",urls:"",address:"",notes:"",pic:"",picPos:"50% 50%",cover:"",coverPos:"50% 50%",coverColor:"",color:"#4f8cff",_draft:true};
   profiles.push(p);curId=p.id;openDetail(p.id);
 };
@@ -2616,6 +2712,10 @@ document.addEventListener("DOMContentLoaded", ()=>{
   };
   const sg = $("sigGen");
   if(sg) sg.onclick = ()=>{
+    if(!hasFeature("signature")){
+      showUpgrade("Email signature is Pro","Branded signatures come with Pro and Premium.");
+      return;
+    }
     const pv = $("sigPreview"), cp = $("sigCopy");
     const card = profiles[0]||{};
     // Profile-first: use the user profile, fall back to the first card
