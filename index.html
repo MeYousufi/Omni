@@ -720,6 +720,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <div class="statrow"><span>Plan</span><b id="planName">Free</b></div>
     <div class="statrow"><span>Cards</span><b id="planCards">0 / 3</b></div>
     <div class="statrow"><span>🪙 Tokens</span><b id="planTokens">0</b></div>
+    <div id="planBenefits" class="muted" style="font-size:13px;margin-top:8px;line-height:1.7"></div>
     <div id="planTrial" class="muted" style="font-size:12px;margin-top:4px" hidden></div>
     <button class="small" id="planUpgradeBtn" style="width:100%;margin-top:8px">View plans</button>
   </div>
@@ -1795,9 +1796,16 @@ function renderPlanBox(){
     const t=effectiveTier(), d=PLAN_DEFS[t];
     $("planName").textContent=d.name+(isTrialing()?` (trial — ${trialDaysLeft()}d left)`:"");
     const lim=cardLimit(), n=profiles.filter(p=>!p._draft).length;
-    $("planCards").textContent=lim===Infinity?`${n} cards`:`${n} / ${lim} cards`;
+    $("planCards").textContent=lim===Infinity?"Unlimited":`${n} / ${lim}`;
     const tb=tokenBalance();
     $("planTokens").textContent=tb===Infinity?"∞":tb;
+    // benefits list
+    const ben={
+      free:["✓ Unlimited sharing","✓ 3 cards (7 after first invite)","✓ Profile picture & logo"],
+      pro:["✓ Unlimited sharing","✓ 12 cards","✓ Unlimited tokens","✓ Premium templates","✓ Email signature"],
+      premium:["✓ Unlimited sharing","✓ Unlimited cards","✓ Unlimited tokens","✓ Premium templates","✓ Advanced analytics","✓ Custom branding","✓ Priority support"]
+    }[t]||[];
+    $("planBenefits").innerHTML=ben.join("<br>");
     const pt=$("planTrial");
     if(isTrialing()){pt.hidden=false;pt.textContent=`Pro trial ends in ${trialDaysLeft()} day(s) — upgrade to keep Pro features.`;}
     else pt.hidden=true;
@@ -2042,26 +2050,23 @@ async function cropVisible(dataUrl,posStr,targetW,targetH){
   }catch(e){return dataUrl;}
 }
 async function shrinkImgs(level){
-  // level: 0/undefined=normal, 1=true=aggressive, 2+=ultra (progressively smaller)
+  // PERMANENT: always shrink to safe sizes, no threshold — vault can never grow too large
   const ultra=(typeof level==="number"&&level>=2);
   const ultra2=(typeof level==="number"&&level>=3);
   const ultra3=(typeof level==="number"&&level>=4);
   const aggressive=!!level;
   for(const p of profiles){for(const k of["pic","cover"]){
-    // pic: 600px/0.9 normal → 400px/0.7 ultra → 250px/0.55 ultra3
-    // cover: 1200px/0.85 normal → 800px/0.8 aggressive → 500px/0.65 ultra → 350px/0.5 ultra3
     let M,Q;
     if(k==="pic"){M=ultra3?250:(ultra?400:600);Q=ultra3?0.55:(ultra?0.7:0.9);}
     else{M=ultra3?350:(ultra2?500:(aggressive?800:1200));Q=ultra3?0.5:(ultra2?0.65:(aggressive?0.8:0.85));}
-    const L=k==="pic"?250000:600000;
-    if(p[k]&&p[k].length>L){p[k]=await shrinkOne(p[k],M,Q);}
+    // No threshold check — always shrink to guarantee small vault
+    if(p[k]&&p[k].length>50000){p[k]=await shrinkOne(p[k],M,Q);}
   }}
-  // user profile pic + cover: preserve quality, only shrink if huge
   try{
-    if(userProfile&&userProfile.pic&&userProfile.pic.length>400000){
+    if(userProfile&&userProfile.pic&&userProfile.pic.length>50000){
       userProfile.pic=await shrinkOne(userProfile.pic,ultra3?250:(ultra?400:800),ultra3?0.55:(ultra?0.7:0.9));
     }
-    if(userProfile&&userProfile.cover&&userProfile.cover.length>600000){
+    if(userProfile&&userProfile.cover&&userProfile.cover.length>50000){
       userProfile.cover=await shrinkOne(userProfile.cover,ultra3?350:(ultra2?500:1200),ultra3?0.5:(ultra2?0.65:0.85));
     }
   }catch(e){}
