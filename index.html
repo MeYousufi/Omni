@@ -2997,9 +2997,10 @@ function openProfile(){
     userProfile.name=$("profileNameInput").value.trim();
     userProfile.phone=$("profilePhoneInput").value.trim();
     userProfile.email=$("profileEmailInput").value.trim();
-    await saveAll();renderPic();
-    toast("Profile saved ✓");
+    try{await saveAll();}catch(e){}
+    renderPic();
     $("profileScreen").hidden=true;$("homeScreen").hidden=false;renderCards();window.scrollTo(0,0);
+    toast("Saved ✓");
   };
 }
 $("profileBack").onclick=()=>{$("profileScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
