@@ -116,6 +116,7 @@ a.wrow:active{background:rgba(255,255,255,.05)}
 .flipinner{position:relative;width:100%;height:230px;transition:transform .55s;transform-style:preserve-3d}
 .flipwrap.flipped .flipinner{transform:rotateY(180deg)}
 .flipfront,.flipback{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:20px;overflow:hidden;
+  -webkit-transform:translateZ(0);transform:translateZ(0);
   background:linear-gradient(#141824,#10131b) padding-box,linear-gradient(135deg,rgba(79,140,255,.6),rgba(139,92,246,.5)) border-box;border:1px solid transparent;
   box-shadow:0 8px 30px rgba(0,0,0,.5),0 0 24px rgba(79,140,255,.15)}
 .flipfront{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:24px;position:relative;overflow:hidden;
@@ -137,7 +138,7 @@ a.wrow:active{background:rgba(255,255,255,.05)}
 .flipfront .fsub{font-size:10px;letter-spacing:.32em;color:var(--accent);font-weight:700;margin-top:6px;position:relative;z-index:1;opacity:.9}
 .flipfront .ftag{margin-top:10px;font-size:14px;color:rgba(255,255,255,.88);font-weight:500;position:relative;z-index:1}
 .flipfront .ftag{color:var(--muted);font-size:12px;margin-top:6px}
-.flipback{transform:rotateY(180deg);padding:16px;overflow-y:auto}
+.flipback{transform:rotateY(180deg) translateZ(1px);-webkit-transform:rotateY(180deg) translateZ(1px);padding:16px;overflow-y:auto}
 .flipback.has-cover-back a{text-shadow:0 1px 3px rgba(0,0,0,.8);background:rgba(0,0,0,.45)}
 .flipback.has-cover-back .flabel{text-shadow:0 1px 3px rgba(0,0,0,.8)}
 .flipback a{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:6px 0;background:#1a1e26;border:1px solid var(--line);border-radius:12px;color:var(--text);font-size:15px}
