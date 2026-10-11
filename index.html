@@ -130,7 +130,7 @@ a.wrow:active{background:rgba(255,255,255,.05)}
 .flipfront img{width:92px;height:92px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.35);box-shadow:0 4px 18px rgba(0,0,0,.45),0 0 16px var(--glow);margin-bottom:12px;position:relative;z-index:1}
 .flipfront .fph{width:84px;height:84px;border-radius:50%;background:#1a1e26;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#8ea6d8;border:2px dashed var(--line);margin-bottom:10px}
 .flipfront .fring{width:64px;height:64px;border-radius:50%;border:5px solid var(--accent);margin-bottom:14px;position:relative;box-shadow:0 0 18px var(--glow)}
-.flipfront.has-cover{background-size:cover;background-position:center;justify-content:flex-end;padding-bottom:28px}
+.flipfront.has-cover{background-size:cover;background-position:center;justify-content:flex-end;padding-bottom:28px;background-repeat:no-repeat}
 .flipfront .fcover-dim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.25) 0%,rgba(0,0,0,.75) 100%);border-radius:inherit}
 .flipfront .fcover-text{position:relative;z-index:2;text-align:center}
 .flipfront .fcover-text h2{text-shadow:0 2px 12px rgba(0,0,0,.8)}
@@ -145,7 +145,9 @@ a.wrow:active{background:rgba(255,255,255,.05)}
 .flipback{transform:rotateY(180deg) translateZ(1px);-webkit-transform:rotateY(180deg) translateZ(1px);padding:16px;overflow-y:auto}
 .flipback.has-cover-back a{text-shadow:0 1px 3px rgba(0,0,0,.8);background:rgba(0,0,0,.45)}
 .flipback.has-cover-back .flabel{text-shadow:0 1px 3px rgba(0,0,0,.8)}
-.flipback a{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:6px 0;background:#1a1e26;border:1px solid var(--line);border-radius:12px;color:var(--text);font-size:15px}
+.flipback a{display:flex;align-items:center;gap:10px;padding:8px 4px;margin:4px 0;background:none;border:none;color:#000;font-size:16px;text-decoration:none}
+.flipback .flabel{color:#000;font-weight:700;margin:8px 0 4px}
+.flipback p{color:#000}
 .flipback a:active{background:#232a3d}
 .flipback .flabel{color:var(--muted);font-size:12px;letter-spacing:.08em;margin:8px 0 2px}
 /* detail */
