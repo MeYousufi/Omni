@@ -2056,7 +2056,8 @@ async function cropVisible(dataUrl,posStr,targetW,targetH){
   if(!I.width)return dataUrl;
   try{
     const parts=(posStr||"50% 50%").split(" ");
-    const px=parseFloat(parts[0])||50, py=parseFloat(parts[1])||50;
+    let px=parseFloat(parts[0]), py=parseFloat(parts[1]);
+    if(!Number.isFinite(px))px=50; if(!Number.isFinite(py))py=50;
     // scale to cover target
     const scale=Math.max(targetW/I.width,targetH/I.height);
     const SW=I.width*scale, SH=I.height*scale;
