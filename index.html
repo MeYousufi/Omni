@@ -306,7 +306,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 /* fullscreen photo viewer */
 .viewer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:95;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .viewer-backdrop img{max-width:100%;max-height:100%;object-fit:contain}
-.viewer-backdrop img[src=""]{display:none}
 </style>
 </head>
 <body>
@@ -602,9 +601,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     </div>
   </div>
   <!-- fullscreen photo viewer (tap anywhere to close) -->
-  <div id="photoViewer" class="viewer-backdrop" hidden>
-    <img id="photoViewerImg" alt="">
-  </div>
+  <div id="photoViewer" class="viewer-backdrop" hidden></div>
   <div class="box">
     <h3 class="sec" style="margin-top:0">Your info</h3>
     <div id="profileInfo"><p class="muted">No card selected.</p></div>
@@ -2173,15 +2170,16 @@ $("photoSheetCancel").onclick=closePhotoSheet;
 $("photoSheet").onclick=e=>{if(e.target===$("photoSheet"))closePhotoSheet();};
 $("photoSheetSee").onclick=()=>{
   const src=photoSheetMode==="profile"?(userProfile&&userProfile.pic):(userProfile&&userProfile.cover);
-  if(!src||!src.startsWith("data:image")){toast("No photo to view yet");return;}
+  if(!src||typeof src!=="string"||!src.startsWith("data:image")){toast("No photo to view yet");return;}
   closePhotoSheet();
-  const img=$("photoViewerImg");
+  // render via innerHTML (same path as the working profile circle)
+  const v=$("photoViewer");
+  v.innerHTML=`<img src="${src}" alt="">`;
+  const img=v.querySelector("img");
   img.onerror=()=>{toast("Couldn't load photo");closePhotoViewer();};
-  img.onload=()=>{img.onerror=null;};
-  img.src=src;
-  $("photoViewer").hidden=false;
+  v.hidden=false;
 };
-function closePhotoViewer(){$("photoViewer").hidden=true;$("photoViewerImg").src="";}
+function closePhotoViewer(){const v=$("photoViewer");v.hidden=true;v.innerHTML="";}
 $("photoViewer").onclick=()=>{closePhotoViewer();};
 $("photoSheetChange").onclick=()=>{
   closePhotoSheet();
