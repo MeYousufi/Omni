@@ -496,6 +496,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <div id="coverShow" style="width:100%;height:90px;border-radius:14px;overflow:hidden;background:#1a1e26;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;border:1px dashed var(--line)">No cover image</div>
     <input type="file" id="coverInput" accept="image/*" hidden>
     <button class="chg" id="coverBtn">Choose card cover</button>
+    <button class="chg" id="coverReposBtn" hidden>Reposition cover</button>
     <button class="chg" id="coverClear" hidden>Remove cover</button>
   </div>
   </details>
@@ -807,15 +808,18 @@ async function deriveKey(pin,salt){
 async function vaultEncrypt(pin,obj,vkey){
   vkey=vkey||"omni_vault";
   // CRITICAL GUARD: never overwrite a non-empty vault with empty data (prevents data loss on refresh)
-  if(vkey==="omni_vault"&&Array.isArray(obj)&&obj.length===0){
-    try{
-      const existing=localStorage.getItem("omni_vault");
-      if(existing&&existing.length>100){
-        // Verify existing has data by checking decrypted length
-        console.warn("Blocked empty overwrite of non-empty vault");
-        return;
-      }
-    }catch(e){}
+  if(vkey==="omni_vault"){
+    const emptyVault=Array.isArray(obj)?obj.length===0:(obj&&Array.isArray(obj.profiles)?obj.profiles.length===0&&!obj.userProfile.pic:false);
+    if(emptyVault){
+      try{
+        const existing=localStorage.getItem("omni_vault");
+        if(existing&&existing.length>100){
+          // Verify existing has data by checking decrypted length
+          console.warn("Blocked empty overwrite of non-empty vault");
+          return;
+        }
+      }catch(e){}
+    }
   }
   const salt=crypto.getRandomValues(new Uint8Array(16));
   const iv=crypto.getRandomValues(new Uint8Array(12));
@@ -937,8 +941,10 @@ async function pinDone(){
       if(pinTmp!==pin){pinTmp=null;pinMsg("Didn't match — try again");return;}
       // keep any restored profiles in memory (from backup restore); only start empty if truly fresh
       if(profiles.length===0&&pendingCard){profiles.push(pendingCard);stat("cards");}
+      // seed user profile name from onboarding
+      if(!userProfile.name&&pendingCard&&pendingCard.name)userProfile.name=pendingCard.name;
       sessionPin=pin;
-      await vaultEncrypt(pin,profiles);
+      await vaultEncrypt(pin,packVault());
       // Auto-enable cloud backup so cards survive logout/login/new device.
       // Silent: no prompts. The Sync ID is shown later in Settings → Cloud Sync.
       if(!syncEnabled()){
@@ -959,7 +965,7 @@ async function pinDone(){
       unlock();return;
     }
     if(hasVault()){
-      profiles=await vaultDecrypt(pin);
+      unpackVault(await vaultDecrypt(pin));
       await loadEncounters(pin);
       sessionPin=pin;pinFailReset();haptic(15);
       // remember working PIN length for this device
@@ -971,7 +977,7 @@ async function pinDone(){
     if(stored&&hashPin(pin)===stored){
       profiles=JSON.parse(localStorage.getItem("omni_profiles")||"[]");
       sessionPin=pin;
-      await vaultEncrypt(pin,profiles);
+      await vaultEncrypt(pin,packVault());
       localStorage.removeItem("omni_profiles");localStorage.removeItem("omni_pin");
       pinFailReset();unlock();return;
     }
@@ -1027,7 +1033,7 @@ $("quickSave").onclick=()=>{
 async function doLock(){
   // save any pending changes before wiping memory — but ALWAYS wipe even if save fails
   try{await saveAll();}catch(e){console.warn("Lock-time save failed:",e);}
-  pinBuf="";pinTmp=null;sessionPin=null;profiles=[];encounters=[];curId=null;buildDots();updateGo();
+  pinBuf="";pinTmp=null;sessionPin=null;profiles=[];encounters=[];userProfile={pic:null,picPos:"50% 50%",name:""};curId=null;buildDots();updateGo();
   const has=hasVault()||hasLegacy();
   pinMsg(has?"Enter your PIN":"Set a 6-digit PIN");
   $("forgotBtn").hidden=!has;
@@ -1095,7 +1101,10 @@ $("resetRestore").onclick=()=>{
         }
         if(!d.profiles||!Array.isArray(d.profiles))throw 0;
         if(confirm("Restore "+d.profiles.length+" cards from backup? This replaces what's on this device.")){
-          profiles=d.profiles;sessionPin=null;
+          profiles=d.profiles;
+          // seed user profile from first card if it has a picture
+          if(profiles.length&&profiles[0].pic){userProfile.pic=profiles[0].pic;userProfile.picPos=profiles[0].picPos||"50% 50%";if(profiles[0].name)userProfile.name=profiles[0].name;}
+          sessionPin=null;
           localStorage.removeItem("omni_vault");localStorage.removeItem("omni_vault_enc");localStorage.removeItem("omni_profiles");localStorage.removeItem("omni_pin");
           // do NOT call doLock() — it would wipe the restored profiles from memory.
           // Go straight to PIN setup, keeping profiles in memory for encryption.
@@ -1527,10 +1536,19 @@ $("bpLater").onclick=()=>{
 
 /* ---------- picture reposition ---------- */
 let reposDrag=null;
+let reposMode="profile";
 $("reposBtn").onclick=()=>{
-  const p=getP();if(!p||!p.pic){alert("Choose a picture first.");return;}
-  $("reposImg").src=p.pic;
-  $("reposImg").style.objectPosition=p.picPos||"50% 50%";
+  if(!userProfile.pic){alert("Choose a picture first.");return;}
+  reposMode="profile";
+  $("reposImg").src=userProfile.pic;
+  $("reposImg").style.objectPosition=userProfile.picPos||"50% 50%";
+  $("reposOverlay").hidden=false;
+};
+$("coverReposBtn").onclick=()=>{
+  const p=getP();if(!p||!p.cover){alert("Choose a cover first.");return;}
+  reposMode="cover";
+  $("reposImg").src=p.cover;
+  $("reposImg").style.objectPosition=p.coverPos||"50% 50%";
   $("reposOverlay").hidden=false;
 };
 function reposPos(ev){
@@ -1550,8 +1568,13 @@ $("reposCircle").addEventListener("pointermove",ev=>{if(reposDrag)reposPos(ev);}
 $("reposCircle").addEventListener("pointerup",()=>{reposDrag=null;});
 $("reposCircle").addEventListener("pointercancel",()=>{reposDrag=null;});
 $("reposDone").onclick=async()=>{
-  const p=getP();if(p)p.picPos=$("reposImg").style.objectPosition;
-  await saveAll();$("reposOverlay").hidden=true;renderPic();renderFlip();
+  const pos=$("reposImg").style.objectPosition;
+  if(reposMode==="cover"){
+    const p=getP();if(p){p.coverPos=pos;await saveAll();}
+  }else{
+    userProfile.picPos=pos;await saveAll();
+  }
+  $("reposOverlay").hidden=true;renderPic();renderFlip();renderCover();
 };
 $("reposCancel").onclick=()=>{$("reposOverlay").hidden=true;};
 
@@ -1584,6 +1607,30 @@ function toast(msg){
 let profiles=[];
 let curId=null, searchQ="";
 
+/* ---------- user profile (USER-level, independent of cards) ---------- */
+let userProfile={pic:null,picPos:"50% 50%",name:""};
+// Vault format v2: {v:2, profiles:[...], userProfile:{...}}
+// Old vaults store just the profiles array — unpackVault handles both.
+function packVault(){return{v:2,profiles:profiles,userProfile:userProfile};}
+function unpackVault(data){
+  if(data&&typeof data==="object"&&!Array.isArray(data)&&data.v===2){
+    profiles=Array.isArray(data.profiles)?data.profiles:[];
+    userProfile=(data.userProfile&&typeof data.userProfile==="object")
+      ? {pic:data.userProfile.pic||null,picPos:data.userProfile.picPos||"50% 50%",name:data.userProfile.name||""}
+      : {pic:null,picPos:"50% 50%",name:""};
+  }else{
+    // legacy: vault holds the profiles array directly
+    profiles=Array.isArray(data)?data:[];
+    userProfile={pic:null,picPos:"50% 50%",name:""};
+  }
+  // migration: adopt first card's picture as the user photo if none set
+  if(!userProfile.pic&&profiles.length&&profiles[0].pic){
+    userProfile.pic=profiles[0].pic;
+    userProfile.picPos=profiles[0].picPos||"50% 50%";
+    if(!userProfile.name&&profiles[0].name)userProfile.name=profiles[0].name;
+  }
+}
+
 /* WCAG AA contrast: pick readable text color for any card background */
 function luminance(hex){
   const c=hex.replace('#','');
@@ -1600,7 +1647,7 @@ let _saving=false;
 async function saveAll(){
   if(!sessionPin||_saving)return;
   _saving=true;
-  try{await shrinkImgs();await vaultEncrypt(sessionPin,profiles);await saveEncounters();}
+  try{await shrinkImgs();await vaultEncrypt(sessionPin,packVault());await saveEncounters();}
   finally{_saving=false;}
 }
 async function shrinkOne(dataUrl,maxPx,quality){
@@ -1613,11 +1660,17 @@ async function shrinkOne(dataUrl,maxPx,quality){
 }
 async function shrinkImgs(aggressive){
   for(const p of profiles){for(const k of["pic","cover"]){
-    // pic: 220px/0.8 ; cover: 600px/0.7 normal, 400px/0.6 aggressive fallback
-    const M=k=="pic"?220:(aggressive?400:600),Q=k=="pic"?0.8:(aggressive?0.6:0.7);
-    const L=k=="pic"?60000:150000;
+    // pic: 600px/0.9 ; cover: 1200px/0.85 normal, 800px/0.8 aggressive fallback
+    const M=k=="pic"?600:(aggressive?800:1200),Q=k=="pic"?0.9:(aggressive?0.8:0.85);
+    const L=k=="pic"?250000:600000;
     if(p[k]&&p[k].length>L){p[k]=await shrinkOne(p[k],M,Q);}
   }}
+  // user profile pic: preserve quality, only shrink if huge
+  try{
+    if(userProfile&&userProfile.pic&&userProfile.pic.length>400000){
+      userProfile.pic=await shrinkOne(userProfile.pic,800,0.9);
+    }
+  }catch(e){}
 }
 const lines=s=>(s||"").split("\n").map(x=>x.trim()).filter(Boolean);
 /* ---------- lock screen photo background ---------- */
@@ -1632,11 +1685,10 @@ function applyLockBg(){
 async function cacheLockBg(){
   try{
     if(!lockPhotoEnabled()){try{localStorage.removeItem("omni_lock_bg");}catch(e){}return;}
-    const p=profiles&&profiles[0];
-    const pic=p&&p.pic;
+    const pic=userProfile&&userProfile.pic;
     if(!pic||typeof pic!=="string"||!pic.startsWith("data:")){try{localStorage.removeItem("omni_lock_bg");}catch(e){}return;}
     let small=pic;
-    if(pic.length>40000)small=await shrinkOne(pic,200,0.5);
+    if(pic.length>100000)small=await shrinkOne(pic,400,0.8);
     try{localStorage.setItem("omni_lock_bg",small);}catch(e){}
   }catch(e){}
 }
@@ -1773,7 +1825,6 @@ function renderFlip(){
     fb.style.backgroundImage=`url("${p.cover}")`;
     fb.style.backgroundSize="cover";
     fb.style.backgroundPosition=p.coverPos||"50% 50%";
-    fb.style.background="";
   }else{
     fb.style.backgroundImage="";
     fb.style.background=p.coverColor||"";
@@ -1799,9 +1850,8 @@ function fillDetail(){
   buildShare();
 }
 function renderPic(){
-  const p=getP();
-  const pos=p?(p.picPos||"50% 50%"):"50% 50%";
-  $("picShow").innerHTML=p&&p.pic?`<img src="${p.pic}" style="object-position:${pos}" alt="">`:`<div class="ph">${initials(p?p.name:"?")}</div>`;
+  const pos=userProfile?(userProfile.picPos||"50% 50%"):"50% 50%";
+  $("picShow").innerHTML=userProfile&&userProfile.pic?`<img src="${userProfile.pic}" style="object-position:${pos}" alt="">`:`<div class="ph">${initials(userProfile?userProfile.name:"?")}</div>`;
 }
 $("picBtn").onclick=()=>$("picInput").click();
 /* dominant color from image (for card back) */
@@ -1829,6 +1879,7 @@ function renderCover(){
   if(p&&p.cover){el.innerHTML=`<img src="${p.cover}" style="width:100%;height:100%;object-fit:cover;object-position:${p.coverPos||"50% 50%"}" alt="">`;}
   else{el.innerHTML=`No cover image`;}
   $("coverClear").hidden=!(p&&p.cover);
+  $("coverReposBtn").hidden=!(p&&p.cover);
 }
 $("coverBtn").onclick=()=>$("coverInput").click();
 $("coverInput").onchange=e=>{
@@ -1836,16 +1887,18 @@ $("coverInput").onchange=e=>{
   const r=new FileReader();
   r.onload=()=>{
     const img=new Image();
-    img.onload=()=>{
+    img.onload=async()=>{
       const c=document.createElement("canvas");
-      const s=800/Math.max(img.width,img.height);
+      const s=1200/Math.max(img.width,img.height);
       c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
       c.getContext("2d").drawImage(img,0,0,c.width,c.height);
       const p=getP();if(!p)return;
-      p.cover=c.toDataURL("image/jpeg",0.82);
+      p.cover=c.toDataURL("image/jpeg",0.9);
       p.coverPos="50% 50%";
+      await saveAll();
       sampleCoverColor(p.cover,col=>{if(col){p.coverColor=col;renderFlip();}});
       renderCover();renderFlip();
+      toast("Cover saved");
     };
     img.src=r.result;
   };
@@ -1855,20 +1908,18 @@ $("coverInput").onchange=e=>{
 $("coverClear").onclick=()=>{const p=getP();if(!p)return;p.cover="";p.coverColor="";renderCover();renderFlip();};
 $("picInput").onchange=e=>{
   const f=e.target.files[0];if(!f)return;
-  let p=getP();
-  if(!p&&profiles.length){p=profiles[0];curId=p.id;}
-  if(!p){alert("Create a card first, then add your picture.");e.target.value="";return;}
   const r=new FileReader();
   r.onload=()=>{
     const img=new Image();
     img.onload=async()=>{
       const c=document.createElement("canvas");
-      const s=220/Math.max(img.width,img.height);
+      const s=600/Math.max(img.width,img.height);
       c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
       c.getContext("2d").drawImage(img,0,0,c.width,c.height);
-      p.pic=c.toDataURL("image/jpeg",0.8);
+      userProfile.pic=c.toDataURL("image/jpeg",0.92);
       await saveAll();
       renderPic();
+      try{cacheLockBg();}catch(err){}
       toast("Profile picture saved");
     };
     img.src=r.result;
@@ -1899,7 +1950,7 @@ $("saveBtn2").onclick=async()=>{
     try{
       if(attempt===1)await shrinkImgs(true);  // aggressive: 400px/0.6
       if(attempt===2)await shrinkImgsUltra();  // ultra: 300px/0.5, strip covers
-      await vaultEncrypt(sessionPin,profiles);
+      await vaultEncrypt(sessionPin,packVault());
       saved=true;
     }catch(e){lastErr=e;}
   }
@@ -1920,11 +1971,11 @@ $("saveBtn2").onclick=async()=>{
     toast("⚠️ Save failed — storage is full. Try removing the card cover photo, then save again");
   }
 };
-// Ultra-aggressive shrink for when storage is critically full
+// Emergency shrink for when storage is critically full (last resort only)
 async function shrinkImgsUltra(){
   for(const p of profiles){
-    if(p.pic&&p.pic.length>30000){p.pic=await shrinkOne(p.pic,150,0.5);}
-    if(p.cover&&p.cover.length>50000){p.cover=await shrinkOne(p.cover,300,0.5);}
+    if(p.pic&&p.pic.length>100000){p.pic=await shrinkOne(p.pic,400,0.7);}
+    if(p.cover&&p.cover.length>200000){p.cover=await shrinkOne(p.cover,800,0.7);}
   }
 }
 $("dupBtn").onclick=async()=>{
@@ -2153,7 +2204,8 @@ async function vaultUpload(silent){
   if(sessionPin){
     try{
       const local = await vaultDecrypt(sessionPin);
-      if(Array.isArray(local) && local.length === 0){
+      const localProfiles=Array.isArray(local)?local:(local&&Array.isArray(local.profiles)?local.profiles:[]);
+      if(localProfiles.length === 0){
         const rl = await fetch(STATS_URL + "/api/vault/load?sync_id=" + encodeURIComponent(id));
         if(rl.ok){ if(!silent) syncMsg("Cloud has your cards — not overwriting with empty", false); return false; }
       }
@@ -2200,7 +2252,7 @@ async function vaultPull(){
     // Re-decrypt with the current session PIN to refresh in-memory cards
     if(sessionPin){
       try{
-        profiles = await vaultDecrypt(sessionPin);
+        unpackVault(await vaultDecrypt(sessionPin));
         renderCards();
       }catch(e){
         // PIN doesn't match the pulled vault — user needs to enter the right PIN
@@ -2232,7 +2284,7 @@ async function vaultCheckRemote(){
       localStorage.setItem("omni_vault", j.blob);
       localStorage.setItem(SYNC_LAST_KEY, String(j.updated_at));
       try{
-        profiles = await vaultDecrypt(sessionPin);
+        unpackVault(await vaultDecrypt(sessionPin));
         renderCards();
         toast("☁️ Updated from cloud");
       }catch(e){ /* PIN mismatch — leave local as-is */ }
@@ -2557,12 +2609,15 @@ function openProfile(){
   $("ownerScreen").hidden=true;$("backupScreen").hidden=true;
   $("profileScreen").hidden=false;window.scrollTo(0,0);
   renderPic();
-  const p=getP();
-  $("profileInfo").innerHTML=p
-    ? `<div class="statrow"><span>Name</span><b>${esc(p.name||"—")}</b></div>`
-      + (p.org?`<div class="statrow"><span>Organization</span><b>${esc(p.org)}</b></div>`:"")
-      + (p.title?`<div class="statrow"><span>Title</span><b>${esc(p.title)}</b></div>`:"")
-    : `<p class="muted">No card selected.</p>`;
+  $("profileInfo").innerHTML=
+    `<div class="statrow"><span>Your name</span></div>`
+    + `<input id="profileNameInput" placeholder="Your name" value="${esc(userProfile.name||"")}" autocomplete="off" style="width:100%;margin:4px 0" aria-label="Your name">`
+    + `<button class="small" id="profileNameSave" style="width:100%;margin-top:6px">Save</button>`;
+  $("profileNameSave").onclick=async()=>{
+    userProfile.name=$("profileNameInput").value.trim();
+    await saveAll();renderPic();
+    toast("Profile saved");
+  };
 }
 $("profileBack").onclick=()=>{$("profileScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
 
@@ -2679,7 +2734,9 @@ $("importInput").onchange=e=>{
       }else if(d.profiles&&Array.isArray(d.profiles)){
         // Legacy v2 plaintext backup
         if(confirm(`Import ${d.profiles.length} card(s)? This replaces your current cards.`)){
-          profiles=d.profiles;await saveAll();renderCards();
+          profiles=d.profiles;
+          if(profiles.length&&profiles[0].pic&&!userProfile.pic){userProfile.pic=profiles[0].pic;userProfile.picPos=profiles[0].picPos||"50% 50%";}
+          await saveAll();renderCards();
         }
       }else throw 0;
     }catch(err){alert("That file doesn't look like an OMNI backup.");}
