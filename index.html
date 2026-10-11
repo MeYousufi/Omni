@@ -746,7 +746,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <p class="muted">Share your invite link — they get <b>7 days of Pro free</b>, you earn <b><span id="inviteTokenRate">100</span> tokens</b> per friend. Tokens buy premium card designs.</p>
     <div class="statrow"><span>🪙 Your tokens</span><b id="bonusBal">0</b></div>
     <div style="display:flex;gap:8px;margin-top:10px">
-      <input id="inviteLink" readonly style="flex:1;margin:0" aria-label="Your invite link">
+      <input id="inviteLink" readonly style="flex:1;margin:0" aria-label="Your invite code">
       <button class="small" id="copyInvite" style="flex:none">Copy</button>
     </div>
     <button class="small gray" id="shareInviteBtn" style="width:100%;margin-top:8px">Share invite link…</button>
@@ -1338,9 +1338,9 @@ async function collectPendingInvites(){
   }catch(e){}
 }
 async function copyInviteLink(){
-  const l=inviteLink();
-  try{await navigator.clipboard.writeText(l);toast("Invite link copied ✓");}
-  catch(e){prompt("Copy your invite link",l);}
+  const c=myInviteCode();
+  try{await navigator.clipboard.writeText(c);toast("Invite code copied ✓");}
+  catch(e){prompt("Copy your invite code",c);}
 }
 $("copyInvite").onclick=copyInviteLink;
 $("shareInviteBtn").onclick=async()=>{
@@ -1383,7 +1383,7 @@ function renderCreditBoxes(){
   try{$("inviteBox").hidden=false;}catch(e){}
   const bb=$("buyBox");if(bb)bb.hidden=true;
   try{
-    $("inviteLink").value=inviteLink();
+    $("inviteLink").value=myInviteCode();
     $("bonusBal").textContent=(userPlan.tokens||0)+" 🪙";
     const ib=$("inviteBonusAmt");if(ib)ib.textContent=tokensPerInvite();
     const itr=$("inviteTokenRate");if(itr)itr.textContent=tokensPerInvite();
