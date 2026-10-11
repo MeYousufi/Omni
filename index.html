@@ -51,6 +51,10 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 #lockScreen>*:not(#lockBg){position:relative;z-index:1}
 #welcomeScreen[hidden]{display:none}
 #lockScreen h1{font-size:46px;letter-spacing:.2em;margin:0 0 8px;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow))}
+#lockScreen h1.logo-anim .logo-o{display:inline-block;animation:oSpin 2s ease-in-out}
+#lockScreen h1.logo-anim .logo-rest{display:inline-block;animation:mniSlide .8s ease-out 2s both}
+@keyframes oSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes mniSlide{from{transform:translateX(60px);opacity:0}to{transform:translateX(0);opacity:1}}
 .dots{display:flex;gap:14px;margin:22px 0}
 .dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--muted);transition:all .15s}
 .dot.on{background:var(--accent);border-color:var(--accent);box-shadow:0 0 12px var(--glow)}
@@ -359,7 +363,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <!-- LOCK -->
 <div id="lockScreen" hidden>
   <div id="lockBg" aria-hidden="true"></div>
-  <h1>OMNI</h1>
+  <h1 class="logo-anim"><span class="logo-o">O</span><span class="logo-rest">MNI</span></h1>
   <div class="muted" style="letter-spacing:.1em">SHARE ONLY WHAT YOU CHOOSE</div>
   <button id="bioUnlockBtn" hidden style="margin-top:22px;width:100%;max-width:280px;font-size:16px;padding:14px;min-height:52px">Unlock with biometrics</button>
   <button id="bioEnrollBtn" class="gray" hidden style="margin-top:18px;width:100%;max-width:280px;font-size:13px;">Set up biometrics for faster unlock</button>
@@ -1114,7 +1118,18 @@ async function doLock(){
   $("lockSyncBtn").hidden=has;$("lockSyncForm").hidden=true;
   const locked=pinLockedLeft();
   if(locked>0)pinMsg("Too many tries — wait "+locked+"s");
-  $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("profileScreen").hidden=true;$("ownerScreen").hidden=true;$("backupScreen").hidden=true;$("welcomeScreen").hidden=true;$("lockScreen").hidden=false;applyLockBg();
+  $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("profileScreen").hidden=true;$("ownerScreen").hidden=true;$("backupScreen").hidden=true;$("welcomeScreen").hidden=true;$("lockScreen").hidden=false;applyLockBg();replayLogo();
+}
+function replayLogo(){
+  try{
+    const h=document.querySelector("#lockScreen h1.logo-anim");
+    if(!h)return;
+    h.style.animation="none";h.offsetHeight;
+    const o=h.querySelector(".logo-o"),r=h.querySelector(".logo-rest");
+    if(o){o.style.animation="none";o.offsetHeight;o.style.animation="";}
+    if(r){r.style.animation="none";r.offsetHeight;r.style.animation="";}
+    h.style.animation="";
+  }catch(e){}
 }
 $("lockBtn").onclick=doLock;
 /* forgot PIN: 3-step safety flow */
