@@ -44,8 +44,11 @@ label.chk span{line-height:1.45}
 pre{white-space:pre-wrap;font:inherit;margin:0}
 #qr{background:#fff;padding:10px;border-radius:12px;width:fit-content;margin-top:12px;display:none;box-shadow:0 0 24px rgba(79,140,255,.25)}
 /* lock screen */
-#lockScreen{min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
+#lockScreen{min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;position:relative;overflow:hidden}
 #lockScreen[hidden]{display:none}
+#lockBg{position:absolute;inset:-40px;z-index:0;background-size:cover;background-position:center;filter:blur(24px) brightness(.5) saturate(1.1)}
+#lockBg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,6,10,.5),rgba(5,6,10,.82))}
+#lockScreen>*:not(#lockBg){position:relative;z-index:1}
 #welcomeScreen[hidden]{display:none}
 #lockScreen h1{font-size:46px;letter-spacing:.2em;margin:0 0 8px;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow))}
 .dots{display:flex;gap:14px;margin:22px 0}
@@ -330,6 +333,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 
 <!-- LOCK -->
 <div id="lockScreen" hidden>
+  <div id="lockBg" aria-hidden="true"></div>
   <h1>OMNI</h1>
   <div class="muted" style="letter-spacing:.1em">SHARE ONLY WHAT YOU CHOOSE</div>
   <button id="bioUnlockBtn" hidden style="margin-top:22px;width:100%;max-width:280px;font-size:16px;padding:14px;min-height:52px">Unlock with biometrics</button>
@@ -415,10 +419,11 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <span class="navmenu-title">Menu</span>
       <button class="iconbtn small" id="navMenuClose" aria-label="Close menu">✕</button>
     </div>
+    <button class="navitem" id="navProfile"><span class="navicon" aria-hidden="true">👤</span>Profile</button>
     <button class="navitem" id="navDash"><span class="navicon" aria-hidden="true">📊</span>Dashboard</button>
-    <button class="navitem" id="navBackup"><span class="navicon" aria-hidden="true">💾</span>Back up</button>
     <button class="navitem" id="navOwner"><span class="navicon" aria-hidden="true">👑</span>Owner controls</button>
-    <button class="navitem" id="navLock"><span class="navicon" aria-hidden="true">🔒</span>Lock app</button>
+    <button class="navitem" id="navBackup"><span class="navicon" aria-hidden="true">💾</span>Back up</button>
+    <button class="navitem" id="navLock"><span class="navicon" aria-hidden="true">🔒</span>Lockout</button>
   </aside>
 </div>
 
@@ -438,7 +443,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 
 <!-- HOME -->
 <div class="wrap" id="homeScreen" hidden>
-  <div class="brand"><h1>OMNI</h1><div><button class="iconbtn" id="menuBtn" aria-label="Open menu" aria-haspopup="true">☰</button><span id="legacyHeaderBtns" style="display:none"><button class="iconbtn small" id="ownerBtn" aria-label="Owner controls">👑</button><button class="iconbtn small" id="dashBtn" aria-label="Open dashboard">📊</button><button class="iconbtn small" id="backupBtn" aria-label="Back up cards">Back up</button><button class="iconbtn" id="lockBtn" aria-label="Lock app">Lock</button></span></div></div>
+  <div class="brand"><h1>OMNI</h1><div><button class="iconbtn" id="menuBtn" aria-label="Open menu" aria-haspopup="true">☰</button><span id="legacyHeaderBtns" style="display:none"><button class="iconbtn small" id="ownerBtn" aria-label="Owner controls">👑</button><button class="iconbtn small" id="dashBtn" aria-label="Open dashboard">📊</button><button class="iconbtn small" id="backupBtn" aria-label="Back up cards">Back up</button><button class="iconbtn" id="lockBtn" aria-label="Lockout">Lock</button></span></div></div>
   <button id="presentShareBtn" class="present-share" aria-label="Share your card now">Share my card</button>
   <div id="offlineBar" class="box" hidden style="border-color:#7a5a2b;text-align:center;padding:10px">📴 Offline — you can view and share saved cards.<br><span class="muted">Backing up and cloud stats need internet.</span></div>
   <div id="backupNudge" class="box" hidden style="border-color:#7a5a2b;background:linear-gradient(160deg,#1d1812,#14110c)">
@@ -555,14 +560,11 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <button id="reposCancel" style="background:none;border:0;box-shadow:none;color:var(--muted);text-decoration:underline;margin-top:16px">Cancel</button>
 </div>
 
-<!-- DASHBOARD -->
-<div class="wrap" id="dashScreen" hidden>
-  <div class="backrow"><button class="iconbtn" id="dashBack">← Back</button></div>
-  <div class="brand"><h1>Dashboard</h1></div>
-  <div class="muted" style="letter-spacing:.08em;font-size:11px">HOW YOUR APP IS DOING</div>
-    <details class="dashgroup" id="dgAccount" open>
-    <summary><span>My account</span></summary>
-<div class="box">
+<!-- PROFILE -->
+<div class="wrap" id="profileScreen" hidden>
+  <div class="backrow"><button class="iconbtn" id="profileBack" aria-label="Back to cards">← Back</button></div>
+  <div class="brand"><h1>Profile</h1></div>
+  <div class="box">
     <h3 class="sec" style="margin-top:0">Profile picture</h3>
     <p class="muted">Your photo — shown on your cards.</p>
     <div class="picwrap">
@@ -572,6 +574,18 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <button class="chg" id="reposBtn">Reposition picture</button>
     </div>
   </div>
+  <div class="box">
+    <h3 class="sec" style="margin-top:0">Your info</h3>
+    <div id="profileInfo"><p class="muted">No card selected.</p></div>
+  </div>
+</div>
+<!-- DASHBOARD -->
+<div class="wrap" id="dashScreen" hidden>
+  <div class="backrow"><button class="iconbtn" id="dashBack">← Back</button></div>
+  <div class="brand"><h1>Dashboard</h1></div>
+  <div class="muted" style="letter-spacing:.08em;font-size:11px">HOW YOUR APP IS DOING</div>
+    <details class="dashgroup" id="dgAccount" open>
+    <summary><span>My account</span></summary>
 <div class="box" id="pinBox">
     <h3 class="sec" style="margin-top:0">Device PIN</h3>
     <button class="small" id="changePinBtn" style="width:100%">Change PIN</button>
@@ -611,6 +625,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <div class="togglerow"><span>Share limits<br><span class="muted" style="font-size:12px">20 tracked shares / week</span></span><label class="switch"><input type="checkbox" id="tgLimits" aria-label="Toggle share limits"><span class="sl"></span></label></div>
       <div class="togglerow"><span>💌 Invite system<br><span class="muted" style="font-size:12px">100 bonus shares per invite</span></span><label class="switch"><input type="checkbox" id="tgInvites" aria-label="Toggle invite system"><span class="sl"></span></label></div>
       <div class="togglerow"><span>💳 Buy shares<br><span class="muted" style="font-size:12px">$3.99 per 100 shares</span></span><label class="switch"><input type="checkbox" id="tgBuy" aria-label="Toggle buy shares"><span class="sl"></span></label></div>
+      <div class="togglerow"><span>Lock screen photo<br><span class="muted" style="font-size:12px">Profile photo behind the PIN pad</span></span><label class="switch"><input type="checkbox" id="tgLockPhoto" aria-label="Toggle lock screen photo"><span class="sl"></span></label></div>
       <h3 class="sec">Users</h3>
       <p style="font-size:32px;font-weight:800;margin:8px 0" id="ownerUserCount">—</p>
       <p class="muted" style="font-size:12px" id="ownerUserSub">accounts created</p>
@@ -947,6 +962,7 @@ function unlock(){
   
   updateCreditUI();
   collectPendingInvites();
+  try{cacheLockBg();}catch(e){}
 }
 $("welcomeGo").onclick=()=>{
   localStorage.setItem("omni_welcomed","1");
@@ -991,7 +1007,7 @@ async function doLock(){
   $("lockSyncBtn").hidden=has;$("lockSyncForm").hidden=true;
   const locked=pinLockedLeft();
   if(locked>0)pinMsg("Too many tries — wait "+locked+"s");
-  $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("welcomeScreen").hidden=true;$("lockScreen").hidden=false;
+  $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("profileScreen").hidden=true;$("welcomeScreen").hidden=true;$("lockScreen").hidden=false;applyLockBg();
 }
 $("lockBtn").onclick=doLock;
 /* forgot PIN: 3-step safety flow */
@@ -1060,7 +1076,8 @@ $("resetRestore").onclick=()=>{
           pinMsg("Set a "+(localStorage.getItem("omni_pinlen")||"6")+"-digit PIN");
           $("forgotBtn").hidden=true;
           $("lockSyncBtn").hidden=false; // no vault on disk yet — cloud restore stays available
-          $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("welcomeScreen").hidden=true;$("lockScreen").hidden=false;
+          $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("profileScreen").hidden=true;$("welcomeScreen").hidden=true;$("lockScreen").hidden=false;
+          try{applyLockBg();}catch(e){}
           updateGo();
         }
       }catch(e){alert("Couldn't read that backup file.");}
@@ -1319,6 +1336,7 @@ function renderCreditBoxes(){
     $("tgLimits").checked=!!FLAGS.shareLimits;
     $("tgInvites").checked=inv;
     $("tgBuy").checked=buy;
+    try{$("tgLockPhoto").checked=lockPhotoEnabled();}catch(e){}
   }
 }
 async function setFlag(name,on){
@@ -1360,48 +1378,17 @@ document.addEventListener("DOMContentLoaded",()=>{
     }catch(e){msg.textContent="Couldn't reach server";msg.style.color="#e08080";}
   };
 });
-$("ownerUnlockBtn").onclick=async()=>{
-  // Check if an owner password exists yet
-  let hasOwner=true;
-  try{
-    const r=await fetch(STATS_URL+"/api/owner/status");
-    hasOwner=(await r.json()).hasOwner;
-  }catch(e){toast("Couldn't reach server");return;}
-  if(!hasOwner){
-    const p1=prompt("Create your owner password (8+ characters). Only you will know this:");
-    if(p1===null)return;
-    if(p1.length<8){alert("Password must be 8+ characters.");return;}
-    const p2=prompt("Confirm owner password:");
-    if(p2!==p1){alert("Passwords didn't match.");return;}
-    try{
-      const r=await fetch(STATS_URL+"/api/owner/setup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:p1})});
-      const j=await r.json();
-      if(j.ok&&j.token){
-        OWNER_TOKEN=j.token;
-        try{sessionStorage.setItem("omni_owner_token",OWNER_TOKEN);}catch(e){}
-        try{localStorage.setItem("omni_owner_unlocked","1");}catch(e){}
-        renderCreditBoxes();toast("Owner password set — controls unlocked");
-      }else alert("Setup failed: "+(j.error||"unknown"));
-    }catch(e){alert("Couldn't reach server.");}
-    return;
-  }
-  const pw=prompt("Enter owner password:");
-  if(pw===null)return;
-  try{
-    const r=await fetch(STATS_URL+"/api/owner/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pw})});
-    const j=await r.json();
-    if(j.ok&&j.token){
-      OWNER_TOKEN=j.token;
-      try{sessionStorage.setItem("omni_owner_token",OWNER_TOKEN);}catch(e){}
-      try{localStorage.setItem("omni_owner_unlocked","1");}catch(e){}
-      renderCreditBoxes();toast("Owner controls unlocked");
-    }else if(j.needSetup){toast("No owner password set yet.");}
-    else{toast("Wrong password.");}
-  }catch(e){toast("Couldn't reach server.");}
-};
+$("ownerUnlockBtn").onclick=async()=>{await ownerAuth();};
 $("tgLimits").onchange=e=>setFlag("shareLimits",e.target.checked);
 $("tgInvites").onchange=e=>setFlag("invites",e.target.checked);
 $("tgBuy").onchange=e=>setFlag("buyShares",e.target.checked);
+$("tgLockPhoto").onchange=e=>{
+  try{
+    if(e.target.checked){localStorage.setItem("omni_lockphoto","1");cacheLockBg();}
+    else{localStorage.setItem("omni_lockphoto","0");localStorage.removeItem("omni_lock_bg");}
+  }catch(err){}
+  try{applyLockBg();}catch(err2){}
+};
 /* Owner: real-time user count (auto-refreshes every 30s) */
 async function loadUserCount(){
   try{
@@ -1442,7 +1429,7 @@ $("dashBtn").onclick=async()=>{
   $("st_opens").textContent=s.opens||0;
   $("st_cards").textContent=s.cards||0;
   $("st_shares").textContent=(s.share||0)+(s.vcf||0)+(s.nfc||0);
-  $("homeScreen").hidden=true;$("dashScreen").hidden=false;window.scrollTo(0,0);
+  $("homeScreen").hidden=true;$("profileScreen").hidden=true;$("dashScreen").hidden=false;window.scrollTo(0,0);
   // share credits: refresh flags + boxes
   try{await loadFlags();}catch(e){}
   renderCreditBoxes();
@@ -1575,6 +1562,26 @@ async function shrinkImgs(aggressive){
   }}
 }
 const lines=s=>(s||"").split("\n").map(x=>x.trim()).filter(Boolean);
+/* ---------- lock screen photo background ---------- */
+function lockPhotoEnabled(){try{return localStorage.getItem("omni_lockphoto")!=="0";}catch(e){return true;}}
+function applyLockBg(){
+  const bg=$("lockBg");if(!bg)return;
+  let url="";
+  try{url=lockPhotoEnabled()?(localStorage.getItem("omni_lock_bg")||""):"";}catch(e){}
+  if(url&&url.startsWith("data:")){bg.style.backgroundImage=`url("${url}")`;bg.style.display="";}
+  else{bg.style.backgroundImage="";bg.style.display="none";}
+}
+async function cacheLockBg(){
+  try{
+    if(!lockPhotoEnabled()){try{localStorage.removeItem("omni_lock_bg");}catch(e){}return;}
+    const p=profiles&&profiles[0];
+    const pic=p&&p.pic;
+    if(!pic||typeof pic!=="string"||!pic.startsWith("data:")){try{localStorage.removeItem("omni_lock_bg");}catch(e){}return;}
+    let small=pic;
+    if(pic.length>40000)small=await shrinkOne(pic,200,0.5);
+    try{localStorage.setItem("omni_lock_bg",small);}catch(e){}
+  }catch(e){}
+}
 const getP=()=>profiles.find(p=>p.id===curId);
 const initials=n=>(n||"?").trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
 
@@ -1658,7 +1665,7 @@ $("fabPlus").onclick=()=>{
 };
 function openDetail(id,toShare){
   curId=id;
-  $("homeScreen").hidden=true;$("detailScreen").hidden=false;
+  $("homeScreen").hidden=true;$("profileScreen").hidden=true;$("detailScreen").hidden=false;
   fillDetail();window.scrollTo(0,0);
   if(toShare)setTimeout(()=>{const s=$("shareBox");if(s&&!s.hidden){const d=$("dgShareCard");if(d)d.open=true;s.scrollIntoView({behavior:"smooth",block:"center"});}},120);
 }
@@ -2479,10 +2486,70 @@ function closeNavMenu(){
 $("menuBtn").onclick=openNavMenu;
 $("navMenuClose").onclick=closeNavMenu;
 $("navMenuBackdrop").onclick=closeNavMenu;
+$("navProfile").onclick=()=>{closeNavMenu();openProfile();};
 $("navDash").onclick=()=>{closeNavMenu();$("dashBtn").onclick();};
+$("navOwner").onclick=async()=>{closeNavMenu();if(!await ownerAuth())return;$("ownerBtn").onclick();};
 $("navBackup").onclick=()=>{closeNavMenu();$("backupBtn").onclick();};
-$("navOwner").onclick=()=>{closeNavMenu();$("ownerBtn").onclick();};
 $("navLock").onclick=()=>{closeNavMenu();$("lockBtn").onclick();};
+
+/* ---------- profile view ---------- */
+function openProfile(){
+  $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;
+  $("profileScreen").hidden=false;window.scrollTo(0,0);
+  renderPic();
+  const p=getP();
+  $("profileInfo").innerHTML=p
+    ? `<div class="statrow"><span>Name</span><b>${esc(p.name||"—")}</b></div>`
+      + (p.org?`<div class="statrow"><span>Organization</span><b>${esc(p.org)}</b></div>`:"")
+      + (p.title?`<div class="statrow"><span>Title</span><b>${esc(p.title)}</b></div>`:"")
+    : `<p class="muted">No card selected.</p>`;
+}
+$("profileBack").onclick=()=>{$("profileScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
+
+/* ---------- owner password gate (reusable) ---------- */
+async function ownerAuth(){
+  // Returns true if owner is authenticated (prompts for password if needed)
+  try{
+    if(localStorage.getItem("omni_owner_unlocked")==="1"&&OWNER_TOKEN)return true;
+  }catch(e){}
+  let hasOwner=true;
+  try{
+    const r=await fetch(STATS_URL+"/api/owner/status");
+    hasOwner=(await r.json()).hasOwner;
+  }catch(e){toast("Couldn't reach server");return false;}
+  if(!hasOwner){
+    const p1=prompt("Create your owner password (8+ characters). Only you will know this:");
+    if(p1===null)return false;
+    if(p1.length<8){alert("Password must be 8+ characters.");return false;}
+    const p2=prompt("Confirm owner password:");
+    if(p2!==p1){alert("Passwords didn't match.");return false;}
+    try{
+      const r=await fetch(STATS_URL+"/api/owner/setup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:p1})});
+      const j=await r.json();
+      if(j.ok&&j.token){
+        OWNER_TOKEN=j.token;
+        try{sessionStorage.setItem("omni_owner_token",OWNER_TOKEN);}catch(e){}
+        try{localStorage.setItem("omni_owner_unlocked","1");}catch(e){}
+        renderCreditBoxes();toast("Owner password set — controls unlocked");
+        return true;
+      }else{alert("Setup failed: "+(j.error||"unknown"));return false;}
+    }catch(e){alert("Couldn't reach server.");return false;}
+  }
+  const pw=prompt("Enter owner password:");
+  if(pw===null)return false;
+  try{
+    const r=await fetch(STATS_URL+"/api/owner/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pw})});
+    const j=await r.json();
+    if(j.ok&&j.token){
+      OWNER_TOKEN=j.token;
+      try{sessionStorage.setItem("omni_owner_token",OWNER_TOKEN);}catch(e){}
+      try{localStorage.setItem("omni_owner_unlocked","1");}catch(e){}
+      renderCreditBoxes();toast("Owner controls unlocked");
+      return true;
+    }else if(j.needSetup){toast("No owner password set yet.");return false;}
+    else{toast("Wrong password.");return false;}
+  }catch(e){toast("Couldn't reach server.");return false;}
+}
 // Escape key closes the menu
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNavMenu();});
 
@@ -2948,6 +3015,7 @@ window.addEventListener("online",()=>{
     if(has)pinMsg("Enter your PIN");
     $("forgotBtn").hidden=!has;
     $("lockSyncBtn").hidden=has; // "Restore my cards from cloud" only on fresh installs
+    try{applyLockBg();}catch(e){}
   }
   updateGo();
   // share credits: fetch flags, then process invite / purchase deep links
