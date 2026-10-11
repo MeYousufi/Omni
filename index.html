@@ -423,6 +423,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <button class="navitem" id="navDash"><span class="navicon" aria-hidden="true">📊</span>Dashboard</button>
     <button class="navitem" id="navOwner"><span class="navicon" aria-hidden="true">👑</span>Owner controls</button>
     <button class="navitem" id="navBackup"><span class="navicon" aria-hidden="true">💾</span>Back up</button>
+    <button class="navitem" id="navConnect"><span class="navicon" aria-hidden="true">✉️</span>Connect</button>
     <button class="navitem" id="navLock"><span class="navicon" aria-hidden="true">🔒</span>Lockout</button>
   </aside>
 </div>
@@ -2490,6 +2491,7 @@ $("navProfile").onclick=()=>{closeNavMenu();openProfile();};
 $("navDash").onclick=()=>{closeNavMenu();$("dashBtn").onclick();};
 $("navOwner").onclick=async()=>{closeNavMenu();if(!await ownerAuth())return;$("ownerBtn").onclick();};
 $("navBackup").onclick=()=>{closeNavMenu();$("backupBtn").onclick();};
+$("navConnect").onclick=()=>{closeNavMenu();window.location.href="mailto:hello@omni-tap.com?subject=OMNI%20Question";};
 $("navLock").onclick=()=>{closeNavMenu();$("lockBtn").onclick();};
 
 /* ---------- profile view ---------- */
