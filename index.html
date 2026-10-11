@@ -120,7 +120,7 @@ a.wrow:active{background:rgba(255,255,255,.05)}
 .flipwrap{perspective:1000px;margin-top:6px;cursor:pointer}
 .flipinner{position:relative;width:100%;height:230px;transition:transform .55s;transform-style:preserve-3d}
 .flipwrap.flipped .flipinner{transform:rotateY(180deg)}
-.flipfront,.flipback{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:20px;overflow:hidden;
+.flipfront,.flipback{position:absolute;top:0;left:0;right:0;bottom:0;height:230px;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:20px;overflow:hidden;
   -webkit-transform:translateZ(0);transform:translateZ(0);
   background:linear-gradient(#141824,#10131b) padding-box,linear-gradient(135deg,rgba(79,140,255,.6),rgba(139,92,246,.5)) border-box;border:1px solid transparent;
   box-shadow:0 8px 30px rgba(0,0,0,.5),0 0 24px rgba(79,140,255,.15)}
@@ -144,9 +144,7 @@ a.wrow:active{background:rgba(255,255,255,.05)}
 .flipfront .ftag{margin-top:10px;font-size:14px;color:rgba(255,255,255,.88);font-weight:500;position:relative;z-index:1}
 .flipfront .ftag{color:var(--muted);font-size:12px;margin-top:6px}
 .flipback{transform:rotateY(180deg) translateZ(1px);-webkit-transform:rotateY(180deg) translateZ(1px);padding:16px;overflow-y:auto}
-.flipback.has-cover-back a{text-shadow:0 1px 3px rgba(0,0,0,.8);background:rgba(0,0,0,.45)}
-.flipback.has-cover-back .flabel{text-shadow:0 1px 3px rgba(0,0,0,.8)}
-.flipback a{display:flex;align-items:center;gap:10px;padding:8px 4px;margin:4px 0;background:none;border:none;color:#000;font-size:16px;text-decoration:none}
+.flipback a{display:flex;align-items:center;gap:10px;padding:8px 4px;margin:4px 0;background:none!important;border:none;color:#000;font-size:16px;text-decoration:none}
 .flipback .flabel{color:#000;font-weight:700;margin:8px 0 4px}
 .flipback p{color:#000}
 .flipback a:active{background:#232a3d}
@@ -2283,7 +2281,7 @@ function renderFlip(){
   lines(p.phones).forEach(v=>back+=`<a href="tel:${esc(v.replace(/\s/g,""))}">📞 ${esc(v)}</a>`);
   lines(p.emails).forEach(v=>back+=`<a href="mailto:${esc(v)}">✉️ ${esc(v)}</a>`);
   lines(p.urls).forEach(v=>{const u=/^https?:/i.test(v)?v:"https://"+v;back+=`<a href="${esc(u)}" target="_blank" rel="noopener">🌐 ${esc(v)}</a>`;});
-  if(p.cover){fb.classList.add("has-cover-back");}else{fb.classList.remove("has-cover-back");}
+  fb.classList.remove("has-cover-back");
   fb.innerHTML=back||`<p class="muted" style="text-align:center;margin-top:60px">No contact info yet.<br>Add some below.</p>`;
 }
 function fillDetail(){
