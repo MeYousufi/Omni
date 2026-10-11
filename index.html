@@ -1945,12 +1945,20 @@ async function saveAll(){
   _saving=true;
   try{
     try{await shrinkImgs();}catch(e){lastSaveStep="shrink";throw e;}
+    // Naweed's permanent fix: crop ALL images to visible portion — app only stores what it displays
+    try{
+      for(const p of profiles){
+        if(p.pic&&p.pic.length>50000){p.pic=await cropVisible(p.pic,p.picPos||"50% 50%",400,400);p.picPos="50% 50%";}
+        if(p.cover&&p.cover.length>50000){p.cover=await cropVisible(p.cover,p.coverPos||"50% 50%",900,300);p.coverPos="50% 50%";}
+      }
+      if(userProfile.pic&&userProfile.pic.length>50000){userProfile.pic=await cropVisible(userProfile.pic,userProfile.picPos||"50% 50%",400,400);userProfile.picPos="50% 50%";}
+      if(userProfile.cover&&userProfile.cover.length>50000){userProfile.cover=await cropVisible(userProfile.cover,userProfile.coverPos||"50% 50%",900,300);userProfile.coverPos="50% 50%";}
+    }catch(e){}
     // Pre-encrypt size loop: keep shrinking until vault is small enough for iOS crypto
     try{
       for(let pass=0;pass<4;pass++){
         const size=JSON.stringify(packVault()).length;
         if(size<1500000)break;
-        // progressively more aggressive: smaller dims + lower quality each pass
         const q=[true,2,3,4][pass]||4;
         await shrinkImgs(q);
       }
