@@ -297,6 +297,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 #profileCoverShow.tappable-photo::after{right:12px;bottom:12px}
 .tappable-photo:active{opacity:.85}
 .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;display:flex;align-items:flex-end;justify-content:center}
+.sheet-backdrop[hidden]{display:none!important}
 .sheet{width:100%;max-width:520px;background:#141824;border:1px solid var(--line);border-bottom:none;border-radius:18px 18px 0 0;padding:10px 16px calc(20px + env(safe-area-inset-bottom));animation:sheetup .22s ease}
 @keyframes sheetup{from{transform:translateY(40px);opacity:.5}to{transform:none;opacity:1}}
 .sheet-title{text-align:center;font-weight:700;font-size:15px;padding:10px 0 6px;color:var(--muted)}
@@ -305,6 +306,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .sheet-cancel{color:#ff8a8a}
 /* fullscreen photo viewer */
 .viewer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:95;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.viewer-backdrop[hidden]{display:none!important}
 .viewer-backdrop img{max-width:100%;max-height:100%;object-fit:contain}
 </style>
 </head>
