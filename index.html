@@ -616,6 +616,13 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <div class="togglerow"><span>Share limits<br><span class="muted" style="font-size:12px">20 tracked shares / week</span></span><label class="switch"><input type="checkbox" id="tgLimits" aria-label="Toggle share limits"><span class="sl"></span></label></div>
       <div class="togglerow"><span>💌 Invite system<br><span class="muted" style="font-size:12px">100 bonus shares per invite</span></span><label class="switch"><input type="checkbox" id="tgInvites" aria-label="Toggle invite system"><span class="sl"></span></label></div>
       <div class="togglerow"><span>💳 Buy shares<br><span class="muted" style="font-size:12px">$3.99 per 100 shares</span></span><label class="switch"><input type="checkbox" id="tgBuy" aria-label="Toggle buy shares"><span class="sl"></span></label></div>
+      <h3 class="sec">Numbers</h3>
+      <div class="togglerow"><span>Free tracked shares / week</span><input id="numWeeklyFree" type="number" min="1" max="10000" style="width:90px" aria-label="Free tracked shares per week"></div>
+      <div class="togglerow"><span>Invite bonus shares</span><input id="numInviteBonus" type="number" min="1" max="10000" style="width:90px" aria-label="Invite bonus shares"></div>
+      <div class="togglerow"><span>Share pack size</span><input id="numSharePack" type="number" min="1" max="10000" style="width:90px" aria-label="Share pack size"></div>
+      <div class="togglerow"><span>Share pack price ($)</span><input id="numSharePrice" type="number" min="0.01" max="1000" step="0.01" style="width:90px" aria-label="Share pack price"></div>
+      <button class="small" id="saveNumbersBtn" style="width:100%;margin:4px 0 12px">Save numbers</button>
+      <p class="muted" id="numbersMsg" style="font-size:12px"></p>
       <div class="togglerow"><span>Lock screen photo<br><span class="muted" style="font-size:12px">Profile photo behind the PIN pad</span></span><label class="switch"><input type="checkbox" id="tgLockPhoto" aria-label="Toggle lock screen photo"><span class="sl"></span></label></div>
       <div style="margin:8px 0 12px"><button class="small" id="lockPhotoBtn">Change lock screen photo</button><input type="file" id="lockPhotoInput" accept="image/*" hidden></div>
       <h3 class="sec">Users</h3>
@@ -719,7 +726,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     </div>
 <div class="box" id="inviteBox" hidden>
     <h3 class="sec" style="margin-top:0">Invite friends</h3>
-    <p class="muted">Share your invite link — you both get <b>100 bonus shares</b>. Bonus shares never expire.</p>
+    <p class="muted">Share your invite link — you both get <b><span id="inviteBonusAmt">100</span> bonus shares</b>. Bonus shares never expire.</p>
     <div class="statrow"><span>✨ Bonus shares</span><b id="bonusBal">0</b></div>
     <div style="display:flex;gap:8px;margin-top:10px">
       <input id="inviteLink" readonly style="flex:1;margin:0" aria-label="Your invite link">
@@ -1158,7 +1165,27 @@ function stat(k){
 function getStats(){try{return JSON.parse(localStorage.getItem("omni_stats")||"{}");}catch(e){return{};}}
 
 /* ---------- share credits (v1) ---------- */
-const WEEKLY_FREE=20, INVITE_BONUS=100, SHARE_PACK=100;
+let WEEKLY_FREE=20, INVITE_BONUS=100, SHARE_PACK=100, SHARE_PRICE=3.99;
+function numSetting(k,def){
+  const v=FLAGS[k];
+  const n=typeof v==="number"?v:parseFloat(v);
+  return Number.isFinite(n)&&n>0?n:def;
+}
+function applyNumSettings(){
+  WEEKLY_FREE=numSetting("weeklyFree",20);
+  INVITE_BONUS=numSetting("inviteBonus",100);
+  SHARE_PACK=numSetting("sharePack",100);
+  SHARE_PRICE=numSetting("sharePrice",3.99);
+  // refresh price/share-count labels
+  try{
+    const price="$"+SHARE_PRICE.toFixed(2);
+    const bl=$("buySharesBtn");if(bl)bl.textContent=`Buy ${SHARE_PACK} shares — ${price}`;
+    const lb=$("limitBuyBtn");if(lb)lb.textContent=`💳 Buy ${SHARE_PACK} tracked shares — ${price}`;
+    const tg=$("tgBuy");if(tg){const row=tg.closest(".togglerow");if(row){const m=row.querySelector(".muted");if(m)m.textContent=`${price} per ${SHARE_PACK} shares`;}}
+    const ti=$("tgInvites");if(ti){const row=ti.closest(".togglerow");if(row){const m=row.querySelector(".muted");if(m)m.textContent=`${INVITE_BONUS} bonus shares per invite`;}}
+    const tl=$("tgLimits");if(tl){const row=tl.closest(".togglerow");if(row){const m=row.querySelector(".muted");if(m)m.textContent=`${WEEKLY_FREE} tracked shares / week`;}}
+  }catch(e){}
+}
 let FLAGS={shareLimits:false,invites:false,buyShares:false};
 function fridayWeekId(d){
   const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());
@@ -1181,6 +1208,7 @@ async function loadFlags(){
   }catch(e){
     try{const c=JSON.parse(localStorage.getItem("omni_flags")||"{}");if(c.f)FLAGS=Object.assign({},FLAGS,c.f);}catch(e2){}
   }
+  applyNumSettings();
 }
 function updateCreditUI(){
   const bar=$("creditBar");if(!bar)return;
@@ -1377,6 +1405,7 @@ function renderCreditBoxes(){
   if(inv){
     $("inviteLink").value=inviteLink();
     $("bonusBal").textContent=creditsState().bonus;
+    try{$("inviteBonusAmt").textContent=INVITE_BONUS;}catch(e){}
   }
   let unlocked=false;
   try{unlocked=localStorage.getItem("omni_owner_unlocked")==="1"&&!!OWNER_TOKEN;}catch(e){}
@@ -1388,10 +1417,11 @@ function renderCreditBoxes(){
     $("tgLimits").checked=!!FLAGS.shareLimits;
     $("tgInvites").checked=inv;
     $("tgBuy").checked=buy;
+    fillNumbers();
     try{$("tgLockPhoto").checked=lockPhotoEnabled();}catch(e){}
   }
 }
-async function setFlag(name,on){
+async function setFlag(name,on,el){
   try{
     const r=await fetch(STATS_URL+"/api/flags",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({owner_token:OWNER_TOKEN,flags:{[name]:!!on}})});
     const j=await r.json();
@@ -1399,8 +1429,33 @@ async function setFlag(name,on){
       FLAGS=Object.assign({},FLAGS,j.flags);
       try{localStorage.setItem("omni_flags",JSON.stringify({f:FLAGS,at:Date.now()}));}catch(e){}
       updateCreditUI();renderCreditBoxes();toast("Saved ✓");
-    }else toast("Couldn't save — check connection");
-  }catch(e){toast("Couldn't reach server");}
+    }else{
+      if(el)el.checked=!!FLAGS[name];
+      toast("Couldn't save — check connection");
+    }
+  }catch(e){if(el)el.checked=!!FLAGS[name];toast("Couldn't reach server");}
+}
+/* owner-adjustable numbers (weekly free, invite bonus, pack size, pack price) */
+async function setNumbers(vals){
+  try{
+    const r=await fetch(STATS_URL+"/api/flags",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({owner_token:OWNER_TOKEN,flags:vals})});
+    const j=await r.json();
+    if(j&&j.ok){
+      FLAGS=Object.assign({},FLAGS,j.flags);
+      try{localStorage.setItem("omni_flags",JSON.stringify({f:FLAGS,at:Date.now()}));}catch(e){}
+      applyNumSettings();updateCreditUI();renderCreditBoxes();fillNumbers();
+      const m=$("numbersMsg");if(m){m.textContent="Saved ✓";m.style.color="#4ade80";}
+      toast("Numbers saved ✓");
+    }else{const m=$("numbersMsg");if(m){m.textContent="Couldn't save — check connection";m.style.color="#e08080";}}
+  }catch(e){const m=$("numbersMsg");if(m){m.textContent="Couldn't reach server";m.style.color="#e08080";}}
+}
+function fillNumbers(){
+  try{
+    $("numWeeklyFree").value=WEEKLY_FREE;
+    $("numInviteBonus").value=INVITE_BONUS;
+    $("numSharePack").value=SHARE_PACK;
+    $("numSharePrice").value=SHARE_PRICE.toFixed(2);
+  }catch(e){}
 }
 // Change owner password
 document.addEventListener("DOMContentLoaded",()=>{
@@ -1431,9 +1486,19 @@ document.addEventListener("DOMContentLoaded",()=>{
   };
 });
 $("ownerUnlockBtn").onclick=async()=>{await ownerAuth();};
-$("tgLimits").onchange=e=>setFlag("shareLimits",e.target.checked);
-$("tgInvites").onchange=e=>setFlag("invites",e.target.checked);
-$("tgBuy").onchange=e=>setFlag("buyShares",e.target.checked);
+$("tgLimits").onchange=e=>setFlag("shareLimits",e.target.checked,e.target);
+$("tgInvites").onchange=e=>setFlag("invites",e.target.checked,e.target);
+$("tgBuy").onchange=e=>setFlag("buyShares",e.target.checked,e.target);
+$("saveNumbersBtn").onclick=()=>{
+  const m=$("numbersMsg");if(m){m.textContent="Saving…";m.style.color="";}
+  const vals={
+    weeklyFree:Math.max(1,parseInt($("numWeeklyFree").value)||20),
+    inviteBonus:Math.max(1,parseInt($("numInviteBonus").value)||100),
+    sharePack:Math.max(1,parseInt($("numSharePack").value)||100),
+    sharePrice:Math.max(0.01,parseFloat($("numSharePrice").value)||3.99)
+  };
+  setNumbers(vals);
+};
 $("tgLockPhoto").onchange=e=>{
   try{
     if(e.target.checked){localStorage.setItem("omni_lockphoto","1");cacheLockBg();}
