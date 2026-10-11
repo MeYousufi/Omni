@@ -769,48 +769,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <div id="packList"></div>
   </div>
   </details>
-  <details class="dashgroup dashinsights" id="dgInsights">
-    <summary id="dgInsightsSum"><span>Insights</span><span class="advbadge">PREMIUM</span></summary>
-<div class="box" id="cloudBox" hidden>
-    <h3 class="sec" style="margin-top:0">All users</h3>
-    <div class="statrow"><span>📱 App opens</span><b id="c_opens">0</b></div>
-    <div class="statrow"><span>📇 Cards created</span><b id="c_cards">0</b></div>
-    <div class="statrow"><span>📤 Total shares</span><b id="c_shares">0</b></div>
-    <div class="statrow sub"><span>— via Share</span><b id="c_share">0</b></div>
-    <div class="statrow sub"><span>— via Save .vcf</span><b id="c_vcf">0</b></div>
-    <div class="statrow sub"><span>— via NFC / QR link</span><b id="c_nfc">0</b></div>
-  </div>
-<div class="box" id="chartBox" hidden>
-    <h3 class="sec" style="margin-top:0">Opens — last 7 days</h3>
-    <div id="dailyBars"></div>
-  </div>
-    <p class="muted" id="cloudLoading" style="text-align:center">Loading cloud stats…</p>
-<div class="box">
-    <h3 class="sec" style="margin-top:0">This device</h3>
-    <div class="statrow"><span>App opens</span><b id="st_opens">0</b></div>
-    <div class="statrow"><span>Cards created</span><b id="st_cards">0</b></div>
-    <div class="statrow"><span>Total shares</span><b id="st_shares">0</b></div>
-  </div>
-<div class="box" id="analyticsBox" hidden>
-    <h3 class="sec" style="margin-top:0">Card analytics</h3>
-    <p class="muted">Taps per card — last 14 days. Requires owner login.</p>
-    <div id="analyticsList"></div>
-  </div>
-<div class="box" id="leadsBox" hidden>
-    <h3 class="sec" style="margin-top:0">Leads</h3>
-    <p class="muted">Contacts sent back to you from shared links.</p>
-    <div id="leadsList"></div>
-  </div>
-<div class="box" id="webhookBox" hidden>
-    <h3 class="sec" style="margin-top:0">Webhook <span class="muted" style="font-size:12px">(Zapier-ready)</span></h3>
-    <p class="muted">Get a POST on every tap and lead. Paste a Zapier webhook URL:</p>
-    <div style="display:flex;gap:8px">
-      <input id="webhookUrl" placeholder="https://hooks.zapier.com/..." style="flex:1;margin:0;font-size:13px" aria-label="Webhook URL">
-      <button class="small" id="webhookSave" style="flex:none">Save</button>
-    </div>
-    <p class="muted" id="webhookMsg" style="font-size:12px"></p>
-  </div>
-  </details>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -1548,38 +1506,17 @@ $("grantBtn").onclick=async()=>{
 /* ---------- dashboard ---------- */
 $("dashBtn").onclick=async()=>{
   const s=getStats();
-  $("st_opens").textContent=s.opens||0;
-  $("st_cards").textContent=s.cards||0;
-  $("st_shares").textContent=(s.share||0)+(s.vcf||0)+(s.nfc||0);
+  try{
+    $("st_opens").textContent=s.opens||0;
+    $("st_cards").textContent=s.cards||0;
+    $("st_shares").textContent=(s.share||0)+(s.vcf||0)+(s.nfc||0);
+  }catch(e){/* Insights removed */}
   $("homeScreen").hidden=true;$("profileScreen").hidden=true;$("ownerScreen").hidden=true;$("backupScreen").hidden=true;$("dashScreen").hidden=false;window.scrollTo(0,0);
   // share credits: refresh flags + boxes
   try{await loadFlags();}catch(e){}
   renderCreditBoxes();
   renderPlanBox();
   renderTokenShop();
-  // cloud stats: hidden until loaded
-  $("cloudBox").hidden=true;$("chartBox").hidden=true;$("cloudLoading").hidden=false;
-  try{
-    const r=await fetch(STATS_URL+"/api/stats?owner_token="+encodeURIComponent(OWNER_TOKEN));
-    if(!r.ok)throw 0;
-    const c=await r.json();
-    $("c_opens").textContent=c.opens||0;
-    $("c_cards").textContent=c.cards||0;
-    $("c_shares").textContent=(c.share||0)+(c.vcf||0)+(c.nfc||0);
-    $("c_share").textContent=c.share||0;
-    $("c_vcf").textContent=c.vcf||0;
-    $("c_nfc").textContent=c.nfc||0;
-    $("cloudBox").hidden=false;$("chartBox").hidden=false;$("cloudLoading").hidden=true;
-    const max=Math.max(1,...c.daily.map(d=>d.opens));
-    $("dailyBars").innerHTML=c.daily.map(d=>{
-      const h=Math.round((d.opens/max)*90)+4;
-      const lbl=new Date(d.day+"T12:00:00").toLocaleDateString(undefined,{weekday:"narrow"});
-      return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:30px;height:${h}px;border-radius:6px;background:linear-gradient(180deg,#6ea8ff,#8b5cf6)"></div><span class="muted" style="font-size:11px">${lbl}</span><span style="font-size:12px">${d.opens}</span></div>`;
-    }).join("");
-    $("dailyBars").style.cssText="display:flex;justify-content:space-around;align-items:flex-end;margin-top:8px";
-  }catch(e){
-    $("cloudLoading").textContent="Couldn't reach cloud stats — check your connection.";
-  }
 };
 $("dashBack").onclick=()=>{$("dashScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
 
@@ -1746,16 +1683,7 @@ function showUpgrade(title,sub){
 }
 $("upgradeClose").onclick=()=>{$("upgradeModal").hidden=true;};
 $("planUpgradeBtn").onclick=()=>showUpgrade("Plans","Unlimited sharing on every plan.");
-// Premium gate for advanced analytics
-document.addEventListener("DOMContentLoaded",()=>{
-  const dg=$("dgInsights"), sm=$("dgInsightsSum");
-  if(dg&&sm)sm.addEventListener("click",e=>{
-    if(!hasFeature("analytics")){
-      e.preventDefault();
-      showUpgrade("Advanced analytics is Premium","Deep insights, custom branding, and priority support come with Premium.");
-    }
-  });
-});
+// (Insights section removed — stats live under My account → Your plan)
 function renderPlanBox(){
   try{
     const t=effectiveTier(), d=PLAN_DEFS[t];
