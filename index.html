@@ -51,8 +51,9 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 #lockScreen>*:not(#lockBg){position:relative;z-index:1}
 #welcomeScreen[hidden]{display:none}
 #lockScreen h1{font-size:46px;letter-spacing:.2em;margin:0 0 8px;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow))}
-#lockScreen h1.logo-anim .logo-o{display:inline-block;animation:oSpin 2s ease-in-out}
-#lockScreen h1.logo-anim .logo-rest{display:inline-block;animation:mniSlide .8s ease-out 2s both}
+#lockScreen h1.logo-anim{background:none;-webkit-text-fill-color:initial;filter:none}
+#lockScreen h1.logo-anim .logo-o{display:inline-block;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow));animation:oSpin 2s ease-in-out}
+#lockScreen h1.logo-anim .logo-rest{display:inline-block;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow));animation:mniSlide .8s ease-out 2s both}
 @keyframes oSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes mniSlide{from{transform:translateX(60px);opacity:0}to{transform:translateX(0);opacity:1}}
 .dots{display:flex;gap:14px;margin:22px 0}
