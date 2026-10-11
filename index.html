@@ -307,7 +307,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .viewer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:95;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .viewer-backdrop img{max-width:100%;max-height:100%;object-fit:contain}
 .viewer-backdrop img[src=""]{display:none}
-#photoViewerClose{position:absolute;top:calc(12px + env(safe-area-inset-top));right:16px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;font-size:26px;line-height:1;display:flex;align-items:center;justify-content:center;z-index:96}
 </style>
 </head>
 <body>
@@ -602,9 +601,8 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <button class="sheet-btn sheet-cancel" id="photoSheetCancel">Cancel</button>
     </div>
   </div>
-  <!-- fullscreen photo viewer -->
+  <!-- fullscreen photo viewer (tap anywhere to close) -->
   <div id="photoViewer" class="viewer-backdrop" hidden>
-    <button id="photoViewerClose" aria-label="Close viewer">×</button>
     <img id="photoViewerImg" alt="">
   </div>
   <div class="box">
@@ -2184,8 +2182,7 @@ $("photoSheetSee").onclick=()=>{
   $("photoViewer").hidden=false;
 };
 function closePhotoViewer(){$("photoViewer").hidden=true;$("photoViewerImg").src="";}
-$("photoViewer").onclick=e=>{closePhotoViewer();};
-$("photoViewerClose").onclick=e=>{e.stopPropagation();closePhotoViewer();};
+$("photoViewer").onclick=()=>{closePhotoViewer();};
 $("photoSheetChange").onclick=()=>{
   closePhotoSheet();
   if(photoSheetMode==="profile")$("picInput").click();
