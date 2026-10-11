@@ -303,6 +303,9 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .sheet-btn{display:block;width:100%;background:#1c2130;border:1px solid var(--line);border-radius:12px;color:var(--text);padding:15px;font-size:16px;margin:8px 0;cursor:pointer}
 .sheet-btn:active{background:#232a3d}
 .sheet-cancel{color:#ff8a8a}
+/* fullscreen photo viewer */
+.viewer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:95;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.viewer-backdrop img{max-width:100%;max-height:100%;object-fit:contain}
 </style>
 </head>
 <body>
@@ -588,13 +591,18 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     </div>
     <div style="height:12px"></div>
   </div>
-  <!-- photo action sheet -->
+  <!-- photo action sheet (Facebook-style) -->
   <div id="photoSheet" class="sheet-backdrop" hidden>
     <div class="sheet" role="dialog" aria-label="Photo options">
       <div class="sheet-title" id="photoSheetTitle">Profile picture</div>
-      <button class="sheet-btn" id="photoSheetChange">Change photo</button>
+      <button class="sheet-btn" id="photoSheetSee">See profile picture</button>
+      <button class="sheet-btn" id="photoSheetChange">Select profile picture</button>
       <button class="sheet-btn sheet-cancel" id="photoSheetCancel">Cancel</button>
     </div>
+  </div>
+  <!-- fullscreen photo viewer -->
+  <div id="photoViewer" class="viewer-backdrop" hidden>
+    <img id="photoViewerImg" alt="Photo viewer">
   </div>
   <div class="box">
     <h3 class="sec" style="margin-top:0">Your info</h3>
@@ -2145,11 +2153,16 @@ $("profileCoverInput").onchange=e=>{
   r.readAsDataURL(f);
   e.target.value="";
 };
-/* tap-to-edit profile photos */
+/* tap-to-edit profile photos (Facebook-style) */
 let photoSheetMode="profile";
 function openPhotoSheet(mode){
   photoSheetMode=mode;
-  $("photoSheetTitle").textContent=mode==="profile"?"Profile picture":"Cover photo";
+  const isProfile=mode==="profile";
+  $("photoSheetTitle").textContent=isProfile?"Profile picture":"Cover photo";
+  $("photoSheetSee").textContent=isProfile?"See profile picture":"See cover photo";
+  $("photoSheetChange").textContent=isProfile?"Select profile picture":"Upload photo";
+  const hasPic=isProfile?!!(userProfile&&userProfile.pic):!!(userProfile&&userProfile.cover);
+  $("photoSheetSee").style.display=hasPic?"":"none";
   $("photoSheet").hidden=false;
 }
 function closePhotoSheet(){$("photoSheet").hidden=true;}
@@ -2157,6 +2170,14 @@ $("picShow").onclick=()=>openPhotoSheet("profile");
 $("profileCoverShow").onclick=()=>openPhotoSheet("cover");
 $("photoSheetCancel").onclick=closePhotoSheet;
 $("photoSheet").onclick=e=>{if(e.target===$("photoSheet"))closePhotoSheet();};
+$("photoSheetSee").onclick=()=>{
+  const src=photoSheetMode==="profile"?(userProfile&&userProfile.pic):(userProfile&&userProfile.cover);
+  if(!src)return;
+  closePhotoSheet();
+  $("photoViewerImg").src=src;
+  $("photoViewer").hidden=false;
+};
+$("photoViewer").onclick=()=>{$("photoViewer").hidden=true;$("photoViewerImg").src="";};
 $("photoSheetChange").onclick=()=>{
   closePhotoSheet();
   if(photoSheetMode==="profile")$("picInput").click();
