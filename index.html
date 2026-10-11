@@ -943,6 +943,11 @@ async function pinDone(){
       if(profiles.length===0&&pendingCard){profiles.push(pendingCard);stat("cards");}
       // seed user profile name from onboarding
       if(!userProfile.name&&pendingCard&&pendingCard.name)userProfile.name=pendingCard.name;
+      // seed user profile contact from signup (phone or email)
+      if(pendingCard){
+        if(!userProfile.phone&&pendingCard.phones)userProfile.phone=pendingCard.phones;
+        if(!userProfile.email&&pendingCard.emails)userProfile.email=pendingCard.emails;
+      }
       sessionPin=pin;
       await vaultEncrypt(pin,packVault());
       // Auto-enable cloud backup so cards survive logout/login/new device.
@@ -1038,7 +1043,7 @@ $("quickSave").onclick=()=>{
 async function doLock(){
   // save any pending changes before wiping memory — but ALWAYS wipe even if save fails
   try{await saveAll();}catch(e){console.warn("Lock-time save failed:",e);}
-  pinBuf="";pinTmp=null;sessionPin=null;profiles=[];encounters=[];userProfile={pic:null,picPos:"50% 50%",name:""};curId=null;buildDots();updateGo();
+  pinBuf="";pinTmp=null;sessionPin=null;profiles=[];encounters=[];userProfile={pic:null,picPos:"50% 50%",name:"",phone:"",email:""};curId=null;buildDots();updateGo();
   const has=hasVault()||hasLegacy();
   pinMsg(has?"Enter your PIN":"Set a 6-digit PIN");
   $("forgotBtn").hidden=!has;
@@ -1613,7 +1618,7 @@ let profiles=[];
 let curId=null, searchQ="";
 
 /* ---------- user profile (USER-level, independent of cards) ---------- */
-let userProfile={pic:null,picPos:"50% 50%",name:""};
+let userProfile={pic:null,picPos:"50% 50%",name:"",phone:"",email:""};
 // Vault format v2: {v:2, profiles:[...], userProfile:{...}}
 // Old vaults store just the profiles array — unpackVault handles both.
 function packVault(){return{v:2,profiles:profiles,userProfile:userProfile};}
@@ -1621,18 +1626,22 @@ function unpackVault(data){
   if(data&&typeof data==="object"&&!Array.isArray(data)&&data.v===2){
     profiles=Array.isArray(data.profiles)?data.profiles:[];
     userProfile=(data.userProfile&&typeof data.userProfile==="object")
-      ? {pic:data.userProfile.pic||null,picPos:data.userProfile.picPos||"50% 50%",name:data.userProfile.name||""}
+      ? {pic:data.userProfile.pic||null,picPos:data.userProfile.picPos||"50% 50%",name:data.userProfile.name||"",phone:data.userProfile.phone||"",email:data.userProfile.email||""}
       : {pic:null,picPos:"50% 50%",name:""};
   }else{
     // legacy: vault holds the profiles array directly
     profiles=Array.isArray(data)?data:[];
-    userProfile={pic:null,picPos:"50% 50%",name:""};
+    userProfile={pic:null,picPos:"50% 50%",name:"",phone:"",email:""};
   }
   // migration: adopt first card's picture as the user photo if none set
   if(!userProfile.pic&&profiles.length&&profiles[0].pic){
     userProfile.pic=profiles[0].pic;
     userProfile.picPos=profiles[0].picPos||"50% 50%";
+  }
+  if(profiles.length){
     if(!userProfile.name&&profiles[0].name)userProfile.name=profiles[0].name;
+    if(!userProfile.phone&&profiles[0].phones)userProfile.phone=profiles[0].phones;
+    if(!userProfile.email&&profiles[0].emails)userProfile.email=profiles[0].emails;
   }
 }
 
@@ -2617,9 +2626,15 @@ function openProfile(){
   $("profileInfo").innerHTML=
     `<div class="statrow"><span>Your name</span></div>`
     + `<input id="profileNameInput" placeholder="Your name" value="${esc(userProfile.name||"")}" autocomplete="off" style="width:100%;margin:4px 0" aria-label="Your name">`
-    + `<button class="small" id="profileNameSave" style="width:100%;margin-top:6px">Save</button>`;
+    + `<div class="statrow" style="margin-top:10px"><span>Phone</span></div>`
+    + `<input id="profilePhoneInput" placeholder="Phone number" value="${esc(userProfile.phone||"")}" autocomplete="off" inputmode="tel" style="width:100%;margin:4px 0" aria-label="Phone number">`
+    + `<div class="statrow" style="margin-top:10px"><span>Email</span></div>`
+    + `<input id="profileEmailInput" placeholder="Email address" value="${esc(userProfile.email||"")}" autocomplete="off" inputmode="email" style="width:100%;margin:4px 0" aria-label="Email address">`
+    + `<button class="small" id="profileNameSave" style="width:100%;margin-top:10px">Save</button>`;
   $("profileNameSave").onclick=async()=>{
     userProfile.name=$("profileNameInput").value.trim();
+    userProfile.phone=$("profilePhoneInput").value.trim();
+    userProfile.email=$("profileEmailInput").value.trim();
     await saveAll();renderPic();
     toast("Profile saved");
   };
