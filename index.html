@@ -291,6 +291,18 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .navitem{display:flex;align-items:center;gap:12px;width:100%;background:#1c2130;border:1px solid var(--line);border-radius:12px;color:var(--text);padding:14px 16px;font-size:16px;min-height:52px;text-align:left;cursor:pointer}
 .navitem:active{background:#232a3d}
 .navicon{font-size:20px;width:28px;text-align:center;flex:none}
+/* tappable profile photos + action sheet */
+.tappable-photo{position:relative;cursor:pointer}
+.tappable-photo::after{content:"📷";position:absolute;right:8px;bottom:8px;width:36px;height:36px;border-radius:50%;background:rgba(10,12,20,.78);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:17px;pointer-events:none}
+#profileCoverShow.tappable-photo::after{right:12px;bottom:12px}
+.tappable-photo:active{opacity:.85}
+.sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:520px;background:#141824;border:1px solid var(--line);border-bottom:none;border-radius:18px 18px 0 0;padding:10px 16px calc(20px + env(safe-area-inset-bottom));animation:sheetup .22s ease}
+@keyframes sheetup{from{transform:translateY(40px);opacity:.5}to{transform:none;opacity:1}}
+.sheet-title{text-align:center;font-weight:700;font-size:15px;padding:10px 0 6px;color:var(--muted)}
+.sheet-btn{display:block;width:100%;background:#1c2130;border:1px solid var(--line);border-radius:12px;color:var(--text);padding:15px;font-size:16px;margin:8px 0;cursor:pointer}
+.sheet-btn:active{background:#232a3d}
+.sheet-cancel{color:#ff8a8a}
 </style>
 </head>
 <body>
@@ -568,17 +580,22 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <div class="backrow"><button class="iconbtn" id="profileBack" aria-label="Back to cards">← Back</button></div>
   <div class="brand"><h1>Profile</h1></div>
   <div class="box" style="overflow:hidden;padding:0">
-    <div id="profileCoverShow"></div>
+    <div id="profileCoverShow" class="tappable-photo" role="button" tabindex="0" aria-label="Change cover photo"></div>
     <div class="picwrap" style="margin-top:-52px;position:relative">
-      <div id="picShow"></div>
+      <div id="picShow" class="tappable-photo" role="button" tabindex="0" aria-label="Change profile picture"></div>
       <input type="file" id="picInput" accept="image/*" hidden>
       <input type="file" id="profileCoverInput" accept="image/*" hidden>
-      <button class="chg" id="picBtn">Choose your profile picture</button>
-      <button class="chg" id="profileCoverBtn">Choose cover photo</button>
-      <button class="chg" id="reposBtn">Reposition picture</button>
-      <button class="chg" id="profileCoverReposBtn" hidden>Reposition cover</button>
     </div>
     <div style="height:12px"></div>
+  </div>
+  <!-- photo action sheet -->
+  <div id="photoSheet" class="sheet-backdrop" hidden>
+    <div class="sheet" role="dialog" aria-label="Photo options">
+      <div class="sheet-title" id="photoSheetTitle">Profile picture</div>
+      <button class="sheet-btn" id="photoSheetChange">Change photo</button>
+      <button class="sheet-btn" id="photoSheetRepos">Adjust position</button>
+      <button class="sheet-btn sheet-cancel" id="photoSheetCancel">Cancel</button>
+    </div>
   </div>
   <div class="box">
     <h3 class="sec" style="margin-top:0">Your info</h3>
@@ -1576,14 +1593,7 @@ $("bpLater").onclick=()=>{
 /* ---------- picture reposition ---------- */
 let reposDrag=null;
 let reposMode="profile";
-$("reposBtn").onclick=()=>{
-  if(!userProfile.pic){alert("Choose a picture first.");return;}
-  reposMode="profile";
-  $("reposCircle").style.borderRadius="50%";$("reposCircle").style.width="260px";$("reposCircle").style.height="260px";
-  $("reposImg").src=userProfile.pic;
-  $("reposImg").style.objectPosition=userProfile.picPos||"50% 50%";
-  $("reposOverlay").hidden=false;
-};
+$("reposBtn").onclick=openReposProfile;
 $("coverReposBtn").onclick=()=>{
   const p=getP();if(!p||!p.cover){alert("Choose a cover first.");return;}
   reposMode="cover";
@@ -1618,6 +1628,9 @@ $("reposDone").onclick=async()=>{
     userProfile.picPos=pos;await saveAll();
   }
   $("reposOverlay").hidden=true;renderPic();renderFlip();renderCover();
+  toast("Saved ✓");
+  // back to main menu
+  $("profileScreen").hidden=true;$("homeScreen").hidden=false;renderCards();window.scrollTo(0,0);
 };
 $("reposCancel").onclick=()=>{$("reposOverlay").hidden=true;};
 
@@ -2099,9 +2112,8 @@ function renderProfileCover(){
   }else{
     el.innerHTML=`<div class="nophoto">Cover photo</div>`;
   }
-  const rb=$("profileCoverReposBtn");if(rb)rb.hidden=!(userProfile&&userProfile.cover);
 }
-$("profileCoverBtn").onclick=()=>$("profileCoverInput").click();
+/* (profile cover button removed — tap the cover to edit) */
 $("profileCoverInput").onchange=e=>{
   const f=e.target.files[0];if(!f)return;
   // instant preview while processing
@@ -2126,22 +2138,54 @@ $("profileCoverInput").onchange=e=>{
         const el2=$("profileCoverShow").querySelector("img");
         if(el2){el2.onload=()=>renderProfileCover();}
       }catch(err2){}
-      toast("Cover photo saved");
+      // straight into adjust — no extra tap needed
+      openReposProfileCover();
     };
     img.src=r.result;
   };
   r.readAsDataURL(f);
   e.target.value="";
 };
-$("profileCoverReposBtn").onclick=()=>{
+/* tap-to-edit profile photos */
+let photoSheetMode="profile";
+function openPhotoSheet(mode){
+  photoSheetMode=mode;
+  $("photoSheetTitle").textContent=mode==="profile"?"Profile picture":"Cover photo";
+  const hasPic=mode==="profile"?!!(userProfile&&userProfile.pic):!!(userProfile&&userProfile.cover);
+  $("photoSheetRepos").style.display=hasPic?"":"none";
+  $("photoSheet").hidden=false;
+}
+function closePhotoSheet(){$("photoSheet").hidden=true;}
+$("picShow").onclick=()=>openPhotoSheet("profile");
+$("profileCoverShow").onclick=()=>openPhotoSheet("cover");
+$("photoSheetCancel").onclick=closePhotoSheet;
+$("photoSheet").onclick=e=>{if(e.target===$("photoSheet"))closePhotoSheet();};
+$("photoSheetChange").onclick=()=>{
+  closePhotoSheet();
+  if(photoSheetMode==="profile")$("picInput").click();
+  else $("profileCoverInput").click();
+};
+$("photoSheetRepos").onclick=()=>{
+  closePhotoSheet();
+  if(photoSheetMode==="profile")openReposProfile();
+  else openReposProfileCover();
+};
+function openReposProfile(){
+  if(!userProfile.pic){alert("Choose a picture first.");return;}
+  reposMode="profile";
+  $("reposCircle").style.borderRadius="50%";$("reposCircle").style.width="260px";$("reposCircle").style.height="260px";
+  $("reposImg").src=userProfile.pic;
+  $("reposImg").style.objectPosition=userProfile.picPos||"50% 50%";
+  $("reposOverlay").hidden=false;
+}
+function openReposProfileCover(){
   if(!userProfile.cover){alert("Choose a cover photo first.");return;}
   reposMode="profileCover";
   $("reposCircle").style.borderRadius="16px";$("reposCircle").style.width="320px";$("reposCircle").style.height="160px";
   $("reposImg").src=userProfile.cover;
   $("reposImg").style.objectPosition=userProfile.coverPos||"50% 50%";
   $("reposOverlay").hidden=false;
-};
-$("picBtn").onclick=()=>$("picInput").click();
+}
 /* dominant color from image (for card back) */
 function sampleCoverColor(src,cb){
   const img=new Image();
@@ -2218,7 +2262,8 @@ $("picInput").onchange=e=>{
         if(el){el.onload=()=>renderPic();}
       }catch(err2){}
       try{cacheLockBg();}catch(err){}
-      toast("Profile picture saved");
+      // straight into adjust — no extra tap needed
+      openReposProfile();
     };
     img.src=r.result;
   };
@@ -2934,7 +2979,8 @@ function openProfile(){
     userProfile.phone=$("profilePhoneInput").value.trim();
     userProfile.email=$("profileEmailInput").value.trim();
     await saveAll();renderPic();
-    toast("Profile saved");
+    toast("Profile saved ✓");
+    $("profileScreen").hidden=true;$("homeScreen").hidden=false;renderCards();window.scrollTo(0,0);
   };
 }
 $("profileBack").onclick=()=>{$("profileScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
