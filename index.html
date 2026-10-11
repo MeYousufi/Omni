@@ -939,14 +939,12 @@ async function pinDone(){
       if(isObviousPin(pin)){pinMsg("Too obvious — pick a harder PIN");return;}
       if(pinTmp===null){pinTmp=pin;pinMsg("Confirm your PIN");return;}
       if(pinTmp!==pin){pinTmp=null;pinMsg("Didn't match — try again");return;}
-      // keep any restored profiles in memory (from backup restore); only start empty if truly fresh
-      if(profiles.length===0&&pendingCard){profiles.push(pendingCard);stat("cards");}
-      // seed user profile name from onboarding
-      if(!userProfile.name&&pendingCard&&pendingCard.name)userProfile.name=pendingCard.name;
-      // seed user profile contact from signup (phone or email)
-      if(pendingCard){
-        if(!userProfile.phone&&pendingCard.phones)userProfile.phone=pendingCard.phones;
-        if(!userProfile.email&&pendingCard.emails)userProfile.email=pendingCard.emails;
+      // keep any restored profiles in memory (from backup restore); never auto-create a card at signup
+      // seed user profile from signup info
+      if(pendingProfile){
+        if(!userProfile.name&&pendingProfile.name)userProfile.name=pendingProfile.name;
+        if(!userProfile.phone&&pendingProfile.phone)userProfile.phone=pendingProfile.phone;
+        if(!userProfile.email&&pendingProfile.email)userProfile.email=pendingProfile.email;
       }
       sessionPin=pin;
       await vaultEncrypt(pin,packVault());
@@ -962,7 +960,7 @@ async function pinDone(){
       }
       pinFailReset();haptic(15);
       if(onboarding){
-        onboarding=false;pendingCard=null;
+        onboarding=false;pendingProfile=null;
         $("lockScreen").hidden=true;
         $("backupPrompt").hidden=false;
         return;
@@ -1022,7 +1020,7 @@ $("welcomeRestoreBtn").onclick=()=>{
   try{$("lockSyncInput").focus();}catch(e){}
 };
 /* quick create: name + one contact method */
-let onboarding=false, pendingCard=null;
+let onboarding=false, pendingProfile=null;
 function validContact(v){
   v=v.trim();
   if(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v))return{type:"emails",val:v};
@@ -1035,10 +1033,11 @@ $("quickSave").onclick=()=>{
   if(!name){$("q_hint").textContent="Please enter your name.";$("q_name").classList.add("bad");return;}
   if(!c){$("q_hint").textContent="Enter a valid phone number or email.";$("q_contact").classList.add("bad");return;}
   $("q_hint").textContent="";$("q_name").classList.remove("bad");$("q_contact").classList.remove("bad");
-  pendingCard={id:"c"+Date.now(),label:"My Card",name:name,org:"",phones:c.type==="phones"?c.val:"",emails:c.type==="emails"?c.val:"",urls:"",address:"",notes:"",pic:"",picPos:"50% 50%",cover:"",coverPos:"50% 50%",coverColor:"",color:"#4f8cff",primary:c.type};
+  // Profile-only signup: no card is auto-created. Contact goes to the user profile.
+  pendingProfile={name:name,phone:c.type==="phones"?c.val:"",email:c.type==="emails"?c.val:""};
   onboarding=true;
   $("quickScreen").hidden=true;$("lockScreen").hidden=false;
-  pinMsg("Set a "+pinLen()+"-digit PIN to protect your card");
+  pinMsg("Set a "+pinLen()+"-digit PIN to protect your profile");
 };
 async function doLock(){
   // save any pending changes before wiping memory — but ALWAYS wipe even if save fails
