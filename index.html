@@ -463,6 +463,19 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <button id="upgradeClose" class="gray" style="width:100%">Not now</button>
   </div>
 </div>
+<div id="ownerPwModal" class="modal" hidden role="dialog" aria-label="Owner password">
+  <div class="box">
+    <h3 class="sec" style="margin-top:0" id="ownerPwTitle">Owner password</h3>
+    <p class="muted" id="ownerPwSub" style="font-size:13px">Enter your owner password to continue.</p>
+    <input type="password" id="ownerPwInput" placeholder="Owner password" autocomplete="current-password" style="width:100%">
+    <input type="password" id="ownerPwInput2" placeholder="Confirm password" autocomplete="new-password" style="width:100%" hidden>
+    <p class="muted" id="ownerPwErr" style="font-size:12px;color:#ff8a8a;min-height:18px"></p>
+    <div style="display:flex;gap:8px">
+      <button id="ownerPwCancel" class="gray" style="flex:1">Cancel</button>
+      <button id="ownerPwSubmit" class="small" style="flex:1">Unlock</button>
+    </div>
+  </div>
+</div>
 
 <!-- HOME -->
 <div class="wrap" id="homeScreen" hidden>
@@ -3179,8 +3192,43 @@ $("fileDownloadBtn").onclick=()=>{$("backupBtn").onclick();};
 $("fileImportBtn").onclick=()=>{$("importInput").click();};
 
 /* ---------- owner password gate (reusable) ---------- */
+/* In-app owner password modal (replaces native prompt) */
+function ownerPwModal(mode){
+  // mode: "login" or "setup" — returns Promise<string|null> (password or null if cancelled)
+  return new Promise(resolve=>{
+    const m=$("ownerPwModal"), t=$("ownerPwTitle"), s=$("ownerPwSub");
+    const i1=$("ownerPwInput"), i2=$("ownerPwInput2"), err=$("ownerPwErr");
+    const btn=$("ownerPwSubmit"), cancel=$("ownerPwCancel");
+    if(mode==="setup"){
+      t.textContent="Create owner password";
+      s.textContent="Choose a password (8+ characters). Only you will know this.";
+      i2.hidden=false; btn.textContent="Create";
+    }else{
+      t.textContent="Owner password";
+      s.textContent="Enter your owner password to continue.";
+      i2.hidden=true; btn.textContent="Unlock";
+    }
+    i1.value=""; i2.value=""; err.textContent="";
+    m.hidden=false; setTimeout(()=>i1.focus(),100);
+    const done=v=>{m.hidden=true;btn.onclick=cancel.onclick=null;i1.onkeydown=i2.onkeydown=null;resolve(v);};
+    const submit=()=>{
+      err.textContent="";
+      const p1=i1.value;
+      if(mode==="setup"){
+        if(p1.length<8){err.textContent="Password must be 8+ characters.";return;}
+        if(i2.value!==p1){err.textContent="Passwords didn't match.";return;}
+      }
+      if(!p1){err.textContent="Enter your password.";return;}
+      done(p1);
+    };
+    btn.onclick=submit;
+    cancel.onclick=()=>done(null);
+    const key=e=>{if(e.key==="Enter")submit();if(e.key==="Escape")done(null);};
+    i1.onkeydown=key; i2.onkeydown=key;
+  });
+}
 async function ownerAuth(){
-  // Returns true if owner is authenticated (prompts for password if needed)
+  // Returns true if owner is authenticated (in-app modal, no native prompt)
   try{
     if(localStorage.getItem("omni_owner_unlocked")==="1"&&OWNER_TOKEN)return true;
   }catch(e){}
@@ -3190,11 +3238,8 @@ async function ownerAuth(){
     hasOwner=(await r.json()).hasOwner;
   }catch(e){toast("Couldn't reach server");return false;}
   if(!hasOwner){
-    const p1=prompt("Create your owner password (8+ characters). Only you will know this:");
+    const p1=await ownerPwModal("setup");
     if(p1===null)return false;
-    if(p1.length<8){alert("Password must be 8+ characters.");return false;}
-    const p2=prompt("Confirm owner password:");
-    if(p2!==p1){alert("Passwords didn't match.");return false;}
     try{
       const r=await fetch(STATS_URL+"/api/owner/setup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:p1})});
       const j=await r.json();
@@ -3204,10 +3249,10 @@ async function ownerAuth(){
         try{localStorage.setItem("omni_owner_unlocked","1");}catch(e){}
         renderCreditBoxes();toast("Owner password set — controls unlocked");
         return true;
-      }else{alert("Setup failed: "+(j.error||"unknown"));return false;}
-    }catch(e){alert("Couldn't reach server.");return false;}
+      }else{toast("Setup failed: "+(j.error||"unknown"));return false;}
+    }catch(e){toast("Couldn't reach server.");return false;}
   }
-  const pw=prompt("Enter owner password:");
+  const pw=await ownerPwModal("login");
   if(pw===null)return false;
   try{
     const r=await fetch(STATS_URL+"/api/owner/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pw})});
