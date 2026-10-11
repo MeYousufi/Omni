@@ -1827,7 +1827,20 @@ let _saving=false;
 async function saveAll(){
   if(!sessionPin||_saving)return false;
   _saving=true;
-  try{await shrinkImgs();await vaultEncrypt(sessionPin,packVault());await saveEncounters();return true;}
+  try{
+    await shrinkImgs();
+    try{
+      await vaultEncrypt(sessionPin,packVault());
+    }catch(e){
+      // Quota exceeded: shrink aggressively and retry once
+      if(e&&e.name==="QuotaExceededError"){
+        await shrinkImgs(true);
+        await vaultEncrypt(sessionPin,packVault());
+      }else throw e;
+    }
+    await saveEncounters();
+    return true;
+  }
   catch(e){return false;}
   finally{_saving=false;}
 }
