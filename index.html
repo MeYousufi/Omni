@@ -843,7 +843,15 @@ async function loadEncounters(pin){
 async function saveEncounters(){
   if(sessionPin){try{await vaultEncrypt(sessionPin,encounters,ENC_VAULT_KEY);}catch(e){}}
 }
-const hasVault=()=>!!localStorage.getItem("omni_vault");
+const hasVault=()=>{
+  if(localStorage.getItem("omni_vault"))return true;
+  // crash-recovery: restore from synchronous backup if main vault is gone
+  try{
+    const b=localStorage.getItem("omni_vault_bak");
+    if(b&&b.length>100){localStorage.setItem("omni_vault",b);return true;}
+  }catch(e){}
+  return false;
+};
 const hasLegacy=()=>!!localStorage.getItem("omni_profiles");
 
 /* ---------- PIN lockout ---------- */
@@ -1588,7 +1596,13 @@ function contrastText(bgHex){
   return luminance(bgHex) > 0.179 ? "#000000" : "#FFFFFF";
 }
 
-async function saveAll(){if(sessionPin){await shrinkImgs();await vaultEncrypt(sessionPin,profiles);await saveEncounters();}}
+let _saving=false;
+async function saveAll(){
+  if(!sessionPin||_saving)return;
+  _saving=true;
+  try{await shrinkImgs();await vaultEncrypt(sessionPin,profiles);await saveEncounters();}
+  finally{_saving=false;}
+}
 async function shrinkOne(dataUrl,maxPx,quality){
   const I=new Image();
   await new Promise(r=>{I.onload=r;I.onerror=r;I.src=dataUrl;});
@@ -3052,9 +3066,20 @@ function renderNudgesMemories(){
   box.querySelectorAll("[data-nudge-snooze]").forEach(b=>b.onclick=async()=>{const e=encounters.find(x=>x.id===b.dataset.nudgeSnooze);if(e){e.followUp=Date.now()+3*86400000;await saveEncounters();renderNudgesMemories();}});
 }
 
-/* safety net: save if page is hidden/closed with unsaved changes */
+/* safety net: save if page is hidden/closed with unsaved changes.
+   Also keeps a synchronous backup of the last-good encrypted vault,
+   so a refresh mid-save can never corrupt or wipe data. */
 document.addEventListener("visibilitychange",()=>{if(document.hidden)saveAll();});
-window.addEventListener("pagehide",()=>{saveAll();});
+window.addEventListener("pagehide",()=>{
+  try{
+    const v=localStorage.getItem("omni_vault");
+    if(v&&v.length>100)localStorage.setItem("omni_vault_bak",v);
+  }catch(e){}
+  saveAll();
+});
+window.addEventListener("beforeunload",e=>{
+  if(_saving){e.preventDefault();e.returnValue="Saving your cards… please wait a moment.";}
+});
 /* connectivity toasts: offline/online transitions (non-intrusive, no spam) */
 let _netOffline=!navigator.onLine;
 window.addEventListener("offline",()=>{
