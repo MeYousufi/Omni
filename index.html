@@ -1250,10 +1250,10 @@ async function claimInvite(code){
     if(j&&j.ok){
       try{localStorage.setItem("omni_invite_claimed","1");}catch(e){}
       try{localStorage.setItem("omni_invite_claimed_by",code);}catch(e){}
-      // Invitee reward: 7-day Pro trial (one per account)
+      // Invitee reward: 7-day Pro trial (one per account, free tier only)
       let trial=false;
       try{
-        if(!localStorage.getItem("omni_trial_used")){
+        if(!localStorage.getItem("omni_trial_used")&&userPlan.tier==="free"&&!userPlan.trialEndsAt){
           userPlan.trialEndsAt=Date.now()+7*86400000;
           localStorage.setItem("omni_trial_used","1");
           trial=true;
@@ -1626,6 +1626,7 @@ const PLAN_DEFS={
 };
 let userPlan={tier:"free",trialEndsAt:0,tokens:0,sharedOnce:false,templates:[]};
 function effectiveTier(){
+  if(userPlan.tier==="premium")return "premium";
   if(userPlan.trialEndsAt&&userPlan.trialEndsAt>Date.now())return "pro";
   return userPlan.tier||"free";
 }
