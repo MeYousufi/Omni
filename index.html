@@ -304,6 +304,10 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .sheet-btn{display:block;width:100%;background:#1c2130;border:1px solid var(--line);border-radius:12px;color:var(--text);padding:15px;font-size:16px;margin:8px 0;cursor:pointer}
 .sheet-btn:active{background:#232a3d}
 .sheet-cancel{color:#ff8a8a}
+/* glassmorphic section icons */
+.glassicon{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.07);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.14);font-size:22px;margin-right:12px;vertical-align:middle;box-shadow:0 4px 18px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.12);flex:none}
+.dashgroup>summary{display:flex;align-items:center;cursor:pointer;list-style:none}
+.dashgroup>summary::-webkit-details-marker{display:none}
 /* fullscreen photo viewer */
 .viewer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:95;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .viewer-backdrop[hidden]{display:none!important}
@@ -710,7 +714,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <div class="brand"><h1>Dashboard</h1></div>
   <div class="muted" style="letter-spacing:.08em;font-size:11px">HOW YOUR APP IS DOING</div>
     <details class="dashgroup" id="dgAccount">
-    <summary><span>⚙️ My account</span></summary>
+    <summary><span class="glassicon">⚙️</span><span>My account</span></summary>
 <div class="box" id="planBox">
     <h3 class="sec" style="margin-top:0">Your plan</h3>
     <div class="statrow"><span>Plan</span><b id="planName">Free</b></div>
@@ -740,7 +744,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   </div>
   </details>
   <details class="dashgroup" id="dgSharing">
-    <summary><span>🎁 Invite friends</span></summary>
+    <summary><span class="glassicon">🎁</span><span>Invite friends</span></summary>
 <div class="box" id="inviteBox" hidden>
     <h3 class="sec" style="margin-top:0">Invite friends</h3>
     <p class="muted">Share your invite link — they get <b>7 days of Pro free</b>, you earn <b><span id="inviteTokenRate">100</span> tokens</b> per friend. Tokens buy premium card designs.</p>
@@ -779,7 +783,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   </div>
   </details>
   <details class="dashgroup" id="dgData">
-    <summary><span>🔒 Data controls</span></summary>
+    <summary><span class="glassicon">🔒</span><span>Data controls</span></summary>
 <div class="box">
     <h3 class="sec" style="margin-top:0">Your data</h3>
     <div class="statrow"><span>Cloud Sync</span><b id="dataSyncStatus">—</b></div>
@@ -789,7 +793,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   </div>
   </details>
   <details class="dashgroup" id="dgReport">
-    <summary><span>⚠️ Report an issue</span></summary>
+    <summary><span class="glassicon">⚠️</span><span>Report an issue</span></summary>
 <div class="box">
     <h3 class="sec" style="margin-top:0">What's wrong?</h3>
     <textarea id="issueText" placeholder="Describe the issue…" style="width:100%;min-height:90px;margin:4px 0" aria-label="Issue description"></textarea>
@@ -798,7 +802,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   </div>
   </details>
   <details class="dashgroup" id="dgHelp">
-    <summary><span>❓ Help & support</span></summary>
+    <summary><span class="glassicon">❓</span><span>Help & support</span></summary>
 <div class="box">
     <h3 class="sec" style="margin-top:0">FAQ</h3>
     <details style="margin:8px 0"><summary style="font-size:14px">How do I share my card?</summary><p class="muted" style="font-size:13px">Tap "Share my card" on the home screen, or open a card and use the Share button. The other person gets your contact details instantly.</p></details>
@@ -809,7 +813,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   </div>
   </details>
   <details class="dashgroup" id="dgLegal">
-    <summary><span>🛡️ Legal info</span></summary>
+    <summary><span class="glassicon">🛡️</span><span>Legal info</span></summary>
 <div class="box">
     <h3 class="sec" style="margin-top:0">Privacy Policy</h3>
     <p class="muted" style="font-size:13px">OMNI encrypts all your data on your device with your PIN before storage or sync. We never see, sell, or share your personal information. Analytics are anonymous and aggregate only. You can export or delete your data at any time from Data controls.</p>
