@@ -593,7 +593,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <div class="sheet" role="dialog" aria-label="Photo options">
       <div class="sheet-title" id="photoSheetTitle">Profile picture</div>
       <button class="sheet-btn" id="photoSheetChange">Change photo</button>
-      <button class="sheet-btn" id="photoSheetRepos">Adjust position</button>
       <button class="sheet-btn sheet-cancel" id="photoSheetCancel">Cancel</button>
     </div>
   </div>
@@ -2151,8 +2150,6 @@ let photoSheetMode="profile";
 function openPhotoSheet(mode){
   photoSheetMode=mode;
   $("photoSheetTitle").textContent=mode==="profile"?"Profile picture":"Cover photo";
-  const hasPic=mode==="profile"?!!(userProfile&&userProfile.pic):!!(userProfile&&userProfile.cover);
-  $("photoSheetRepos").style.display=hasPic?"":"none";
   $("photoSheet").hidden=false;
 }
 function closePhotoSheet(){$("photoSheet").hidden=true;}
@@ -2165,11 +2162,7 @@ $("photoSheetChange").onclick=()=>{
   if(photoSheetMode==="profile")$("picInput").click();
   else $("profileCoverInput").click();
 };
-$("photoSheetRepos").onclick=()=>{
-  closePhotoSheet();
-  if(photoSheetMode==="profile")openReposProfile();
-  else openReposProfileCover();
-};
+/* (adjust position removed — choosing a photo auto-opens adjust) */
 function openReposProfile(){
   if(!userProfile.pic){alert("Choose a picture first.");return;}
   reposMode="profile";
