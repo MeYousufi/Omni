@@ -1682,11 +1682,11 @@ $("reposCircle").addEventListener("pointercancel",()=>{reposDrag=null;});
 $("reposDone").onclick=async()=>{
   const pos=$("reposImg").style.objectPosition;
   if(reposMode==="cover"){
-    const p=getP();if(p){p.coverPos="50% 50%";if(p.cover){try{p.cover=await cropVisible(p.cover,pos,900,300);}catch(e){}}await saveAll();}
+    const p=getP();if(p){p.coverPos="50% 50%";if(p.cover){try{p.cover=await cropVisible(p.cover,pos,512,170);}catch(e){}}await saveAll();}
   }else if(reposMode==="profileCover"){
-    userProfile.coverPos="50% 50%";if(userProfile.cover){try{userProfile.cover=await cropVisible(userProfile.cover,pos,900,300);}catch(e){}}await saveAll();
+    userProfile.coverPos="50% 50%";if(userProfile.cover){try{userProfile.cover=await cropVisible(userProfile.cover,pos,512,170);}catch(e){}}await saveAll();
   }else{
-    userProfile.picPos="50% 50%";if(userProfile.pic){try{userProfile.pic=await cropVisible(userProfile.pic,pos,400,400);}catch(e){}}await saveAll();
+    userProfile.picPos="50% 50%";if(userProfile.pic){try{userProfile.pic=await cropVisible(userProfile.pic,pos,512,512);}catch(e){}}await saveAll();
   }
   $("reposOverlay").hidden=true;renderPic();renderFlip();renderCover();
   toast("Saved ✓");
@@ -1961,11 +1961,11 @@ async function saveAll(){
     // Naweed's permanent fix: crop ALL images to visible portion — app only stores what it displays
     try{
       for(const p of profiles){
-        if(p.pic&&p.pic.length>50000){p.pic=await cropVisible(p.pic,p.picPos||"50% 50%",400,400);p.picPos="50% 50%";}
-        if(p.cover&&p.cover.length>50000){p.cover=await cropVisible(p.cover,p.coverPos||"50% 50%",900,300);p.coverPos="50% 50%";}
+        if(p.pic&&p.pic.length>50000){p.pic=await cropVisible(p.pic,p.picPos||"50% 50%",512,512);p.picPos="50% 50%";}
+        if(p.cover&&p.cover.length>50000){p.cover=await cropVisible(p.cover,p.coverPos||"50% 50%",512,170);p.coverPos="50% 50%";}
       }
-      if(userProfile.pic&&userProfile.pic.length>50000){userProfile.pic=await cropVisible(userProfile.pic,userProfile.picPos||"50% 50%",400,400);userProfile.picPos="50% 50%";}
-      if(userProfile.cover&&userProfile.cover.length>50000){userProfile.cover=await cropVisible(userProfile.cover,userProfile.coverPos||"50% 50%",900,300);userProfile.coverPos="50% 50%";}
+      if(userProfile.pic&&userProfile.pic.length>50000){userProfile.pic=await cropVisible(userProfile.pic,userProfile.picPos||"50% 50%",512,512);userProfile.picPos="50% 50%";}
+      if(userProfile.cover&&userProfile.cover.length>50000){userProfile.cover=await cropVisible(userProfile.cover,userProfile.coverPos||"50% 50%",512,170);userProfile.coverPos="50% 50%";}
     }catch(e){}
     // Pre-encrypt size loop: keep shrinking until vault is small enough for iOS crypto
     try{
