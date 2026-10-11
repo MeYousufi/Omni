@@ -1959,16 +1959,22 @@ async function saveAll(){
   _saving=true;
   try{
     try{await shrinkImgs();}catch(e){lastSaveStep="shrink";throw e;}
-    // Clear oversized legacy photos that iOS can't decode — user re-selects at 512px
+    // Aggressive 512px enforcement: shrink ALL images, clear any iOS can't decode
     window._clearedPhotos=false;
     try{
-      const MAXLEN=700000; // ~500KB image — anything larger is pre-512px legacy
+      const ensure512=async img=>{
+        if(!img||!img.startsWith("data:image"))return img;
+        const shrunk=await shrinkOne(img,512,0.8);
+        // If still huge (>400KB), iOS can't decode it — clear
+        if(shrunk.length>400000){window._clearedPhotos=true;return "";}
+        return shrunk;
+      };
       for(const p of profiles){
-        if(p.pic&&p.pic.length>MAXLEN){p.pic="";p.picPos="50% 50%";window._clearedPhotos=true;}
-        if(p.cover&&p.cover.length>MAXLEN){p.cover="";p.coverPos="50% 50%";window._clearedPhotos=true;}
+        if(p.pic){const r=await ensure512(p.pic);if(!r)p.picPos="50% 50%";p.pic=r;}
+        if(p.cover){const r=await ensure512(p.cover);if(!r)p.coverPos="50% 50%";p.cover=r;}
       }
-      if(userProfile.pic&&userProfile.pic.length>MAXLEN){userProfile.pic="";userProfile.picPos="50% 50%";window._clearedPhotos=true;}
-      if(userProfile.cover&&userProfile.cover.length>MAXLEN){userProfile.cover="";userProfile.coverPos="50% 50%";window._clearedPhotos=true;}
+      if(userProfile.pic){const r=await ensure512(userProfile.pic);if(!r)userProfile.picPos="50% 50%";userProfile.pic=r;}
+      if(userProfile.cover){const r=await ensure512(userProfile.cover);if(!r)userProfile.coverPos="50% 50%";userProfile.cover=r;}
     }catch(e){}
     // Pre-encrypt size loop: keep shrinking until vault is small enough for iOS crypto
     try{
