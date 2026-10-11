@@ -983,6 +983,11 @@ async function pinDone(){
     }
     throw new Error("bad pin");
   }catch(e){
+    // Never blame the PIN for a crypto/storage failure — say what's actually wrong.
+    if(!window.isSecureContext||!window.crypto||!window.crypto.subtle){
+      pinMsg("⚠️ Page isn't secure — OMNI needs HTTPS to encrypt. Open https://omni-tap.com");
+      pinBuf="";renderDots();return;
+    }
     const f=pinFailRecord();
     pinMsg(f.lockUntil>Date.now()?"Too many tries — wait 30s":"Wrong PIN — try again");
   }
@@ -3152,6 +3157,16 @@ window.addEventListener("online",()=>{
 /* init */
 (function init(){
   buildDots();
+  // Secure-context guard: encryption needs crypto.subtle (HTTPS). Without it,
+  // PIN setup would fail with a misleading "Wrong PIN" — say what's wrong instead.
+  try{
+    if(!window.isSecureContext||!window.crypto||!window.crypto.subtle){
+      $("lockScreen").hidden=false;
+      pinMsg("⚠️ This page isn't secure — OMNI needs HTTPS to encrypt your cards. Please open https://omni-tap.com instead.");
+      try{$("forgotBtn").hidden=true;$("lockSyncBtn").hidden=true;}catch(e){}
+      return;
+    }
+  }catch(e){}
   const welcomed=localStorage.getItem("omni_welcomed");
   const has=hasVault()||hasLegacy();
   if(!welcomed&&!has){
