@@ -1593,7 +1593,7 @@ $("bpLater").onclick=()=>{
 /* ---------- picture reposition ---------- */
 let reposDrag=null;
 let reposMode="profile";
-$("reposBtn").onclick=openReposProfile;
+/* (reposBtn removed — reposition now via tap-to-edit action sheet) */
 $("coverReposBtn").onclick=()=>{
   const p=getP();if(!p||!p.cover){alert("Choose a cover first.");return;}
   reposMode="cover";
