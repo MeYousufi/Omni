@@ -149,6 +149,9 @@ a.wrow:active{background:rgba(255,255,255,.05)}
 .picwrap img{width:110px;height:110px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);background:#1a1e26;box-shadow:0 0 20px var(--glow)}
 .picwrap .ph{width:110px;height:110px;border-radius:50%;background:#1a1e26;display:inline-flex;align-items:center;justify-content:center;font-size:38px;font-weight:800;color:#8ea6d8;border:2px dashed var(--line)}
 .picwrap .chg{display:block;margin:8px auto 0;background:#232838;font-size:13px;padding:8px 14px;box-shadow:none;border:1px solid var(--line);min-height:44px}
+#profileCoverShow{width:100%;height:120px;background:#1a1e26;overflow:hidden}
+#profileCoverShow img{width:100%;height:100%;object-fit:cover;display:block}
+#profileCoverShow .nophoto{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#5a6480;font-size:13px}
 h3.sec{margin:18px 0 4px;font-size:15px}
 .rowbtns{display:flex;flex-wrap:wrap;gap:0}
 .colorrow{display:flex;align-items:center;gap:10px;margin-top:8px}
@@ -566,15 +569,18 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <div class="wrap" id="profileScreen" hidden>
   <div class="backrow"><button class="iconbtn" id="profileBack" aria-label="Back to cards">← Back</button></div>
   <div class="brand"><h1>Profile</h1></div>
-  <div class="box">
-    <h3 class="sec" style="margin-top:0">Profile picture</h3>
-    <p class="muted">Your photo — shown on your cards.</p>
-    <div class="picwrap">
+  <div class="box" style="overflow:hidden;padding:0">
+    <div id="profileCoverShow"></div>
+    <div class="picwrap" style="margin-top:-52px;position:relative">
       <div id="picShow"></div>
       <input type="file" id="picInput" accept="image/*" hidden>
-      <button class="chg" id="picBtn">Choose picture</button>
+      <input type="file" id="profileCoverInput" accept="image/*" hidden>
+      <button class="chg" id="picBtn">Choose your profile picture</button>
+      <button class="chg" id="profileCoverBtn">Choose cover photo</button>
       <button class="chg" id="reposBtn">Reposition picture</button>
+      <button class="chg" id="profileCoverReposBtn" hidden>Reposition cover</button>
     </div>
+    <div style="height:12px"></div>
   </div>
   <div class="box">
     <h3 class="sec" style="margin-top:0">Your info</h3>
@@ -1042,7 +1048,7 @@ $("quickSave").onclick=()=>{
 async function doLock(){
   // save any pending changes before wiping memory — but ALWAYS wipe even if save fails
   try{await saveAll();}catch(e){console.warn("Lock-time save failed:",e);}
-  pinBuf="";pinTmp=null;sessionPin=null;profiles=[];encounters=[];userProfile={pic:null,picPos:"50% 50%",name:"",phone:"",email:""};curId=null;buildDots();updateGo();
+  pinBuf="";pinTmp=null;sessionPin=null;profiles=[];encounters=[];userProfile={pic:null,picPos:"50% 50%",name:"",phone:"",email:"",cover:"",coverPos:"50% 50%"};curId=null;buildDots();updateGo();
   const has=hasVault()||hasLegacy();
   pinMsg(has?"Enter your PIN":"Set a 6-digit PIN");
   $("forgotBtn").hidden=!has;
@@ -1549,6 +1555,7 @@ let reposMode="profile";
 $("reposBtn").onclick=()=>{
   if(!userProfile.pic){alert("Choose a picture first.");return;}
   reposMode="profile";
+  $("reposCircle").style.borderRadius="50%";$("reposCircle").style.width="260px";$("reposCircle").style.height="260px";
   $("reposImg").src=userProfile.pic;
   $("reposImg").style.objectPosition=userProfile.picPos||"50% 50%";
   $("reposOverlay").hidden=false;
@@ -1556,6 +1563,7 @@ $("reposBtn").onclick=()=>{
 $("coverReposBtn").onclick=()=>{
   const p=getP();if(!p||!p.cover){alert("Choose a cover first.");return;}
   reposMode="cover";
+  $("reposCircle").style.borderRadius="16px";$("reposCircle").style.width="320px";$("reposCircle").style.height="160px";
   $("reposImg").src=p.cover;
   $("reposImg").style.objectPosition=p.coverPos||"50% 50%";
   $("reposOverlay").hidden=false;
@@ -1580,6 +1588,8 @@ $("reposDone").onclick=async()=>{
   const pos=$("reposImg").style.objectPosition;
   if(reposMode==="cover"){
     const p=getP();if(p){p.coverPos=pos;await saveAll();}
+  }else if(reposMode==="profileCover"){
+    userProfile.coverPos=pos;await saveAll();
   }else{
     userProfile.picPos=pos;await saveAll();
   }
@@ -1617,7 +1627,7 @@ let profiles=[];
 let curId=null, searchQ="";
 
 /* ---------- user profile (USER-level, independent of cards) ---------- */
-let userProfile={pic:null,picPos:"50% 50%",name:"",phone:"",email:""};
+let userProfile={pic:null,picPos:"50% 50%",name:"",phone:"",email:"",cover:"",coverPos:"50% 50%"};
 // Vault format v2: {v:2, profiles:[...], userProfile:{...}}
 // Old vaults store just the profiles array — unpackVault handles both.
 function packVault(){return{v:2,profiles:profiles,userProfile:userProfile};}
@@ -1625,12 +1635,12 @@ function unpackVault(data){
   if(data&&typeof data==="object"&&!Array.isArray(data)&&data.v===2){
     profiles=Array.isArray(data.profiles)?data.profiles:[];
     userProfile=(data.userProfile&&typeof data.userProfile==="object")
-      ? {pic:data.userProfile.pic||null,picPos:data.userProfile.picPos||"50% 50%",name:data.userProfile.name||"",phone:data.userProfile.phone||"",email:data.userProfile.email||""}
+      ? {pic:data.userProfile.pic||null,picPos:data.userProfile.picPos||"50% 50%",name:data.userProfile.name||"",phone:data.userProfile.phone||"",email:data.userProfile.email||"",cover:data.userProfile.cover||"",coverPos:data.userProfile.coverPos||"50% 50%"}
       : {pic:null,picPos:"50% 50%",name:""};
   }else{
     // legacy: vault holds the profiles array directly
     profiles=Array.isArray(data)?data:[];
-    userProfile={pic:null,picPos:"50% 50%",name:"",phone:"",email:""};
+    userProfile={pic:null,picPos:"50% 50%",name:"",phone:"",email:"",cover:"",coverPos:"50% 50%"};
   }
   // migration: adopt first card's picture as the user photo if none set
   if(!userProfile.pic&&profiles.length&&profiles[0].pic){
@@ -1678,10 +1688,13 @@ async function shrinkImgs(aggressive){
     const L=k=="pic"?250000:600000;
     if(p[k]&&p[k].length>L){p[k]=await shrinkOne(p[k],M,Q);}
   }}
-  // user profile pic: preserve quality, only shrink if huge
+  // user profile pic + cover: preserve quality, only shrink if huge
   try{
     if(userProfile&&userProfile.pic&&userProfile.pic.length>400000){
       userProfile.pic=await shrinkOne(userProfile.pic,800,0.9);
+    }
+    if(userProfile&&userProfile.cover&&userProfile.cover.length>600000){
+      userProfile.cover=await shrinkOne(userProfile.cover,1200,0.85);
     }
   }catch(e){}
 }
@@ -1865,7 +1878,47 @@ function fillDetail(){
 function renderPic(){
   const pos=userProfile?(userProfile.picPos||"50% 50%"):"50% 50%";
   $("picShow").innerHTML=userProfile&&userProfile.pic?`<img src="${userProfile.pic}" style="object-position:${pos}" alt="">`:`<div class="ph">${initials(userProfile?userProfile.name:"?")}</div>`;
+  renderProfileCover();
 }
+function renderProfileCover(){
+  const el=$("profileCoverShow");if(!el)return;
+  if(userProfile&&userProfile.cover){
+    el.innerHTML=`<img src="${userProfile.cover}" style="object-position:${userProfile.coverPos||"50% 50%"}" alt="">`;
+  }else{
+    el.innerHTML=`<div class="nophoto">Cover photo</div>`;
+  }
+  const rb=$("profileCoverReposBtn");if(rb)rb.hidden=!(userProfile&&userProfile.cover);
+}
+$("profileCoverBtn").onclick=()=>$("profileCoverInput").click();
+$("profileCoverInput").onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    const img=new Image();
+    img.onload=async()=>{
+      const c=document.createElement("canvas");
+      const s=1200/Math.max(img.width,img.height);
+      c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+      userProfile.cover=c.toDataURL("image/jpeg",0.9);
+      userProfile.coverPos="50% 50%";
+      await saveAll();
+      renderProfileCover();
+      toast("Cover photo saved");
+    };
+    img.src=r.result;
+  };
+  r.readAsDataURL(f);
+  e.target.value="";
+};
+$("profileCoverReposBtn").onclick=()=>{
+  if(!userProfile.cover){alert("Choose a cover photo first.");return;}
+  reposMode="profileCover";
+  $("reposCircle").style.borderRadius="16px";$("reposCircle").style.width="320px";$("reposCircle").style.height="160px";
+  $("reposImg").src=userProfile.cover;
+  $("reposImg").style.objectPosition=userProfile.coverPos||"50% 50%";
+  $("reposOverlay").hidden=false;
+};
 $("picBtn").onclick=()=>$("picInput").click();
 /* dominant color from image (for card back) */
 function sampleCoverColor(src,cb){
