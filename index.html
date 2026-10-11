@@ -1894,9 +1894,10 @@ function contrastText(bgHex){
 
 let _saving=false;
 async function saveAll(){
-  if(!sessionPin||_saving)return;
+  if(!sessionPin||_saving)return false;
   _saving=true;
-  try{await shrinkImgs();await vaultEncrypt(sessionPin,packVault());await saveEncounters();}
+  try{await shrinkImgs();await vaultEncrypt(sessionPin,packVault());await saveEncounters();return true;}
+  catch(e){return false;}
   finally{_saving=false;}
 }
 async function shrinkOne(dataUrl,maxPx,quality){
@@ -2997,10 +2998,10 @@ function openProfile(){
     userProfile.name=$("profileNameInput").value.trim();
     userProfile.phone=$("profilePhoneInput").value.trim();
     userProfile.email=$("profileEmailInput").value.trim();
-    try{await saveAll();}catch(e){}
+    const ok=await saveAll();
     renderPic();
     $("profileScreen").hidden=true;$("homeScreen").hidden=false;renderCards();window.scrollTo(0,0);
-    toast("Saved ✓");
+    toast(ok?"Saved ✓":"Couldn't save — try again");
   };
 }
 $("profileBack").onclick=()=>{$("profileScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
