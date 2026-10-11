@@ -2250,15 +2250,9 @@ function renderFlip(){
       `<h2>${esc(p.label||"OMNI")}</h2><div class="fsub">DIGITAL CARD</div>`+
       `<div class="ftag">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div>`;
   }
-  // back: cover image as background if set, else solid color
-  if(p.cover){
-    fb.style.backgroundImage=`url("${p.cover}")`;
-    fb.style.backgroundSize="cover";
-    fb.style.backgroundPosition=p.coverPos||"50% 50%";
-  }else{
-    fb.style.backgroundImage="";
-    fb.style.background=p.coverColor||"";
-  }
+  // back: solid color only (no photo) — Naweed's design
+  fb.style.backgroundImage="";
+  fb.style.background=p.color||p.coverColor||"#4f8cff";
   fb.style.borderColor=p.coverColor||"";
   let back="";
   if(p.title)back+=`<div class="flabel">${esc(p.title)}</div>`;
