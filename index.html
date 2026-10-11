@@ -1893,7 +1893,11 @@ function contrastText(bgHex){
 
 let _saving=false;
 async function saveAll(){
-  if(!sessionPin||_saving)return false;
+  if(!sessionPin)return false;
+  // Queue: wait for any in-progress save instead of failing
+  let waits=0;
+  while(_saving&&waits<50){await new Promise(r=>setTimeout(r,100));waits++;}
+  if(_saving)return false;
   _saving=true;
   try{
     await shrinkImgs();
