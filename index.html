@@ -797,6 +797,13 @@ async function deriveKey(pin,salt){
   const km=await crypto.subtle.importKey("raw",te.encode("OMNI:"+pin),"PBKDF2",false,["deriveKey"]);
   return crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:120000,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
 }
+async function vaultEncryptBlob(pin,obj){
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await deriveKey(pin,salt);
+  const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,te.encode(JSON.stringify(obj)));
+  return b64(salt)+"."+b64(iv)+"."+b64(ct);
+}
 async function vaultEncrypt(pin,obj,vkey){
   vkey=vkey||"omni_vault";
   // CRITICAL GUARD: never overwrite a non-empty vault with empty data (prevents data loss on refresh)
@@ -813,11 +820,8 @@ async function vaultEncrypt(pin,obj,vkey){
       }catch(e){}
     }
   }
-  const salt=crypto.getRandomValues(new Uint8Array(16));
-  const iv=crypto.getRandomValues(new Uint8Array(12));
-  const key=await deriveKey(pin,salt);
-  const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,te.encode(JSON.stringify(obj)));
-  localStorage.setItem(vkey,b64(salt)+"."+b64(iv)+"."+b64(ct));
+  const blob=await vaultEncryptBlob(pin,obj);
+  localStorage.setItem(vkey,blob);
 }
 async function vaultDecrypt(pin,vkey){
   vkey=vkey||"omni_vault";
@@ -1829,22 +1833,55 @@ async function saveAll(){
   _saving=true;
   try{
     await shrinkImgs();
-    try{
-      await vaultEncrypt(sessionPin,packVault());
-    }catch(e){
-      // Quota exceeded: shrink aggressively and retry once
-      if(e&&e.name==="QuotaExceededError"){
-        await shrinkImgs(true);
-        await vaultEncrypt(sessionPin,packVault());
-      }else throw e;
+    let blob=null;
+    try{blob=await vaultEncryptBlob(sessionPin,packVault());}
+    catch(e){
+      // Encryption failed (rare) — try aggressive shrink once
+      await shrinkImgs(true);
+      blob=await vaultEncryptBlob(sessionPin,packVault());
+    }
+    // Try phone storage first
+    let localOk=false;
+    try{localStorage.setItem("omni_vault",blob);localOk=true;}
+    catch(e){
+      // Phone storage full/broken — shrink harder and retry once
+      try{await shrinkImgs(true);blob=await vaultEncryptBlob(sessionPin,packVault());localStorage.setItem("omni_vault",blob);localOk=true;}
+      catch(e2){}
     }
     await saveEncounters();
-    // Auto-sync to Cloudflare in background (silent, best-effort)
-    try{if(syncEnabled()){vaultUpload(true).catch(()=>{});}}catch(e){}
-    return true;
+    // Cloud: primary fallback if phone failed, background backup if phone worked
+    if(localOk){
+      try{if(syncEnabled()){vaultUpload(true).catch(()=>{});}}catch(e){}
+      return true;
+    }
+    // Phone storage failed — cloud is the fallback
+    if(!syncEnabled())return false;
+    try{if(await vaultUploadBlob(blob))return true;}catch(e){}
+    return await cloudHasVault();
   }
   catch(e){return false;}
   finally{_saving=false;}
+}
+async function vaultUploadBlob(blob){
+  const id=syncId();if(!id||!blob)return false;
+  try{
+    const r=await fetch(STATS_URL+"/api/vault/save",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({sync_id:id,blob,updated_at:Date.now()})
+    });
+    const j=await r.json();
+    if(j.ok){localStorage.setItem(SYNC_LAST_KEY,String(Date.now()));return true;}
+    return false;
+  }catch(e){return false;}
+}
+async function cloudHasVault(){
+  const id=syncId();if(!id)return false;
+  try{
+    const r=await fetch(STATS_URL+"/api/vault/load?sync_id="+encodeURIComponent(id));
+    if(!r.ok)return false;
+    const j=await r.json();
+    return !!(j.ok&&j.blob);
+  }catch(e){return false;}
 }
 async function shrinkOne(dataUrl,maxPx,quality){
   const I=new Image();
