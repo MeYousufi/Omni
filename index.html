@@ -288,7 +288,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .navmenu.open .navmenu-panel{transform:translateX(0)}
 .navmenu-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .navmenu-title{font-size:17px;font-weight:700;letter-spacing:.04em}
-.navitem{display:flex;align-items:center;gap:12px;width:100%;background:#1c2130;border:1px solid var(--line);border-radius:12px;color:var(--text);padding:14px 16px;font-size:16px;min-height:52px;text-align:left;cursor:pointer}
+.navitem{display:flex;align-items:center;justify-content:center;gap:14px;width:100%;background:#1c2130;border:1px solid var(--line);border-radius:12px;color:var(--text);padding:14px 16px;font-size:16px;min-height:52px;text-align:center;cursor:pointer}
 .navitem:active{background:#232a3d}
 .navicon{font-size:20px;width:28px;text-align:center;flex:none}
 /* tappable profile photos + action sheet */
@@ -305,7 +305,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .sheet-btn:active{background:#232a3d}
 .sheet-cancel{color:#ff8a8a}
 /* glassmorphic section icons */
-.glassicon{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.07);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.14);font-size:22px;margin-right:12px;vertical-align:middle;box-shadow:0 4px 18px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.12);flex:none}
+.glassicon{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.07);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.14);font-size:22px;vertical-align:middle;box-shadow:0 4px 18px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.12);flex:none}
 .dashgroup>summary{display:flex;align-items:center;cursor:pointer;list-style:none}
 .dashgroup>summary::-webkit-details-marker{display:none}
 /* fullscreen photo viewer */
@@ -433,12 +433,12 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <span class="navmenu-title">Menu</span>
       <button class="iconbtn small" id="navMenuClose" aria-label="Close menu">✕</button>
     </div>
-    <button class="navitem" id="navProfile"><span class="navicon" aria-hidden="true"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg></span></span>Profile</button>
-    <button class="navitem" id="navDash"><span class="navicon" aria-hidden="true"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg></span></span>Dashboard</button>
-    <button class="navitem" id="navOwner"><span class="navicon" aria-hidden="true"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18h18"/><path d="M4 18l-1.5-9L7 12l5-7 5 7 4.5-3L20 18"/></svg></span></span>Owner controls</button>
-    <button class="navitem" id="navBackup"><span class="navicon" aria-hidden="true"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg></span></span>Back up</button>
-    <button class="navitem" id="navConnect"><span class="navicon" aria-hidden="true"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span></span>Connect</button>
-    <button class="navitem" id="navLock"><span class="navicon" aria-hidden="true"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span></span>Lockout</button>
+    <button class="navitem" id="navProfile"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg></span>Profile</button>
+    <button class="navitem" id="navDash"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg></span>Dashboard</button>
+    <button class="navitem" id="navOwner"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18h18"/><path d="M4 18l-1.5-9L7 12l5-7 5 7 4.5-3L20 18"/></svg></span>Owner controls</button>
+    <button class="navitem" id="navBackup"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg></span>Back up</button>
+    <button class="navitem" id="navConnect"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span>Connect</button>
+    <button class="navitem" id="navLock"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>Lockout</button>
   </aside>
 </div>
 
