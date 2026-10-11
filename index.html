@@ -1103,12 +1103,32 @@ function unlock(){
   $("homeScreen").hidden=false;
   stat("opens");
   checkTrialExpired();
+  syncSubscriptionStatus(); // server-side plan check
   renderCards();
   renderNudgesMemories();
   
   updateCreditUI();
   collectPendingInvites();
   try{cacheLockBg();}catch(e){}
+}
+// Sync subscription status from server (permanent enforcement)
+async function syncSubscriptionStatus(){
+  try{
+    const syncId=localStorage.getItem("omni_sync_id");
+    if(!syncId)return;
+    const r=await fetch(STATS_URL+"/api/subscription/status?syncId="+encodeURIComponent(syncId));
+    const j=await r.json();
+    if(j.tier&&j.tier!==userPlan.tier){
+      userPlan.tier=j.tier;
+      userPlan.status=j.status||"active";
+      await saveAll();renderPlanBox();
+      if(j.tier!=="free")toast(`Plan updated: ${PLAN_DEFS[j.tier].name} ✓`);
+    }
+    // Sync token balance from server
+    if(typeof j.tokens==="number"&&j.tokens!==(userPlan.tokens||0)){
+      userPlan.tokens=j.tokens;await saveAll();updateCreditUI();
+    }
+  }catch(e){/* offline — keep local plan */}
 }
 $("welcomeGo").onclick=()=>{
   localStorage.setItem("omni_welcomed","1");
