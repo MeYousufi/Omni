@@ -751,6 +751,15 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     </div>
     <button class="small gray" id="shareInviteBtn" style="width:100%;margin-top:8px">Share invite link…</button>
   </div>
+<div class="box" id="redeemBox">
+    <h3 class="sec" style="margin-top:0">🎁 Redeem referral code</h3>
+    <p class="muted">New here? Enter a friend's invite code for <b>7 days of Pro free</b>.</p>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <input id="redeemInput" placeholder="Enter code" style="flex:1;margin:0;text-transform:uppercase" aria-label="Referral code" autocomplete="off">
+      <button class="small" id="redeemBtn" style="flex:none">Redeem</button>
+    </div>
+    <p class="muted" id="redeemMsg" style="font-size:12px;margin-top:4px"></p>
+  </div>
 <div class="box" id="sigBox">
     <h3 class="sec" style="margin-top:0">Email signature <span class="advbadge">PRO</span></h3>
     <p class="muted">Generate a branded signature from your profile.</p>
@@ -1349,6 +1358,28 @@ $("shareInviteBtn").onclick=async()=>{
   try{if(navigator.share){await navigator.share({title:"OMNI",text:"Get OMNI — you get 7 days of Pro free!",url:l});return;}}catch(e){}
   copyInviteLink();
 };
+/* ---------- redeem referral code ---------- */
+$("redeemBtn").onclick=async()=>{
+  const msg=$("redeemMsg");
+  const code=$("redeemInput").value.trim().toUpperCase();
+  if(!code){msg.textContent="Enter a code first.";return;}
+  try{
+    if(localStorage.getItem("omni_invite_claimed")){msg.textContent="You already redeemed a code.";return;}
+    if(localStorage.getItem("omni_trial_used")||userPlan.tier!=="free"){msg.textContent="Referral codes are for new Free users only.";return;}
+    if(code===myInviteCode()){msg.textContent="That's your own code.";return;}
+  }catch(e){}
+  msg.textContent="Checking…";
+  await claimInvite(code);
+  try{
+    if(localStorage.getItem("omni_invite_claimed")){
+      msg.textContent="✓ Redeemed — enjoy 7 days of Pro!";
+      $("redeemInput").value="";
+      renderPlanBox();renderCreditBoxes();
+    }else{
+      msg.textContent="That code didn't work — check and try again.";
+    }
+  }catch(e){msg.textContent="That code didn't work — check and try again.";}
+};
 
 /* ---------- buy shares ---------- */
 async function buyShares(){
@@ -1892,21 +1923,22 @@ function contrastText(bgHex){
 }
 
 let _saving=false;
+let lastSaveStep="";
 async function saveAll(){
-  if(!sessionPin)return false;
+  if(!sessionPin){lastSaveStep="no-pin";return false;}
   // Queue: wait for any in-progress save instead of failing
   let waits=0;
   while(_saving&&waits<50){await new Promise(r=>setTimeout(r,100));waits++;}
-  if(_saving)return false;
+  if(_saving){lastSaveStep="busy-timeout";return false;}
   _saving=true;
   try{
-    await shrinkImgs();
+    try{await shrinkImgs();}catch(e){lastSaveStep="shrink";throw e;}
     let blob=null;
     try{blob=await vaultEncryptBlob(sessionPin,packVault());}
     catch(e){
       // Encryption failed (rare) — try aggressive shrink once
-      await shrinkImgs(true);
-      blob=await vaultEncryptBlob(sessionPin,packVault());
+      try{await shrinkImgs(true);blob=await vaultEncryptBlob(sessionPin,packVault());}
+      catch(e2){lastSaveStep="encrypt";throw e2;}
     }
     // Try phone storage first
     let localOk=false;
@@ -1914,13 +1946,13 @@ async function saveAll(){
     catch(e){
       // Phone storage full/broken — shrink harder and retry once
       try{await shrinkImgs(true);blob=await vaultEncryptBlob(sessionPin,packVault());localStorage.setItem("omni_vault",blob);localOk=true;}
-      catch(e2){}
+      catch(e2){lastSaveStep="phone-storage";}
     }
-    await saveEncounters();
+    try{await saveEncounters();}catch(e){}
     // Cloud: primary fallback if phone failed, background backup if phone worked
     if(localOk){
       try{if(syncEnabled()){vaultUpload(true).catch(()=>{});}}catch(e){}
-      return true;
+      lastSaveStep="";return true;
     }
     // Phone storage failed — cloud is the fallback (auto-setup sync if needed)
     let sid=syncId();
@@ -1937,12 +1969,12 @@ async function saveAll(){
       if(j.ok){
         try{localStorage.setItem(SYNC_LAST_KEY,String(Date.now()));}catch(e){}
         try{localStorage.setItem(SYNC_ID_KEY,sid);}catch(e){}
-        return true;
-      }
-    }catch(e){}
+        lastSaveStep="";return true;
+      }else{lastSaveStep="cloud-rejected";}
+    }catch(e){lastSaveStep="cloud-network";}
     return false;
   }
-  catch(e){return false;}
+  catch(e){if(!lastSaveStep)lastSaveStep="unknown";return false;}
   finally{_saving=false;}
 }
 async function vaultUploadBlob(blob){
@@ -3067,7 +3099,7 @@ function openProfile(){
     const ok=await saveAll();
     renderPic();
     $("profileScreen").hidden=true;$("homeScreen").hidden=false;renderCards();window.scrollTo(0,0);
-    toast(ok?"Saved ✓":"Couldn't save — try again");
+    toast(ok?"Saved ✓":"Couldn't save ("+lastSaveStep+") — try again");
   };
 }
 $("profileBack").onclick=()=>{$("profileScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
