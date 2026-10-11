@@ -2498,17 +2498,27 @@ document.addEventListener("DOMContentLoaded", ()=>{
   };
   const sg = $("sigGen");
   if(sg) sg.onclick = ()=>{
-    const p = profiles[0];
     const pv = $("sigPreview"), cp = $("sigCopy");
-    if(!p){ pv.hidden = true; cp.hidden = true; toast("Create a card first"); return; }
+    const card = profiles[0]||{};
+    // Profile-first: use the user profile, fall back to the first card
+    const nm = userProfile.name||card.name||"";
+    const ph = userProfile.phone||card.phones||"";
+    const em = userProfile.email||card.emails||"";
+    const pic = userProfile.pic||card.pic||"";
+    const title = card.title||"";
+    const org = card.org||"";
+    const urls = card.urls||"";
+    if(!nm&&!ph&&!em){ pv.hidden = true; cp.hidden = true; toast("Add your info to your Profile first"); return; }
     const sigHtml = `<table cellpadding="0" cellspacing="0" style="font-family:Arial,sans-serif;font-size:14px;color:#333">
-<tr><td style="font-weight:bold;font-size:16px;color:#111">${esc(p.name||"")}</td></tr>
-${p.title?`<tr><td style="color:#666">${esc(p.title)}</td></tr>`:""}
-${p.org?`<tr><td style="color:#666">${esc(p.org)}</td></tr>`:""}
-${(p.phones||[]).map(x=>`<tr><td>📞 ${esc(x)}</td></tr>`).join("")}
-${(p.emails||[]).map(x=>`<tr><td>✉️ <a href="mailto:${esc(x)}" style="color:#0a84ff">${esc(x)}</a></td></tr>`).join("")}
-${(p.urls||[]).map(x=>`<tr><td>🌐 <a href="${esc(x)}" style="color:#0a84ff">${esc(x)}</a></td></tr>`).join("")}
-<tr><td style="padding-top:8px;font-size:12px;color:#999">Sent with <a href="https://omni-tap.com" style="color:#0a84ff">OMNI</a></td></tr>
+<tr>${pic?`<td style="padding-right:12px;vertical-align:top"><img src="${pic}" width="64" height="64" style="border-radius:50%;object-fit:cover"></td>`:""}<td style="vertical-align:top">
+${nm?`<div style="font-weight:bold;font-size:16px;color:#111">${esc(nm)}</div>`:""}
+${title?`<div style="color:#666">${esc(title)}</div>`:""}
+${org?`<div style="color:#666">${esc(org)}</div>`:""}
+${ph?`<div style="margin-top:4px">📞 ${esc(ph)}</div>`:""}
+${em?`<div>✉️ <a href="mailto:${esc(em)}" style="color:#0a84ff">${esc(em)}</a></div>`:""}
+${urls?`<div>🌐 <a href="${esc(urls)}" style="color:#0a84ff">${esc(urls)}</a></div>`:""}
+<div style="padding-top:8px;font-size:12px;color:#999">Sent with <a href="https://omni-tap.com" style="color:#0a84ff">OMNI</a></div>
+</td></tr>
 </table>`;
     pv.innerHTML = sigHtml;
     pv.hidden = false; cp.hidden = false;
