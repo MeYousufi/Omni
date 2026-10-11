@@ -732,7 +732,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <h3 class="sec" style="margin-top:0">Your plan</h3>
     <div class="statrow"><span>Plan</span><b id="planName">Free</b></div>
     <div class="statrow"><span>Cards</span><b id="planCards">0 / 3</b></div>
-    <div class="statrow"><span>🪙 Tokens</span><b id="planTokens">0</b></div>
+    <div class="statrow"><span>Tokens</span><b id="planTokens">0</b></div>
     <div id="planBenefits" class="muted" style="font-size:13px;margin-top:8px;line-height:1.7"></div>
     <div id="planTrial" class="muted" style="font-size:12px;margin-top:4px" hidden></div>
     <button class="small" id="planUpgradeBtn" style="width:100%;margin-top:8px">View plans</button>
@@ -762,7 +762,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <div class="box" id="inviteBox" hidden>
     <h3 class="sec" style="margin-top:0">Invite friends</h3>
     <p class="muted">Share your invite link — you'll earn <b><span id="inviteTokenRate">100</span> tokens</b> per friend plus access to 7 cards. Tokens can buy premium card designs. Your friend earns a free Pro trial.</p>
-    <div class="statrow"><span>🪙 Your tokens</span><b id="bonusBal">0</b></div>
+    <div class="statrow"><span>Your tokens</span><b id="bonusBal">0</b></div>
     <div style="display:flex;gap:8px;margin-top:10px">
       <input id="inviteLink" readonly style="flex:1;margin:0" aria-label="Your invite code">
       <button class="small" id="copyInvite" style="flex:none">Copy</button>
@@ -770,7 +770,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <button class="small gray" id="shareInviteBtn" style="width:100%;margin-top:8px">Share invite link…</button>
   </div>
 <div class="box" id="redeemBox">
-    <h3 class="sec" style="margin-top:0">🎁 Redeem referral code</h3>
+    <h3 class="sec" style="margin-top:0">Redeem referral code</h3>
     <p class="muted">New here? Enter a friend's invite code — you'll earn 7 cards plus 7 days of Pro trial.</p>
     <div style="display:flex;gap:8px;margin-top:8px">
       <input id="redeemInput" placeholder="Enter code" style="flex:1;margin:0;text-transform:uppercase" aria-label="Referral code" autocomplete="off">
@@ -787,12 +787,12 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   </div>
 <details class="box" id="shopBox" style="padding:12px">
     <summary style="font-size:15px;font-weight:600;cursor:pointer;list-style:none">Premium designs</summary>
-    <div class="statrow"><span>🪙 Your tokens</span><b id="shopTokens">0</b></div>
+    <div class="statrow"><span>Your tokens</span><b id="shopTokens">0</b></div>
     <div id="shopList"></div>
   </details>
 <details class="box" id="tokenBox" style="padding:12px;margin-top:8px">
     <summary style="font-size:15px;font-weight:600;cursor:pointer;list-style:none">Get tokens</summary>
-    <p class="muted">Earn 🪙 100 per friend who joins, or buy a pack.</p>
+    <p class="muted">Earn 100 tokens per friend who joins, or buy a pack.</p>
     <div id="packList"></div>
   </details>
   </details>
@@ -2303,10 +2303,10 @@ $("profileCoverInput").onchange=e=>{
     const img=new Image();
     img.onload=async()=>{
       const c=document.createElement("canvas");
-      const s=1200/Math.max(img.width,img.height);
+      const s=512/Math.max(img.width,img.height);
       c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
       c.getContext("2d").drawImage(img,0,0,c.width,c.height);
-      userProfile.cover=c.toDataURL("image/jpeg",0.9);
+      userProfile.cover=c.toDataURL("image/jpeg",0.8);
       userProfile.coverPos="50% 50%";
       await saveAll();
       renderProfileCover();
@@ -2409,11 +2409,11 @@ $("coverInput").onchange=e=>{
     const img=new Image();
     img.onload=async()=>{
       const c=document.createElement("canvas");
-      const s=1200/Math.max(img.width,img.height);
+      const s=512/Math.max(img.width,img.height);
       c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
       c.getContext("2d").drawImage(img,0,0,c.width,c.height);
       const p=getP();if(!p)return;
-      p.cover=c.toDataURL("image/jpeg",0.9);
+      p.cover=c.toDataURL("image/jpeg",0.8);
       p.coverPos="50% 50%";
       await saveAll();
       sampleCoverColor(p.cover,col=>{if(col){p.coverColor=col;renderFlip();}});
@@ -2438,10 +2438,10 @@ $("picInput").onchange=e=>{
     const img=new Image();
     img.onload=async()=>{
       const c=document.createElement("canvas");
-      const s=600/Math.max(img.width,img.height);
+      const s=512/Math.max(img.width,img.height);
       c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
       c.getContext("2d").drawImage(img,0,0,c.width,c.height);
-      userProfile.pic=c.toDataURL("image/jpeg",0.92);
+      userProfile.pic=c.toDataURL("image/jpeg",0.8);
       await saveAll();
       renderPic();
       // belt-and-suspenders: re-render once the img element confirms load (iOS timing)
