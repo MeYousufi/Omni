@@ -3915,6 +3915,15 @@ window.addEventListener("online",()=>{
 /* ---------- PWA ---------- */
 if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}
 </script>
+<!-- Native bridge: loaded only in Capacitor native app -->
+<script>
+if(window.Capacitor&&window.Capacitor.isNativePlatform()){
+  var s=document.createElement("script");
+  s.src="native-bridge.js";
+  s.onerror=function(){console.warn("[OMNI] native-bridge.js not found")};
+  document.head.appendChild(s);
+}
+</script>
 
 </body>
 </html>
