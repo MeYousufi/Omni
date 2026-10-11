@@ -1137,9 +1137,10 @@ $("resetRestore").onclick=()=>{
   inp.click();
 };
 $("resetConfirm").onclick=()=>{
-  localStorage.removeItem("omni_vault");localStorage.removeItem("omni_profiles");localStorage.removeItem("omni_pin");
+  localStorage.removeItem("omni_vault");localStorage.removeItem("omni_vault_bak");localStorage.removeItem("omni_profiles");localStorage.removeItem("omni_pin");
   localStorage.removeItem("omni_pinlen");localStorage.removeItem("omni_pinfail");localStorage.removeItem("omni_last_backup");
   localStorage.removeItem("omni_sync_id");localStorage.removeItem("omni_sync_last");localStorage.removeItem("omni_first_backup_done");
+  userPlan={tier:"free",trialEndsAt:0,tokens:0,sharedOnce:false,templates:[]};
   profiles=[];sessionPin=null;pinTmp=null;pinBuf="";
   $("resetModal").hidden=true;buildDots();doLock();
 };
