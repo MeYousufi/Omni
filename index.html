@@ -71,8 +71,8 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 }
 .forgot{background:none;color:var(--muted);font-size:15px;margin-top:18px;text-decoration:underline;padding:14px 20px;box-shadow:none;border:0;min-height:44px}
 /* Premium lock screen: balanced, spacious, fits one screen */
-#lockScreen{justify-content:center;padding-top:8px}
-#lockScreen h1{font-size:44px;margin:0 0 6px;letter-spacing:.18em}
+#lockScreen{justify-content:center;padding-top:0}
+#lockScreen h1{font-size:52px;margin:0 0 18px;letter-spacing:.16em}
 #lockScreen .muted{font-size:13px;margin-bottom:10px;letter-spacing:.28em;opacity:.75}
 #lockScreen .dots{gap:14px;margin:18px 0 20px}
 #lockScreen .dot{width:14px;height:14px}
@@ -397,7 +397,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <div id="lockScreen" hidden>
   <div id="lockBg" aria-hidden="true"></div>
   <h1 class="logo-anim"><span class="logo-o">O</span><span class="logo-rest">MNI</span></h1>
-  <div class="muted" style="letter-spacing:.1em">SHARE ONLY WHAT YOU CHOOSE</div>
   <button id="bioUnlockBtn" hidden style="margin-top:22px;width:100%;max-width:280px;font-size:16px;padding:14px;min-height:52px">Unlock with biometrics</button>
   <button id="bioEnrollBtn" class="gray" hidden style="margin-top:18px;width:100%;max-width:280px;font-size:13px;">Set up biometrics for faster unlock</button>
   <div id="bioDivider" class="muted" hidden style="margin:14px 0 0;font-size:12px">or enter your PIN</div>
