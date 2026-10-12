@@ -3902,17 +3902,13 @@ window.addEventListener("online",()=>{
       return;
     }
   }catch(e){}
-  const welcomed=localStorage.getItem("omni_welcomed");
   const has=hasVault()||hasLegacy();
-  if(!welcomed&&!has){
-    $("welcomeScreen").hidden=false; // lockScreen stays hidden
-  }else{
-    $("lockScreen").hidden=false;
-    if(has)pinMsg("Enter your PIN");
-    $("forgotBtn").hidden=!has;
-    $("lockSyncBtn").hidden=has; // "Restore my cards from cloud" only on fresh installs
-    try{applyLockBg();}catch(e){}
-  }
+  // Skip welcome screen — go straight to lock screen (handles both new PIN setup and existing PIN entry)
+  $("lockScreen").hidden=false;
+  if(has)pinMsg("Enter your PIN");
+  $("forgotBtn").hidden=!has;
+  $("lockSyncBtn").hidden=has; // "Restore my cards from cloud" only on fresh installs
+  try{applyLockBg();}catch(e){}
   updateGo();
   // share credits: fetch flags, then process invite / purchase deep links
   (async()=>{
