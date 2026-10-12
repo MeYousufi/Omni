@@ -341,14 +341,15 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <!-- QUICK CREATE (first card, 3 steps) -->
 <div id="quickScreen" hidden>
   <div class="wrap" style="min-height:90vh;display:flex;flex-direction:column;justify-content:center">
-    <h1>Your first card</h1>
-    <p class="muted">Just the essentials — you can add a photo, color, and more later.</p>
+    <h1>Create your account</h1>
+    <p class="muted">Your email and phone keep your account unique — you can add a photo and more later.</p>
     <div class="box">
       <input id="q_name" placeholder="Your name" autocomplete="name" aria-label="Your name">
-      <input id="q_contact" placeholder="Phone or email" autocomplete="off" aria-label="Phone or email">
+      <input id="q_email" placeholder="Email address" autocomplete="email" inputmode="email" aria-label="Email address">
+      <input id="q_phone" placeholder="Phone number" autocomplete="tel" inputmode="tel" aria-label="Phone number">
       <div class="vhint" id="q_hint"></div>
     </div>
-    <button id="quickSave" style="width:100%;padding:15px;font-size:17px">Create my card →</button>
+    <button id="quickSave" style="width:100%;padding:15px;font-size:17px">Create account →</button>
   </div>
 </div>
 
@@ -1052,6 +1053,15 @@ async function pinDone(){
       }
       pinFailReset();haptic(15);
       if(onboarding){
+        // Register the new account on the server (duplicate check already done, this is idempotent)
+        try{
+          const rp=await fetch(STATS_URL+"/api/users/register",{method:"POST",headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({email:userProfile.email,phone:userProfile.phone,deviceId:myDeviceId()})});
+          const rj=await rp.json();
+          if(rj&&rj.ok){
+            try{localStorage.setItem("omni_user_registered",userProfile.email.toLowerCase()+"|"+userProfile.phone.replace(/\D/g,""));}catch(e){}
+          }
+        }catch(e){/* server unreachable — profile saved locally, will sync later */}
         onboarding=false;pendingProfile=null;
         $("lockScreen").hidden=true;
         // Generate and show recovery key
@@ -1151,14 +1161,28 @@ function validContact(v){
   if(v.replace(/\D/g,"").length>=7)return{type:"phones",val:v};
   return null;
 }
-$("quickSave").onclick=()=>{
+$("quickSave").onclick=async()=>{
   const name=$("q_name").value.trim();
-  const c=validContact($("q_contact").value);
+  const email=$("q_email").value.trim();
+  const phone=$("q_phone").value.trim();
   if(!name){$("q_hint").textContent="Please enter your name.";$("q_name").classList.add("bad");return;}
-  if(!c){$("q_hint").textContent="Enter a valid phone number or email.";$("q_contact").classList.add("bad");return;}
-  $("q_hint").textContent="";$("q_name").classList.remove("bad");$("q_contact").classList.remove("bad");
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){$("q_hint").textContent="Enter a valid email address.";$("q_email").classList.add("bad");return;}
+  if(!phone||phone.replace(/\D/g,"").length<7){$("q_hint").textContent="Enter a valid phone number.";$("q_phone").classList.add("bad");return;}
+  $("q_hint").textContent="";$("q_name").classList.remove("bad");$("q_email").classList.remove("bad");$("q_phone").classList.remove("bad");
+  // Check server for duplicates before proceeding
+  $("q_hint").textContent="Checking availability…";
+  try{
+    const r=await fetch(STATS_URL+"/api/users/check",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({email:email,phone:phone})});
+    const j=await r.json();
+    if(j&&!j.available){
+      $("q_hint").textContent=j.field==="email"?"This email is already registered. Try logging in instead.":"This phone number is already registered. Try logging in instead.";
+      return;
+    }
+  }catch(e){/* server unreachable — proceed anyway, will verify on profile save */}
+  $("q_hint").textContent="";
   // Profile-only signup: no card is auto-created. Contact goes to the user profile.
-  pendingProfile={name:name,phone:c.type==="phones"?c.val:"",email:c.type==="emails"?c.val:""};
+  pendingProfile={name:name,phone:phone,email:email};
   onboarding=true;
   $("quickScreen").hidden=true;$("lockScreen").hidden=false;
   pinMsg("Set a "+pinLen()+"-digit PIN to protect your profile");
@@ -3934,9 +3958,13 @@ window.addEventListener("online",()=>{
     }
   }catch(e){}
   const has=hasVault()||hasLegacy();
-  // Skip welcome screen — go straight to lock screen (handles both new PIN setup and existing PIN entry)
-  $("lockScreen").hidden=false;
-  if(has)pinMsg("Enter your PIN");
+  // New users: show account creation first, then PIN setup. Existing users: go straight to PIN entry.
+  if(!has){
+    $("quickScreen").hidden=false;
+  }else{
+    $("lockScreen").hidden=false;
+    pinMsg("Enter your PIN");
+  }
   $("forgotBtn").hidden=!has;
   $("lockSyncBtn").hidden=has; // "Restore my cards from cloud" only on fresh installs
   try{applyLockBg();}catch(e){}
