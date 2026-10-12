@@ -70,14 +70,17 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
   #lockScreen h1{font-size:28px}
 }
 .forgot{background:none;color:var(--muted);font-size:15px;margin-top:18px;text-decoration:underline;padding:14px 20px;box-shadow:none;border:0;min-height:44px}
-/* Compact lock screen: fit PIN pad + auth links on one screen without scrolling */
-#lockScreen h1{font-size:36px;margin:0 0 4px}
-#lockScreen .muted{font-size:13px;margin-bottom:6px}
-#lockScreen .dots{gap:12px;margin:14px 0}
-#lockScreen .pinpad{grid-template-columns:repeat(3,minmax(68px,78px));gap:10px;max-width:270px}
-#lockScreen .pinpad button{max-width:78px;max-height:78px;font-size:24px}
-#lockAuthLinks{margin-top:8px !important;gap:4px !important}
-#lockAuthLinks .forgot{margin:0 !important;padding:10px !important;min-height:40px !important;font-size:15px}
+/* Premium lock screen: balanced, spacious, fits one screen */
+#lockScreen{justify-content:center;padding-top:8px}
+#lockScreen h1{font-size:44px;margin:0 0 6px;letter-spacing:.18em}
+#lockScreen .muted{font-size:13px;margin-bottom:10px;letter-spacing:.28em;opacity:.75}
+#lockScreen .dots{gap:14px;margin:18px 0 20px}
+#lockScreen .dot{width:14px;height:14px}
+#lockScreen .pinpad{grid-template-columns:repeat(3,minmax(72px,82px));gap:12px;max-width:290px}
+#lockScreen .pinpad button{max-width:82px;max-height:82px;font-size:26px;background:#161b28;border:1px solid #2a3040}
+#lockScreen .pinpad button:active{background:#1e2536}
+#lockAuthLinks{margin-top:14px !important;gap:4px !important}
+#lockAuthLinks .forgot{margin:0 !important;padding:10px !important;min-height:40px !important;font-size:14px;opacity:.7}
 /* cards */
 .searchrow{display:flex;gap:8px;margin-top:10px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-top:12px}
@@ -402,7 +405,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <div class="dots" id="dots"></div>
   <div class="pinpad" id="pinpad"></div>
   <div id="lockAuthLinks" style="margin-top:8px;display:flex;flex-direction:column;gap:4px;align-items:center">
-    <button class="forgot" id="lockCreateBtn" style="margin:0;padding:6px">New here? Create an account</button>
     <button class="forgot" id="lockSyncBtn" style="margin:0;padding:6px" hidden>☁️ Restore my cards from cloud</button>
     <button class="forgot" id="forgotBtn" hidden style="margin:0;padding:6px">Forgot PIN? Reset everything</button>
   </div>
@@ -713,6 +715,23 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <h3 class="sec">Users</h3>
       <p style="font-size:32px;font-weight:800;margin:8px 0" id="ownerUserCount">—</p>
       <p class="muted" style="font-size:12px" id="ownerUserSub">accounts created</p>
+      <div style="display:flex;gap:8px;margin:12px 0">
+        <div style="flex:1;background:#141926;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Free</div>
+          <div style="font-size:28px;font-weight:800;margin:4px 0" id="planFreeCount">—</div>
+          <div style="height:6px;background:#1e2536;border-radius:3px;overflow:hidden"><div id="planFreeBar" style="height:100%;background:#6ea8ff;width:0%;border-radius:3px;transition:width .5s"></div></div>
+        </div>
+        <div style="flex:1;background:#141926;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Pro</div>
+          <div style="font-size:28px;font-weight:800;margin:4px 0" id="planProCount">—</div>
+          <div style="height:6px;background:#1e2536;border-radius:3px;overflow:hidden"><div id="planProBar" style="height:100%;background:#a78bfa;width:0%;border-radius:3px;transition:width .5s"></div></div>
+        </div>
+        <div style="flex:1;background:#141926;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Premium</div>
+          <div style="font-size:28px;font-weight:800;margin:4px 0" id="planPremiumCount">—</div>
+          <div style="height:6px;background:#1e2536;border-radius:3px;overflow:hidden"><div id="planPremiumBar" style="height:100%;background:#f0b429;width:0%;border-radius:3px;transition:width .5s"></div></div>
+        </div>
+      </div>
       <button class="small" id="refreshUserCount">Refresh</button>
       <h3 class="sec">Grant bonus shares</h3>
       <p class="muted">Enter the user's invite code (they'll find it in Dashboard → Invite friends).</p>
@@ -1192,6 +1211,14 @@ function unlock(){
   $("lockScreen").hidden=true;
   $("homeScreen").hidden=false;
   stat("opens");
+  // Report plan tier to server for owner stats (fire-and-forget)
+  try{
+    const s=getSession();
+    if(s&&s.token){
+      fetch(STATS_URL+"/api/plan/report",{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({token:s.token,tier:(userPlan&&userPlan.tier)||"free"})}).catch(()=>{});
+    }
+  }catch(e){}
   checkTrialExpired();
   syncSubscriptionStatus(); // server-side plan check
   renderCards();
@@ -1408,11 +1435,6 @@ function resetCheckBackup(){
   }
   el.innerHTML=html;
 }
-$("lockCreateBtn").onclick=()=>{
-  $("lockScreen").hidden=true;
-  $("quickScreen").hidden=false;
-  window.scrollTo(0,0);
-};
 $("forgotBtn").onclick=()=>{
   resetShowStep(1);
   $("resetModal").hidden=false;
@@ -1891,6 +1913,14 @@ async function loadUserCount(){
     if(el)el.textContent=j.total||0;
     const sub=$("ownerUserSub");
     if(sub&&j.at)sub.textContent="accounts created · updated "+new Date(j.at).toLocaleTimeString();
+    // Plan breakdown bars
+    if(j.plans){
+      const p=j.plans, max=Math.max(1,p.free,p.pro,p.premium);
+      const set=(id,bar,val)=>{const e=$(id);if(e)e.textContent=val;const b=$(bar);if(b)b.style.width=(val/max*100)+"%";};
+      set("planFreeCount","planFreeBar",p.free||0);
+      set("planProCount","planProBar",p.pro||0);
+      set("planPremiumCount","planPremiumBar",p.premium||0);
+    }
   }catch(e){}
 }
 document.addEventListener("DOMContentLoaded",()=>{
