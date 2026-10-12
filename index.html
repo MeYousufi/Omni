@@ -3317,9 +3317,40 @@ function openProfile(){
     + `<input id="profileEmailInput" placeholder="Email address" value="${esc(userProfile.email||"")}" autocomplete="off" inputmode="email" style="width:100%;margin:4px 0" aria-label="Email address">`
     + `<button class="small" id="profileNameSave" style="width:100%;margin-top:10px">Save</button>`;
   $("profileNameSave").onclick=async()=>{
-    userProfile.name=$("profileNameInput").value.trim();
-    userProfile.phone=$("profilePhoneInput").value.trim();
-    userProfile.email=$("profileEmailInput").value.trim();
+    const newName=$("profileNameInput").value.trim();
+    const newPhone=$("profilePhoneInput").value.trim();
+    const newEmail=$("profileEmailInput").value.trim();
+    // Check server for duplicate email/phone (unless already registered on this device)
+    let registered="";try{registered=localStorage.getItem("omni_user_registered")||"";}catch(e){}
+    const emailChanged=newEmail.toLowerCase()!==registered.split("|")[0];
+    const phoneChanged=newPhone.replace(/\D/g,"")!==registered.split("|")[1];
+    if((emailChanged&&newEmail)||(phoneChanged&&newPhone)){
+      try{
+        const r=await fetch(STATS_URL+"/api/users/check",{method:"POST",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({email:emailChanged?newEmail:"",phone:phoneChanged?newPhone:""})});
+        const j=await r.json();
+        if(j&&!j.available){
+          toast(j.field==="email"?"This email is already registered to another account":"This phone number is already registered to another account");
+          return;
+        }
+      }catch(e){/* server unreachable — allow save, will check on next sync */}
+    }
+    userProfile.name=newName;
+    userProfile.phone=newPhone;
+    userProfile.email=newEmail;
+    // Register with server (idempotent)
+    try{
+      const r=await fetch(STATS_URL+"/api/users/register",{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({email:newEmail,phone:newPhone,deviceId:myDeviceId()})});
+      const j=await r.json();
+      if(j&&j.ok){
+        try{localStorage.setItem("omni_user_registered",newEmail.toLowerCase()+"|"+newPhone.replace(/\D/g,""));}catch(e){}
+      }else if(j&&j.error==="email_taken"){
+        toast("This email is already registered to another account");return;
+      }else if(j&&j.error==="phone_taken"){
+        toast("This phone number is already registered to another account");return;
+      }
+    }catch(e){/* server unreachable — save locally anyway */}
     const ok=await saveAll();
     renderPic();
     $("profileScreen").hidden=true;$("homeScreen").hidden=false;renderCards();window.scrollTo(0,0);
