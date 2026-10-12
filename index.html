@@ -2852,7 +2852,7 @@ $("delBtn").onclick=async()=>{
 
 
 /* Auto backup modal: triggers on first card save */
-function showFirstBackupModal(){
+async function showFirstBackupModal(){
   localStorage.setItem("omni_first_backup_done","1");
   // CLOUD-ONLY: generate backup blob from current in-memory data
   const vaultData = await vaultEncryptBlob(sessionPin, packVault()).catch(()=> "");
