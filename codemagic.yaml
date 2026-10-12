@@ -1,0 +1,90 @@
+workflows:
+  ios-appstore:
+    name: OMNI iOS App Store
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_ids:
+          - com.omnitap.app
+      vars:
+        XCODE_WORKSPACE: "capacitor/ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+        BUNDLE_ID: "com.omnitap.app"
+        APP_STORE_CONNECT_ISSUER_ID: Encrypted(...)
+        APP_STORE_CONNECT_KEY_IDENTIFIER: Encrypted(...)
+        APP_STORE_CONNECT_PRIVATE_KEY: Encrypted(...)
+        CERTIFICATE_PRIVATE_KEY: Encrypted(...)
+      node: 20
+      xcode: 16.2
+      cocoapods: default
+    scripts:
+      - name: Install npm dependencies
+        script: |
+          cd capacitor
+          npm install
+      - name: Copy web assets to www/
+        script: |
+          cd capacitor
+          mkdir -p www
+          # Core app files from repo root
+          cp ../index.html www/ 2>/dev/null || echo "no index.html"
+          cp ../manifest.json www/ 2>/dev/null || echo "no manifest.json"
+          cp ../sw.js www/ 2>/dev/null || echo "no sw.js"
+          # Legal pages
+          cp ../privacy.html www/ 2>/dev/null || echo "no privacy.html"
+          cp ../terms.html www/ 2>/dev/null || echo "no terms.html"
+          # Icons
+          cp ../icon-192.png www/ 2>/dev/null || echo "no icon-192.png"
+          cp ../icon-512.png www/ 2>/dev/null || echo "no icon-512.png"
+          cp ../apple-touch-icon.png www/ 2>/dev/null || echo "no apple-touch-icon.png"
+          # Native bridge (lives in capacitor/ folder)
+          cp native-bridge.js www/ 2>/dev/null || echo "no native-bridge.js"
+          echo "=== www/ contents ==="
+          ls -la www/
+      - name: Set up keychain for code signing
+        script: |
+          keychain initialize
+      - name: Fetch signing files
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+      - name: Add iOS platform and sync
+        script: |
+          cd capacitor
+          # Add iOS platform on first build; safe to re-run
+          npx cap add ios || echo "iOS platform already added"
+          npx cap sync ios
+      - name: Set up CocoaPods
+        script: |
+          cd capacitor/ios/App
+          pod install
+      - name: Configure Info.plist usage descriptions
+        script: |
+          PLIST="capacitor/ios/App/App/Info.plist"
+          # NFC
+          /usr/libexec/PlistBuddy -c "Add :NFCReaderUsageDescription string 'OMNI uses NFC to share your contact card with a tap.'" "$PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NFCReaderUsageDescription 'OMNI uses NFC to share your contact card with a tap.'" "$PLIST"
+          # Face ID
+          /usr/libexec/PlistBuddy -c "Add :NSFaceIDUsageDescription string 'OMNI uses Face ID to securely unlock your cards.'" "$PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSFaceIDUsageDescription 'OMNI uses Face ID to securely unlock your cards.'" "$PLIST"
+          # Contacts
+          /usr/libexec/PlistBuddy -c "Add :NSContactsUsageDescription string 'OMNI saves shared contacts to your phone.'" "$PLIST" 2>/dev/null || \
+          /usr/libexec/PlistBuddy -c "Set :NSContactsUsageDescription 'OMNI uses NFC to share your contact card with a tap.'" "$PLIST"
+          echo "=== Info.plist usage descriptions ==="
+          /usr/libexec/PlistBuddy -c "Print :NFCReaderUsageDescription" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Print :NSFaceIDUsageDescription" "$PLIST"
+      - name: Build iOS app for App Store
+        script: |
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
