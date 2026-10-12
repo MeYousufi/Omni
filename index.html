@@ -350,6 +350,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <div class="vhint" id="q_hint"></div>
     </div>
     <button id="quickSave" style="width:100%;padding:15px;font-size:17px">Create account →</button>
+    <button class="forgot" id="quickLoginBtn" style="margin-top:12px">Already have an account? Log in</button>
   </div>
 </div>
 
@@ -1161,6 +1162,15 @@ function validContact(v){
   if(v.replace(/\D/g,"").length>=7)return{type:"phones",val:v};
   return null;
 }
+$("quickLoginBtn").onclick=()=>{
+  $("quickScreen").hidden=true;
+  $("lockScreen").hidden=false;
+  pinMsg("Enter your PIN");
+  // Show the cloud restore option prominently for returning users
+  const rsb=$("lockSyncBtn");
+  if(rsb){rsb.hidden=false;rsb.textContent="☁️ Restore my cards from cloud";}
+  toast("Welcome back! Enter your PIN or restore from cloud");
+};
 $("quickSave").onclick=async()=>{
   const name=$("q_name").value.trim();
   const email=$("q_email").value.trim();
@@ -1176,7 +1186,9 @@ $("quickSave").onclick=async()=>{
       body:JSON.stringify({email:email,phone:phone})});
     const j=await r.json();
     if(j&&!j.available){
-      $("q_hint").textContent=j.field==="email"?"This email is already registered. Try logging in instead.":"This phone number is already registered. Try logging in instead.";
+      const field=j.field==="email"?"email":"phone number";
+      $("q_hint").innerHTML="This "+field+" is already registered. <a href='#' id='q_loginLink' style='color:var(--accent)'>Log in instead</a>";
+      $("q_loginLink").onclick=(e)=>{e.preventDefault();$("quickScreen").hidden=true;$("lockScreen").hidden=false;pinMsg("Enter your PIN");toast("Welcome back! Enter your PIN or restore from cloud");};
       return;
     }
   }catch(e){/* server unreachable — proceed anyway, will verify on profile save */}
@@ -3355,8 +3367,13 @@ function openProfile(){
           body:JSON.stringify({email:emailChanged?newEmail:"",phone:phoneChanged?newPhone:""})});
         const j=await r.json();
         if(j&&!j.available){
-          toast(j.field==="email"?"This email is already registered to another account":"This phone number is already registered to another account");
-          return;
+          const isYou=confirm("This "+(j.field==="email"?"email":"phone number")+" is already registered.\n\nIs this your account? Click OK to log in, or Cancel to use a different "+(j.field==="email"?"email":"phone number")+".");
+          if(isYou){
+            // Mark as registered (user confirmed it's theirs) and proceed
+            try{localStorage.setItem("omni_user_registered",newEmail.toLowerCase()+"|"+newPhone.replace(/\D/g,""));}catch(e){}
+          }else{
+            return;
+          }
         }
       }catch(e){/* server unreachable — allow save, will check on next sync */}
     }
