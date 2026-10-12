@@ -45,7 +45,7 @@ label.chk span{line-height:1.45}
 pre{white-space:pre-wrap;font:inherit;margin:0}
 #qr{background:#fff;padding:10px;border-radius:12px;width:fit-content;margin-top:12px;display:none;box-shadow:0 0 24px rgba(79,140,255,.25)}
 /* lock screen */
-#lockScreen{min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;position:relative;overflow:hidden}
+#lockScreen{min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;padding:20px;padding-top:8vh;position:relative;overflow-y:auto}
 #lockScreen[hidden]{display:none}
 #lockBg{position:absolute;inset:-40px;z-index:0;background-size:cover;background-position:center;filter:blur(24px) brightness(.5) saturate(1.1)}
 #lockBg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,6,10,.5),rgba(5,6,10,.82))}
@@ -393,9 +393,11 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <p id="lockMsg" class="muted" style="margin-top:26px">Set a 6-digit PIN</p>
   <div class="dots" id="dots"></div>
   <div class="pinpad" id="pinpad"></div>
-  <button class="forgot" id="forgotBtn" hidden>Forgot PIN? Reset everything</button>
-  <button class="forgot" id="lockSyncBtn" style="margin-top:4px">☁️ Restore my cards from cloud</button>
-  <button class="forgot" id="lockCreateBtn" style="margin-top:4px">New here? Create an account</button>
+  <div id="lockAuthLinks" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;align-items:center">
+    <button class="forgot" id="lockCreateBtn">New here? Create an account</button>
+    <button class="forgot" id="lockSyncBtn">☁️ Restore my cards from cloud</button>
+    <button class="forgot" id="forgotBtn" hidden>Forgot PIN? Reset everything</button>
+  </div>
   <div id="lockSyncForm" hidden style="margin-top:8px;width:100%;max-width:280px;">
     <div style="display:flex;gap:8px">
       <input id="lockSyncInput" placeholder="OMNI-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters" style="flex:1;margin:0;font-size:14px" aria-label="Sync ID">
