@@ -1282,6 +1282,10 @@ $("loginBtn").onclick=async()=>{
       saveSession(j.token, j.uid, j.name);
       $("l_hint").textContent="";
       $("loginScreen").hidden=true;
+      // Fetch account's invite code (tied to UID, not this device)
+      fetchAccountInviteCode().then(code=>{
+        if(code) try{localStorage.setItem("omni_invite_code",code);}catch(e){}
+      });
       // Try to load vault from server
       try{
         const vr=await fetch(STATS_URL+"/api/auth/vault/load?token="+encodeURIComponent(j.token));
@@ -1551,6 +1555,7 @@ function myDeviceId(){
   return d;
 }
 function myInviteCode(){
+  // CLOUD-ONLY: code is tied to account, not device. Check localStorage cache first.
   let c=null;try{c=localStorage.getItem("omni_invite_code");}catch(e){}
   if(!c){
     const ch="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",r=crypto.getRandomValues(new Uint8Array(8));
@@ -1560,13 +1565,29 @@ function myInviteCode(){
   }
   return c;
 }
+// Fetch the account's invite code from server (for new devices). Returns code or null.
+async function fetchAccountInviteCode(){
+  const sess=getSession();
+  if(!sess||!sess.token) return null;
+  try{
+    const r=await fetch(STATS_URL+"/api/invite/my-code?token="+encodeURIComponent(sess.token));
+    const j=await r.json();
+    if(j&&j.code){
+      try{localStorage.setItem("omni_invite_code",j.code);}catch(e){}
+      return j.code;
+    }
+  }catch(e){}
+  return null;
+}
 function registerInviteCode(c,attempt){
   attempt=attempt||1;
   try{
     let sid="";try{sid=localStorage.getItem("omni_sync_id")||"";}catch(e){}
     let claimed="";try{claimed=localStorage.getItem("omni_invite_claimed_by")||"";}catch(e){}
+    // TIE TO ACCOUNT: include session token so server links code to auth UID
+    let token="";try{const s=getSession();if(s&&s.token)token=s.token;}catch(e){}
     fetch(STATS_URL+"/api/invite/register",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({code:c,deviceId:myDeviceId(),syncId:sid,invitedBy:claimed})})
+      body:JSON.stringify({code:c,deviceId:myDeviceId(),syncId:sid,invitedBy:claimed,token:token})})
     .then(r=>{if(r.ok){try{localStorage.setItem("omni_invite_registered","1");}catch(e){}}else if(attempt<4){setTimeout(()=>registerInviteCode(c,attempt+1),attempt*3000);}})
     .catch(()=>{if(attempt<4)setTimeout(()=>registerInviteCode(c,attempt+1),attempt*3000);});
   }catch(e){if(attempt<4)setTimeout(()=>registerInviteCode(c,attempt+1),attempt*3000);}
@@ -4151,6 +4172,10 @@ window.addEventListener("online",()=>{
     vaultIsNew=false; // existing account: verify PIN
     $("lockScreen").hidden=false;
     pinMsg("Enter your PIN");
+    // Ensure invite code is account-tied (not a stale device code)
+    fetchAccountInviteCode().then(code=>{
+      if(code){try{localStorage.setItem("omni_invite_code",code);}catch(e){}registerInviteCode(code);}
+    });
   }
   $("forgotBtn").hidden=!hasSession;
   // Cloud-only: no Sync ID restore button needed (vault is tied to account)
