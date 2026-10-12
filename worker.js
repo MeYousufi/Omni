@@ -731,6 +731,86 @@ export default {
         await kv.put("plan:" + sess.uid, tier);
         return json({ ok: true, tier });
       }
+      /* Owner: wipe all accounts except the one tied to keepCode (fresh start) */
+      if (p === "/api/admin/wipe-accounts" && req.method === "POST") {
+        if (!(await ownerTokenValid(req, kv))) return json({ error: "forbidden" }, 403);
+        let b = {};
+        try { b = await req.json(); } catch (e) {}
+        const keepCode = String(b.keepCode || "").toUpperCase().slice(0, 16);
+        const confirm = String(b.confirm || "");
+        if (!keepCode || confirm !== "WIPE-ALL-OTHERS")
+          return json({ error: "confirmation required" }, 400);
+        // Find the UID tied to keepCode
+        const keepRec = await kv.get("invite:code:" + keepCode, "json");
+        const keepUid = keepRec && keepRec.uid ? keepRec.uid : null;
+        if (!keepUid)
+          return json({ error: "keepCode not linked to any account yet — open the app first" }, 400);
+        const deleted = [];
+        // 1. Delete all auth users except keepUid
+        let cursor = undefined;
+        const uidsToDelete = [];
+        do {
+          const res = await kv.list({ prefix: "auth:user:", cursor });
+          for (const k of res.keys) {
+            const uid = k.name.slice(10); // strip "auth:user:"
+            if (uid !== keepUid) uidsToDelete.push(uid);
+          }
+          cursor = res.cursor;
+          if (res.list_complete) break;
+        } while (cursor);
+        for (const uid of uidsToDelete) {
+          const urec = await kv.get("auth:user:" + uid, "json");
+          // Delete user record
+          await kv.delete("auth:user:" + uid);
+          // Delete email index
+          if (urec && urec.email) {
+            await kv.delete("auth:email:" + urec.email.toLowerCase());
+            const digits = String(urec.phone || "").replace(/\D/g, "");
+            if (digits) await kv.delete("auth:phone:" + digits);
+          }
+          // Delete vaults (all vkeys)
+          let vcur = undefined;
+          do {
+            const vres = await kv.list({ prefix: "auth:vault:" + uid + ":", cursor: vcur });
+            for (const vk of vres.keys) await kv.delete(vk.name);
+            vcur = vres.cursor;
+            if (vres.list_complete) break;
+          } while (vcur);
+          // Delete plan record
+          await kv.delete("plan:" + uid);
+          // Delete invite uid index
+          await kv.delete("invite:uid:" + uid);
+          deleted.push(uid);
+        }
+        // 2. Delete all sessions except keepUid's
+        let scur = undefined;
+        do {
+          const sres = await kv.list({ prefix: "auth:session:", cursor: scur });
+          for (const sk of sres.keys) {
+            const srec = await kv.get(sk.name, "json");
+            if (!srec || srec.uid !== keepUid) await kv.delete(sk.name);
+          }
+          scur = sres.cursor;
+          if (sres.list_complete) break;
+        } while (scur);
+        // 3. Delete invite codes not tied to keepUid
+        let icur = undefined;
+        do {
+          const ires = await kv.list({ prefix: "invite:code:", cursor: icur });
+          for (const ik of ires.keys) {
+            const irec = await kv.get(ik.name, "json");
+            if (!irec || irec.uid !== keepUid) {
+              await kv.delete(ik.name);
+              // Also clean pending rewards for deleted codes
+              const code = ik.name.slice(12);
+              await kv.delete("invite:pending:" + code);
+            }
+          }
+          icur = ires.cursor;
+          if (ires.list_complete) break;
+        } while (icur);
+        return json({ ok: true, keptUid: keepUid, keptCode: keepCode, deletedCount: deleted.length, deleted });
+      }
       /* Owner: real-time user stats with plan breakdown */
       if (p === "/api/users/stats" && req.method === "GET") {
         if (!(await ownerTokenValid(req, kv))) return json({ error: "forbidden" }, 403);
