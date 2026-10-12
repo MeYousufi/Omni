@@ -427,19 +427,20 @@ export default {
         return json({ ok: true, uid, token, name: userRec.name });
       }
 
-      // Authenticated vault save: ties encrypted vault to user account
+      // Authenticated vault save: ties encrypted vault to user account (cloud-only storage)
       if (p === "/api/auth/vault/save" && req.method === "POST") {
         let b = {};
         try { b = await req.json(); } catch (e) {}
         const token = String(b.token || "").slice(0, 64);
         const blob = String(b.blob || "");
         const updatedAt = parseInt(b.updated_at, 10) || Date.now();
+        const vkey = String(b.vkey || "main").slice(0, 32);
         if (!token || !blob || blob.length > 500000)
           return json({ error: "bad request" }, 400);
         const sess = await kv.get("auth:session:" + token, "json");
         if (!sess || sess.expires < Date.now())
           return json({ error: "invalid_session" }, 401);
-        const key = "auth:vault:" + sess.uid;
+        const key = "auth:vault:" + sess.uid + ":" + vkey;
         const existing = await kv.get(key, "json");
         if (existing && existing.updated_at > updatedAt)
           return json({ ok: false, conflict: true, server_updated_at: existing.updated_at }, 409);
@@ -447,14 +448,15 @@ export default {
         return json({ ok: true, updated_at: updatedAt });
       }
 
-      // Authenticated vault load: download vault by session
+      // Authenticated vault load: download vault by session (cloud-only storage)
       if (p === "/api/auth/vault/load" && req.method === "GET") {
         const token = String(url.searchParams.get("token") || "").slice(0, 64);
+        const vkey = String(url.searchParams.get("vkey") || "main").slice(0, 32);
         if (!token) return json({ error: "no token" }, 401);
         const sess = await kv.get("auth:session:" + token, "json");
         if (!sess || sess.expires < Date.now())
           return json({ error: "invalid_session" }, 401);
-        const v = await kv.get("auth:vault:" + sess.uid, "json");
+        const v = await kv.get("auth:vault:" + sess.uid + ":" + vkey, "json");
         if (!v) return json({ error: "not found" }, 404);
         return json({ ok: true, blob: v.blob, updated_at: v.updated_at });
       }
