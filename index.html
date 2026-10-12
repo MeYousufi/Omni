@@ -1458,13 +1458,36 @@ $("resetRestore").onclick=()=>{
   };
   inp.click();
 };
-$("resetConfirm").onclick=()=>{
+$("resetConfirm").onclick=async()=>{
+  // CLOUD-ONLY RESET: wipe server vault, logout, then offer fresh PIN setup.
+  const sess=getSession();
+  if(sess&&sess.token){
+    try{
+      await fetch(STATS_URL+"/api/auth/vault/delete",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({token:sess.token,vkey:"main"})
+      });
+      await fetch(STATS_URL+"/api/auth/vault/delete",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({token:sess.token,vkey:"omni_vault_enc"})
+      });
+    }catch(e){}
+  }
+  clearSession();
   localStorage.removeItem("omni_vault");localStorage.removeItem("omni_vault_bak");localStorage.removeItem("omni_profiles");localStorage.removeItem("omni_pin");
   localStorage.removeItem("omni_pinlen");localStorage.removeItem("omni_pinfail");localStorage.removeItem("omni_last_backup");
   localStorage.removeItem("omni_sync_id");localStorage.removeItem("omni_sync_last");localStorage.removeItem("omni_first_backup_done");
+  localStorage.removeItem("omni_recovery");
   userPlan={tier:"free",trialEndsAt:0,tokens:0,sharedOnce:false,templates:[]};
   profiles=[];sessionPin=null;pinTmp=null;pinBuf="";
-  $("resetModal").hidden=true;buildDots();doLock();
+  $("resetModal").hidden=true;buildDots();
+  // Go to PIN setup (not lock screen) so user creates a new PIN
+  $("lockScreen").hidden=false;
+  pinMsg("Set a 6-digit PIN");
+  $("forgotBtn").hidden=true;
+  try{applyLockBg();}catch(e){}
+  updateGo();
+  toast("Reset complete. Set a new PIN to start fresh.");
 };
 
 /* ---------- stats ---------- */
