@@ -482,18 +482,28 @@ export default {
         const deviceId = String(b.deviceId || "").slice(0, 64);
         const syncId = String(b.syncId || "").toUpperCase().slice(0, 16);
         const invitedBy = String(b.invitedBy || "").toUpperCase().slice(0, 16);
+        const token = String(b.token || "").slice(0, 64);
         if (!/^[A-Z2-9]{4,16}$/.test(code) || !deviceId)
           return json({ error: "bad request" }, 400);
+        // TIE TO ACCOUNT: if session token provided, link code to auth UID
+        let uid = "";
+        if (token) {
+          const sess = await kv.get("auth:session:" + token, "json");
+          if (sess && sess.expires > Date.now()) uid = sess.uid;
+        }
         const ck = "invite:code:" + code;
         const existing = await kv.get(ck, "json");
         if (!existing) {
           // New user record — never deleted, only status changes (audit trail)
           const rec = { code, deviceId, syncId: (/^OMNI-[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(syncId)?syncId:""),
             invitedBy: (/^[A-Z2-9]{4,16}$/.test(invitedBy)?invitedBy:""),
+            uid: uid,
             created_at: new Date().toISOString(), status: "active" };
           await kv.put(ck, JSON.stringify(rec));
           // Also index by syncId so the code follows the user across browsers
           if (rec.syncId) await kv.put("invite:sync:" + rec.syncId, code);
+          // Index by UID so the code follows the account across devices (cloud-only)
+          if (uid) await kv.put("invite:uid:" + uid, code);
           // Bump user counter
           const uc = parseInt((await kv.get("users:count")) || "0", 10) || 0;
           await kv.put("users:count", String(uc + 1));
@@ -510,7 +520,23 @@ export default {
           await kv.put(ck, JSON.stringify(existing));
           await kv.put("invite:sync:" + syncId, code);
         }
+        // TIE TO ACCOUNT: link existing code to UID if not already linked
+        if (uid && existing && !existing.uid) {
+          existing.uid = uid;
+          await kv.put(ck, JSON.stringify(existing));
+          await kv.put("invite:uid:" + uid, code);
+        }
         return json({ ok: true, code });
+      }
+
+      /* Get the invite code for an account (cloud-only: by session token) */
+      if (p === "/api/invite/my-code" && req.method === "GET") {
+        const token = String(url.searchParams.get("token") || "").slice(0, 64);
+        if (!token) return json({ code: null });
+        const sess = await kv.get("auth:session:" + token, "json");
+        if (!sess || sess.expires < Date.now()) return json({ code: null });
+        const code = await kv.get("invite:uid:" + sess.uid);
+        return json({ code: code || null });
       }
 
       /* Get the invite code for a Sync ID (so it's consistent across browsers) */
