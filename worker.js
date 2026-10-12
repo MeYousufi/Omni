@@ -59,6 +59,25 @@ async function sha256hex(s){
   return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,"0")).join("");
 }
 
+// PBKDF2 password hashing (100k iterations, SHA-256)
+async function hashPassword(password, salt){
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt: enc.encode(salt), iterations: 100000, hash: "SHA-256" },
+    keyMaterial, 256
+  );
+  return [...new Uint8Array(bits)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+async function verifyPassword(password, salt, expectedHash){
+  const h = await hashPassword(password, salt);
+  if (h.length !== expectedHash.length) return false;
+  let diff = 0;
+  for (let i = 0; i < h.length; i++) diff |= h.charCodeAt(i) ^ expectedHash.charCodeAt(i);
+  return diff === 0;
+}
+
 // Owner auth: password-based token. The password hash lives in KV;
 // the raw password/owner key is never in client code.
 async function ownerTokenValid(req, kv){
@@ -96,7 +115,7 @@ async function fireWebhook(env, kv, payload){
   }catch(e){ /* webhook failures are silent */ }
 }
 
-const DEFAULT_FLAGS = { shareLimits: false, invites: false, buyShares: false };
+const DEFAULT_FLAGS = { shareLimits: false, invites: true, buyShares: false };
 async function getFlags(env) {
   try {
     const f = await env.OMNI_STATS.get("flags", "json");
@@ -214,6 +233,230 @@ export default {
         const next = { ...cur, ...upd };
         await kv.put("flags", JSON.stringify(next));
         return json({ ok: true, flags: next });
+      }
+
+      /* ---------------- user accounts ---------------- */
+      // Check if email/phone is available (hashes only, privacy-safe)
+      if (p === "/api/users/check" && req.method === "POST") {
+        let b = {};
+        try { b = await req.json(); } catch (e) {}
+        const email = String(b.email || "").toLowerCase().trim();
+        const phone = String(b.phone || "").replace(/\D/g, "");
+        const result = { available: true };
+        if (email) {
+          const eh = await sha256hex(email);
+          if (await kv.get("user:email:" + eh)) {
+            result.available = false; result.field = "email";
+            return json(result);
+          }
+        }
+        if (phone) {
+          const ph = await sha256hex(phone);
+          if (await kv.get("user:phone:" + ph)) {
+            result.available = false; result.field = "phone";
+            return json(result);
+          }
+        }
+        return json(result);
+      }
+      // Register a new user account (stores hashes only)
+      if (p === "/api/users/register" && req.method === "POST") {
+        let b = {};
+        try { b = await req.json(); } catch (e) {}
+        const email = String(b.email || "").toLowerCase().trim();
+        const phone = String(b.phone || "").replace(/\D/g, "");
+        const deviceId = String(b.deviceId || "").slice(0, 64);
+        if (!email || !phone || !deviceId)
+          return json({ ok: false, error: "email, phone, and deviceId required" }, 400);
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+          return json({ ok: false, error: "invalid email" }, 400);
+        if (phone.length < 7)
+          return json({ ok: false, error: "invalid phone" }, 400);
+        const eh = await sha256hex(email);
+        const ph = await sha256hex(phone);
+        if (await kv.get("user:email:" + eh))
+          return json({ ok: false, error: "email_taken" }, 409);
+        if (await kv.get("user:phone:" + ph))
+          return json({ ok: false, error: "phone_taken" }, 409);
+        const uid = "u" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        const rec = { uid, deviceId, created_at: new Date().toISOString() };
+        await kv.put("user:email:" + eh, JSON.stringify(rec));
+        await kv.put("user:phone:" + ph, JSON.stringify(rec));
+        await kv.put("user:id:" + uid, JSON.stringify({ email_hash: eh, phone_hash: ph }));
+        return json({ ok: true, uid });
+      }
+      /* ---------------- user authentication (2026-10-12) ----------------
+       * Full login system: email + password -> session token.
+       * The PIN remains the local vault encryption key (never sent to server).
+       * The password is only for server authentication (never decrypts vault).
+       * ------------------------------------------------------------------------ */
+      // Register: create account with password
+      if (p === "/api/auth/register" && req.method === "POST") {
+        let b = {};
+        try { b = await req.json(); } catch (e) {}
+        const name = String(b.name || "").slice(0, 100).trim();
+        const email = String(b.email || "").toLowerCase().trim();
+        const phone = String(b.phone || "").replace(/\D/g, "");
+        const password = String(b.password || "");
+        const deviceId = String(b.deviceId || "").slice(0, 64);
+        if (!name || !email || !phone || !password || !deviceId)
+          return json({ ok: false, error: "name, email, phone, password, deviceId required" }, 400);
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+          return json({ ok: false, error: "invalid email" }, 400);
+        if (phone.length < 7)
+          return json({ ok: false, error: "invalid phone" }, 400);
+        if (password.length < 6)
+          return json({ ok: false, error: "password_min_6" }, 400);
+        const eh = await sha256hex("auth:" + email);
+        const ph = await sha256hex("auth:" + phone);
+        // Atomic-ish check: if either exists, reject
+        if (await kv.get("auth:user:" + eh))
+          return json({ ok: false, error: "email_taken" }, 409);
+        if (await kv.get("auth:phone:" + ph))
+          return json({ ok: false, error: "phone_taken" }, 409);
+        const uid = "u" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+        const salt = genId(32);
+        const pwdHash = await hashPassword(password, salt);
+        const userRec = {
+          uid, name, email_hash: eh, phone_hash: ph,
+          pwd_hash: pwdHash, salt,
+          deviceId, created_at: new Date().toISOString()
+        };
+        await kv.put("auth:user:" + eh, JSON.stringify(userRec));
+        await kv.put("auth:phone:" + ph, eh); // phone -> email_hash lookup
+        await kv.put("auth:id:" + uid, JSON.stringify({ email_hash: eh }));
+        // Also register in the legacy duplicate-check system for compatibility
+        try {
+          const leh = await sha256hex(email);
+          const lph = await sha256hex(phone);
+          const legRec = { uid, deviceId, created_at: new Date().toISOString() };
+          await kv.put("user:email:" + leh, JSON.stringify(legRec));
+          await kv.put("user:phone:" + lph, JSON.stringify(legRec));
+        } catch (e) {}
+        // Create session
+        const token = genId(48);
+        const expires = Date.now() + 30 * 86400000; // 30 days
+        await kv.put("auth:session:" + token, JSON.stringify({ uid, expires }), { expirationTtl: 30 * 86400 });
+        return json({ ok: true, uid, token, name });
+      }
+
+      // Login: email + password -> session token
+      if (p === "/api/auth/login" && req.method === "POST") {
+        let b = {};
+        try { b = await req.json(); } catch (e) {}
+        const email = String(b.email || "").toLowerCase().trim();
+        const password = String(b.password || "");
+        if (!email || !password)
+          return json({ ok: false, error: "email and password required" }, 400);
+        const eh = await sha256hex("auth:" + email);
+        const userRec = await kv.get("auth:user:" + eh, "json");
+        // Generic error to avoid user enumeration
+        if (!userRec)
+          return json({ ok: false, error: "invalid_credentials" }, 401);
+        const valid = await verifyPassword(password, userRec.salt, userRec.pwd_hash);
+        if (!valid)
+          return json({ ok: false, error: "invalid_credentials" }, 401);
+        const token = genId(48);
+        const expires = Date.now() + 30 * 86400000;
+        await kv.put("auth:session:" + token, JSON.stringify({ uid: userRec.uid, expires }), { expirationTtl: 30 * 86400 });
+        return json({ ok: true, uid: userRec.uid, token, name: userRec.name });
+      }
+
+      // Logout: invalidate session
+      if (p === "/api/auth/logout" && req.method === "POST") {
+        let b = {};
+        try { b = await req.json(); } catch (e) {}
+        const token = String(b.token || "").slice(0, 64);
+        if (token) await kv.delete("auth:session:" + token);
+        return json({ ok: true });
+      }
+
+      // Me: validate session, return user info
+      if (p === "/api/auth/me" && req.method === "GET") {
+        const token = String(url.searchParams.get("token") || "").slice(0, 64);
+        if (!token) return json({ ok: false, error: "no token" }, 401);
+        const sess = await kv.get("auth:session:" + token, "json");
+        if (!sess || sess.expires < Date.now()) {
+          if (sess) await kv.delete("auth:session:" + token);
+          return json({ ok: false, error: "invalid_session" }, 401);
+        }
+        const idRec = await kv.get("auth:id:" + sess.uid, "json");
+        if (!idRec) return json({ ok: false, error: "user_not_found" }, 404);
+        const userRec = await kv.get("auth:user:" + idRec.email_hash, "json");
+        if (!userRec) return json({ ok: false, error: "user_not_found" }, 404);
+        return json({ ok: true, uid: userRec.uid, name: userRec.name });
+      }
+
+      // Set password: for existing users migrating to full auth (one-time)
+      if (p === "/api/auth/set-password" && req.method === "POST") {
+        let b = {};
+        try { b = await req.json(); } catch (e) {}
+        const email = String(b.email || "").toLowerCase().trim();
+        const phone = String(b.phone || "").replace(/\D/g, "");
+        const password = String(b.password || "");
+        const name = String(b.name || "").slice(0, 100).trim();
+        if (!email || !phone || !password)
+          return json({ ok: false, error: "email, phone, password required" }, 400);
+        if (password.length < 6)
+          return json({ ok: false, error: "password_min_6" }, 400);
+        const eh = await sha256hex("auth:" + email);
+        // Must not already have auth account
+        if (await kv.get("auth:user:" + eh))
+          return json({ ok: false, error: "already_has_password" }, 409);
+        // Must exist in legacy system (proves they had an account)
+        const leh = await sha256hex(email);
+        const legacy = await kv.get("user:email:" + leh, "json");
+        if (!legacy)
+          return json({ ok: false, error: "no_existing_account" }, 404);
+        const ph = await sha256hex("auth:" + phone);
+        const uid = legacy.uid || ("u" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
+        const salt = genId(32);
+        const pwdHash = await hashPassword(password, salt);
+        const userRec = {
+          uid, name: name || "User", email_hash: eh, phone_hash: ph,
+          pwd_hash: pwdHash, salt,
+          deviceId: legacy.deviceId || "", created_at: new Date().toISOString(),
+          migrated: true
+        };
+        await kv.put("auth:user:" + eh, JSON.stringify(userRec));
+        await kv.put("auth:phone:" + ph, eh);
+        await kv.put("auth:id:" + uid, JSON.stringify({ email_hash: eh }));
+        const token = genId(48);
+        const expires = Date.now() + 30 * 86400000;
+        await kv.put("auth:session:" + token, JSON.stringify({ uid, expires }), { expirationTtl: 30 * 86400 });
+        return json({ ok: true, uid, token, name: userRec.name });
+      }
+
+      // Authenticated vault save: ties encrypted vault to user account
+      if (p === "/api/auth/vault/save" && req.method === "POST") {
+        let b = {};
+        try { b = await req.json(); } catch (e) {}
+        const token = String(b.token || "").slice(0, 64);
+        const blob = String(b.blob || "");
+        const updatedAt = parseInt(b.updated_at, 10) || Date.now();
+        if (!token || !blob || blob.length > 500000)
+          return json({ error: "bad request" }, 400);
+        const sess = await kv.get("auth:session:" + token, "json");
+        if (!sess || sess.expires < Date.now())
+          return json({ error: "invalid_session" }, 401);
+        const key = "auth:vault:" + sess.uid;
+        const existing = await kv.get(key, "json");
+        if (existing && existing.updated_at > updatedAt)
+          return json({ ok: false, conflict: true, server_updated_at: existing.updated_at }, 409);
+        await kv.put(key, JSON.stringify({ blob, updated_at: updatedAt }));
+        return json({ ok: true, updated_at: updatedAt });
+      }
+
+      // Authenticated vault load: download vault by session
+      if (p === "/api/auth/vault/load" && req.method === "GET") {
+        const token = String(url.searchParams.get("token") || "").slice(0, 64);
+        if (!token) return json({ error: "no token" }, 401);
+        const sess = await kv.get("auth:session:" + token, "json");
+        if (!sess || sess.expires < Date.now())
+          return json({ error: "invalid_session" }, 401);
+        const v = await kv.get("auth:vault:" + sess.uid, "json");
+        if (!v) return json({ error: "not found" }, 404);
+        return json({ ok: true, blob: v.blob, updated_at: v.updated_at });
       }
 
       /* ---------------- invites ---------------- */
