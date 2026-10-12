@@ -1325,6 +1325,8 @@ const _lc=$("limitClose");if(_lc)_lc.onclick=()=>{const m=$("limitModal");if(m)m
 document.addEventListener("DOMContentLoaded",()=>{
   const gm=$("planGetMore");
   if(gm)gm.onclick=e=>{e.preventDefault();showLimitModal();};
+  // Ensure our invite code is registered on the server (retry if needed)
+  setTimeout(ensureInviteRegistered,2000);
 });
 const _lib=$("limitInviteBtn");if(_lib)_lib.onclick=()=>{const m=$("limitModal");if(m)m.hidden=true;copyInviteLink();};
 const _lbb=$("limitBuyBtn");if(_lbb)_lbb.onclick=()=>{const m=$("limitModal");if(m)m.hidden=true;buyShares();};
@@ -1345,12 +1347,23 @@ function myInviteCode(){
   }
   return c;
 }
-function registerInviteCode(c){
+function registerInviteCode(c,attempt){
+  attempt=attempt||1;
   try{
     let sid="";try{sid=localStorage.getItem("omni_sync_id")||"";}catch(e){}
     let claimed="";try{claimed=localStorage.getItem("omni_invite_claimed_by")||"";}catch(e){}
     fetch(STATS_URL+"/api/invite/register",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({code:c,deviceId:myDeviceId(),syncId:sid,invitedBy:claimed})}).catch(()=>{});
+      body:JSON.stringify({code:c,deviceId:myDeviceId(),syncId:sid,invitedBy:claimed})})
+    .then(r=>{if(r.ok){try{localStorage.setItem("omni_invite_registered","1");}catch(e){}}else if(attempt<4){setTimeout(()=>registerInviteCode(c,attempt+1),attempt*3000);}})
+    .catch(()=>{if(attempt<4)setTimeout(()=>registerInviteCode(c,attempt+1),attempt*3000);});
+  }catch(e){if(attempt<4)setTimeout(()=>registerInviteCode(c,attempt+1),attempt*3000);}
+}
+/* Ensure our code is on the server on every boot (idempotent) */
+function ensureInviteRegistered(){
+  try{
+    const c=myInviteCode();
+    let ok="";try{ok=localStorage.getItem("omni_invite_registered")||"";}catch(e){}
+    registerInviteCode(c);
   }catch(e){}
 }
 /* When Cloud Sync is linked, adopt the invite code tied to that Sync ID
