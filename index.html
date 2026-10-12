@@ -1481,13 +1481,11 @@ $("resetConfirm").onclick=async()=>{
   userPlan={tier:"free",trialEndsAt:0,tokens:0,sharedOnce:false,templates:[]};
   profiles=[];sessionPin=null;pinTmp=null;pinBuf="";
   $("resetModal").hidden=true;buildDots();
-  // Go to PIN setup (not lock screen) so user creates a new PIN
-  $("lockScreen").hidden=false;
-  pinMsg("Set a 6-digit PIN");
-  $("forgotBtn").hidden=true;
-  try{applyLockBg();}catch(e){}
-  updateGo();
-  toast("Reset complete. Set a new PIN to start fresh.");
+  // CLOUD-ONLY: need an account before PIN setup (vault saves to server).
+  // Show account creation screen.
+  $("lockScreen").hidden=true;
+  $("quickScreen").hidden=false;
+  toast("Reset complete. Create your account to start fresh.");
 };
 
 /* ---------- stats ---------- */
