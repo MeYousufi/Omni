@@ -3339,7 +3339,8 @@ function openProfile(){
     + `<input id="profilePhoneInput" placeholder="Phone number" value="${esc(userProfile.phone||"")}" autocomplete="off" inputmode="tel" style="width:100%;margin:4px 0" aria-label="Phone number">`
     + `<div class="statrow" style="margin-top:10px"><span>Email</span></div>`
     + `<input id="profileEmailInput" placeholder="Email address" value="${esc(userProfile.email||"")}" autocomplete="off" inputmode="email" style="width:100%;margin:4px 0" aria-label="Email address">`
-    + `<button class="small" id="profileNameSave" style="width:100%;margin-top:10px">Save</button>`;
+    + `<button class="small" id="profileNameSave" style="width:100%;margin-top:10px">Save</button>`
+    + `<button class="small" id="profileChangePin" style="width:100%;margin-top:10px">Change PIN</button>`;
   $("profileNameSave").onclick=async()=>{
     const newName=$("profileNameInput").value.trim();
     const newPhone=$("profilePhoneInput").value.trim();
@@ -3380,6 +3381,18 @@ function openProfile(){
     $("profileScreen").hidden=true;$("homeScreen").hidden=false;renderCards();window.scrollTo(0,0);
     if(ok&&window._clearedPhotos){toast("Saved ✓ — old photos cleared, please re-select them");}
     else{toast(ok?"Saved ✓":"Couldn't save ("+lastSaveStep+") — try again");}
+  };
+  $("profileChangePin").onclick=()=>{
+    $("profileScreen").hidden=true;
+    $("backupScreen").hidden=false;
+    window.scrollTo(0,0);
+    // Scroll to the PIN section and expand it
+    setTimeout(()=>{
+      const pinBox=$("pinBox");
+      if(pinBox){pinBox.scrollIntoView({behavior:"smooth",block:"center"});}
+      const form=$("changePinForm");
+      if(form&&form.hidden){$("changePinBtn").click();}
+    },300);
   };
 }
 $("profileBack").onclick=()=>{$("profileScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
