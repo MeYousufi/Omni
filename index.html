@@ -403,7 +403,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <div class="pinpad" id="pinpad"></div>
   <div id="lockAuthLinks" style="margin-top:8px;display:flex;flex-direction:column;gap:4px;align-items:center">
     <button class="forgot" id="lockCreateBtn" style="margin:0;padding:6px">New here? Create an account</button>
-    <button class="forgot" id="lockSyncBtn" style="margin:0;padding:6px">☁️ Restore my cards from cloud</button>
+    <button class="forgot" id="lockSyncBtn" style="margin:0;padding:6px" hidden>☁️ Restore my cards from cloud</button>
     <button class="forgot" id="forgotBtn" hidden style="margin:0;padding:6px">Forgot PIN? Reset everything</button>
   </div>
   <div id="lockSyncForm" hidden style="margin-top:8px;width:100%;max-width:280px;">
@@ -923,38 +923,27 @@ async function vaultEncryptBlob(pin,obj){
   return "310k."+b64(salt)+"."+b64(iv)+"."+b64(ct);
 }
 async function vaultEncrypt(pin,obj,vkey){
-  vkey=vkey||"omni_vault";
-  // CRITICAL GUARD: never overwrite a non-empty vault with empty data (prevents data loss on refresh)
-  if(vkey==="omni_vault"){
-    const emptyVault=Array.isArray(obj)?obj.length===0:(obj&&Array.isArray(obj.profiles)?obj.profiles.length===0&&!obj.userProfile.pic:false);
-    if(emptyVault){
-      try{
-        const existing=localStorage.getItem("omni_vault");
-        if(existing&&existing.length>100){
-          // Verify existing has data by checking decrypted length
-          console.warn("Blocked empty overwrite of non-empty vault");
-          return;
-        }
-      }catch(e){}
-    }
-  }
+  // CLOUD-ONLY: server is the single source of truth. No localStorage vault.
+  // vkey kept for API compat (encounters use separate key, also cloud now).
   const blob=await vaultEncryptBlob(pin,obj);
-  localStorage.setItem(vkey,blob);
+  const sess=getSession();
+  if(!sess||!sess.token) throw new Error("no session - login required");
+  const r=await fetch(STATS_URL+"/api/auth/vault/save",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({token:sess.token,blob:blob,updated_at:Date.now(),vkey:vkey||"main"})
+  });
+  const j=await r.json();
+  if(!j||!j.ok) throw new Error("cloud save failed");
 }
 async function vaultDecrypt(pin,vkey){
-  vkey=vkey||"omni_vault";
-  const parts=(localStorage.getItem(vkey)||"").split(".");
-  let iter,saltB64,ivB64,ctB64;
-  if(parts.length===4&&parts[0]==="310k"){
-    // New format: iter.salt.iv.ct
-    iter=310000;saltB64=parts[1];ivB64=parts[2];ctB64=parts[3];
-  }else if(parts.length===3){
-    // Legacy format: salt.iv.ct (120k iterations)
-    iter=120000;saltB64=parts[0];ivB64=parts[1];ctB64=parts[2];
-  }else throw new Error("no vault");
-  const key=await deriveKey(pin,ub64(saltB64),iter);
-  const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:ub64(ivB64)},key,ub64(ctB64));
-  return JSON.parse(td.decode(pt));
+  // CLOUD-ONLY: download encrypted blob from server, decrypt locally with PIN.
+  // Server never sees plaintext. vkey kept for API compat.
+  const sess=getSession();
+  if(!sess||!sess.token) throw new Error("no session - login required");
+  const r=await fetch(STATS_URL+"/api/auth/vault/load?token="+encodeURIComponent(sess.token)+"&vkey="+encodeURIComponent(vkey||"main"));
+  const j=await r.json();
+  if(!j||!j.ok||!j.blob) throw new Error("no vault");
+  return vaultDecryptBlob(pin,j.blob);
 }
 async function vaultDecryptBlob(pin,blob){
   const parts=(blob||"").split(".");
@@ -980,8 +969,15 @@ async function loadEncounters(pin){
 async function saveEncounters(){
   if(sessionPin){try{await vaultEncrypt(sessionPin,encounters,ENC_VAULT_KEY);}catch(e){}}
 }
-const hasVault=()=>{
-  if(localStorage.getItem("omni_vault"))return true;
+const hasVault=async()=>{
+  // CLOUD-ONLY: check if vault exists on server (requires valid session)
+  const sess=getSession();
+  if(!sess||!sess.token) return false;
+  try{
+    const r=await fetch(STATS_URL+"/api/auth/vault/load?token="+encodeURIComponent(sess.token));
+    const j=await r.json();
+    return !!(j&&j.ok&&j.blob);
+  }catch(e){ return false; }
   // crash-recovery: restore from synchronous backup if main vault is gone
   try{
     const b=localStorage.getItem("omni_vault_bak");
@@ -1136,13 +1132,19 @@ async function pinDone(){
         throw new Error("bad pin"); // PIN didn't decrypt the server vault
       }
     }
-    if(hasVault()){
-      unpackVault(await vaultDecrypt(pin));
+    // CLOUD-ONLY: download vault from server, decrypt with PIN
+    try{
+      const vaultData=await vaultDecrypt(pin);
+      unpackVault(vaultData);
       await loadEncounters(pin);
       sessionPin=pin;pinFailReset();haptic(15);
-      // remember working PIN length for this device
       if(!localStorage.getItem("omni_pinlen"))localStorage.setItem("omni_pinlen",String(pin.length));
       unlock();return;
+    }catch(e){
+      // No vault on server or wrong PIN - will fall through to error handling
+      if(e.message==="no session - login required") throw e;
+      // Otherwise treat as bad PIN (vault exists but PIN didn't decrypt)
+      throw new Error("bad pin");
     }
     // legacy plaintext migration: verify against old hash, then encrypt
     const stored=localStorage.getItem("omni_pin");
@@ -1597,16 +1599,17 @@ async function collectPendingInvites(){
     if(!r.ok)return;
     const j=await r.json();
     if(j&&j.pending>0){
-      // Inviter rewards: first successful share bumps free cards 3→7, every share gives 100 tokens
-      const tpi=tokensPerInvite();
+      // Inviter rewards: first successful share bumps free cards 3→7, every share gives 100 tokens.
+      // 'pending' from the worker is already a TOKEN count (claim adds 100, owner grant adds token amounts) — do NOT multiply again.
+      const reward=Math.round(j.pending);
       let msg="";
       if(!userPlan.sharedOnce){
         userPlan.sharedOnce=true;
-        userPlan.tokens=(userPlan.tokens||0)+j.pending*tpi;
-        msg=`🎉 Your cards bumped to 7 +${j.pending*tpi} tokens — a friend joined!`;
+        userPlan.tokens=(userPlan.tokens||0)+reward;
+        msg=`🎉 Your cards bumped to 7 +${reward} tokens — a friend joined!`;
       }else{
-        userPlan.tokens=(userPlan.tokens||0)+j.pending*tpi;
-        msg=`🎉 +${j.pending*tpi} tokens — a friend joined!`;
+        userPlan.tokens=(userPlan.tokens||0)+reward;
+        msg=`🎉 +${reward} tokens — a friend joined!`;
       }
       await saveAll();
       toast(msg);
@@ -4103,7 +4106,7 @@ window.addEventListener("online",()=>{
   toast("Back online.");
 });
 /* init */
-(function init(){
+(async function init(){
   buildDots();
   // Secure-context guard: encryption needs crypto.subtle (HTTPS). Without it,
   // PIN setup would fail with a misleading "Wrong PIN" — say what's wrong instead.
@@ -4115,16 +4118,26 @@ window.addEventListener("online",()=>{
       return;
     }
   }catch(e){}
-  const has=hasVault()||hasLegacy();
-  // New users: show account creation first, then PIN setup. Existing users: go straight to PIN entry.
-  if(!has){
-    $("quickScreen").hidden=false;
+  // CLOUD-ONLY STARTUP: session determines the flow, not local vault.
+  // No session -> login screen. Valid session -> PIN entry (vault downloads from server).
+  const sess=getSession();
+  let hasSession=false;
+  if(sess&&sess.token){
+    try{
+      const mr=await fetch(STATS_URL+"/api/auth/me?token="+encodeURIComponent(sess.token));
+      const mj=await mr.json();
+      hasSession=!!(mj&&mj.ok);
+      if(!hasSession) clearSession();
+    }catch(e){ hasSession=false; }
+  }
+  if(!hasSession){
+    $("loginScreen").hidden=false;
   }else{
     $("lockScreen").hidden=false;
     pinMsg("Enter your PIN");
   }
-  $("forgotBtn").hidden=!has;
-  $("lockSyncBtn").hidden=has; // "Restore my cards from cloud" only on fresh installs
+  $("forgotBtn").hidden=!hasSession;
+  // Cloud-only: no Sync ID restore button needed (vault is tied to account)
   try{applyLockBg();}catch(e){}
   updateGo();
   // share credits: fetch flags, then process invite / purchase deep links
