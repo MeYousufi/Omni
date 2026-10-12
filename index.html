@@ -840,7 +840,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <div class="box">
     <h3 class="sec" style="margin-top:0">Your data</h3>
     <div class="statrow"><span>Cloud Sync</span><b id="dataSyncStatus">—</b></div>
-    <div class="statrow"><span>Local backup</span><b id="dataLocalStatus">—</b></div>
+    <div class="statrow"><span>Cloud vault</span><b id="dataLocalStatus">—</b></div>
     <button class="small" id="dataExportBtn" style="width:100%;margin-top:8px">Export my data</button>
     <p class="muted" style="font-size:12px;margin-top:6px">Downloads an encrypted backup file. Only your PIN can open it.</p>
   </div>
@@ -978,12 +978,6 @@ const hasVault=async()=>{
     const j=await r.json();
     return !!(j&&j.ok&&j.blob);
   }catch(e){ return false; }
-  // crash-recovery: restore from synchronous backup if main vault is gone
-  try{
-    const b=localStorage.getItem("omni_vault_bak");
-    if(b&&b.length>100){localStorage.setItem("omni_vault",b);return true;}
-  }catch(e){}
-  return false;
 };
 const hasLegacy=()=>!!localStorage.getItem("omni_profiles");
 
@@ -1004,6 +998,7 @@ function pinLockedLeft(){
 /* ---------- PIN lock ---------- */
 const hashPin=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return h.toString(36);};
 let pinBuf="",pinTmp=null;
+let vaultIsNew=false; // cloud-only: true when setting up a new PIN (no vault on server yet)
 const pinLen=()=>parseInt(localStorage.getItem("omni_pinlen")||"6");
 function isObviousPin(pin){
   const blocked=["1234","0000","1111","2222","3333","4444","5555","6666","7777","8888","9999","123456","000000","111111","222222","333333","444444","555555","666666","777777","888888","999999","123123","654321","121212","112233","012345","987654"];
@@ -1032,7 +1027,7 @@ function pinMsg(t){$("lockMsg").textContent=t;}
       b.style.background="linear-gradient(135deg,#2d5a2d,#3a7a3a)";
       b.onclick=()=>{
         // only allow early submit when unlocking an existing vault (unknown PIN length)
-        if((hasVault()||hasLegacy())&&pinBuf.length>=4)pinDone();
+        if(!vaultIsNew&&pinBuf.length>=4)pinDone();
       };
     }else{
       b.setAttribute("aria-label",k==="⌫"?"Delete digit":"Digit "+k);
@@ -1042,7 +1037,7 @@ function pinMsg(t){$("lockMsg").textContent=t;}
         if(pinBuf.length>=max)return;
         pinBuf+=k;renderDots();updateGo();
         // auto-submit at expected length for new setups; existing users tap GO
-        if(!hasVault()&&!hasLegacy()&&pinBuf.length===pinLen())setTimeout(pinDone,160);
+        if(vaultIsNew&&pinBuf.length===pinLen())setTimeout(pinDone,160);
       };
     }
     $("pinpad").appendChild(b);
@@ -1053,17 +1048,17 @@ function updateGo(){
   // actually disable it (not just dim) when it shouldn't be tappable
   const go=[...$("pinpad").children].find(b=>b.textContent==="GO");
   if(go){
-    const enabled=(hasVault()||hasLegacy())&&pinBuf.length>=4;
+    const enabled=pinBuf.length>=4;
     go.style.opacity=enabled?"1":"0.35";
     go.disabled=!enabled;
   }
 }
 async function pinDone(){
   const locked=pinLockedLeft();
-  if(locked>0){pinMsg("Too many tries — wait "+locked+"s");pinBuf="";renderDots();setTimeout(()=>{if(pinLockedLeft()<=0)pinMsg(hasVault()||hasLegacy()?"Enter your PIN":"Set a 6-digit PIN");},locked*1000);return;}
+  if(locked>0){pinMsg("Too many tries — wait "+locked+"s");pinBuf="";renderDots();setTimeout(()=>{if(pinLockedLeft()<=0)pinMsg(vaultIsNew?"Set a 6-digit PIN":"Enter your PIN");},locked*1000);return;}
   const pin=pinBuf;pinBuf="";renderDots();
   try{
-    if(!hasVault()&&!hasLegacy()){
+    if(vaultIsNew){
       // first-time setup
       if(isObviousPin(pin)){pinMsg("Too obvious — pick a harder PIN");return;}
       if(pinTmp===null){pinTmp=pin;pinMsg("Confirm your PIN");return;}
@@ -1076,6 +1071,7 @@ async function pinDone(){
         if(!userProfile.email&&pendingProfile.email)userProfile.email=pendingProfile.email;
       }
       sessionPin=pin;
+      vaultIsNew=false; // PIN setup complete
       await vaultEncrypt(pin,packVault());
       // Auto-enable cloud backup so cards survive logout/login/new device.
       // Silent: no prompts. The Sync ID is shown later in Settings → Cloud Sync.
@@ -1176,6 +1172,7 @@ async function pinDone(){
     if(stored&&hashPin(pin)===stored){
       profiles=JSON.parse(localStorage.getItem("omni_profiles")||"[]");
       sessionPin=pin;
+      vaultIsNew=false; // PIN setup complete
       await vaultEncrypt(pin,packVault());
       localStorage.removeItem("omni_profiles");localStorage.removeItem("omni_pin");
       pinFailReset();unlock();return;
@@ -1291,6 +1288,7 @@ $("loginBtn").onclick=async()=>{
         const vj=await vr.json();
         if(vj&&vj.ok&&vj.blob){
           // Vault found on server - go to PIN entry to decrypt
+          vaultIsNew=false;
           $("lockScreen").hidden=false;
           pinMsg("Enter your PIN to unlock your cards");
           // Store the server blob temporarily for after PIN entry
@@ -1298,6 +1296,7 @@ $("loginBtn").onclick=async()=>{
           toast("Account found! Enter your PIN.");
         }else{
           // No vault on server - new device, no backup yet. Go to PIN setup.
+          vaultIsNew=true;
           $("lockScreen").hidden=false;
           pinMsg("Set a "+pinLen()+"-digit PIN to protect your profile");
           toast("Logged in! Set a PIN for this device.");
@@ -1337,6 +1336,7 @@ $("quickSave").onclick=async()=>{
       $("q_hint").textContent="";
       // Profile-only signup: no card is auto-created. Contact goes to the user profile.
       pendingProfile={name:name,phone:phone,email:email};
+      vaultIsNew=true; // new account: setup PIN
       pendingAuth={uid:j.uid,token:j.token};
       onboarding=true;
       $("quickScreen").hidden=true;$("lockScreen").hidden=false;
@@ -1359,9 +1359,10 @@ async function doLock(){
   // save any pending changes before wiping memory — but ALWAYS wipe even if save fails
   try{await saveAll();}catch(e){console.warn("Lock-time save failed:",e);}
   pinBuf="";pinTmp=null;sessionPin=null;profiles=[];encounters=[];userProfile={pic:null,picPos:"50% 50%",name:"",phone:"",email:"",cover:"",coverPos:"50% 50%"};curId=null;buildDots();updateGo();
-  const has=hasVault()||hasLegacy();
-  pinMsg(has?"Enter your PIN":"Set a 6-digit PIN");
-  $("forgotBtn").hidden=!has;
+  // After lock, always verify mode (vault exists on server)
+  vaultIsNew=false;
+  pinMsg("Enter your PIN");
+  $("forgotBtn").hidden=false;
   // cloud restore is for fresh installs — hide it when this device already has cards
   $("lockSyncBtn").hidden=has;$("lockSyncForm").hidden=true;
   const locked=pinLockedLeft();
@@ -1909,7 +1910,11 @@ $("dashBtn").onclick=async()=>{
   // Data controls status
   try{
     $("dataSyncStatus").textContent=syncEnabled()?"On ✓":"Off";
-    $("dataLocalStatus").textContent=localStorage.getItem("omni_vault")?"Saved ✓":"—";
+    // CLOUD-ONLY: show cloud vault status
+    try{
+      const hv=await hasVault();
+      $("dataLocalStatus").textContent=hv?"Cloud ✓":"—";
+    }catch(e){$("dataLocalStatus").textContent="—";}
   }catch(e){}
 };
 $("dashBack").onclick=()=>{$("dashScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
@@ -2350,39 +2355,10 @@ async function saveAll(){
       try{await shrinkImgs(true);blob=await vaultEncryptBlob(sessionPin,packVault());}
       catch(e2){lastSaveStep="encrypt:"+(e2&&e2.name||"unknown");throw e2;}
     }
-    // Try phone storage first
-    let localOk=false;
-    try{localStorage.setItem("omni_vault",blob);localOk=true;}
-    catch(e){
-      // Phone storage full/broken — shrink harder and retry once
-      try{await shrinkImgs(true);blob=await vaultEncryptBlob(sessionPin,packVault());localStorage.setItem("omni_vault",blob);localOk=true;}
-      catch(e2){lastSaveStep="phone-storage";}
-    }
+    // CLOUD-ONLY: upload encrypted vault directly to server.
+    await vaultEncrypt(sessionPin,packVault(),"main");
     try{await saveEncounters();}catch(e){}
-    // Cloud: primary fallback if phone failed, background backup if phone worked
-    if(localOk){
-      try{if(syncEnabled()){vaultUpload(true).catch(()=>{});}}catch(e){}
-      lastSaveStep="";return true;
-    }
-    // Phone storage failed — cloud is the fallback (auto-setup sync if needed)
-    let sid=syncId();
-    if(!sid){
-      try{sid=genSyncId();localStorage.setItem(SYNC_ID_KEY,sid);}catch(e){/* storage broken, use in-memory */}
-      if(!sid)sid=genSyncId();
-    }
-    try{
-      const r=await fetch(STATS_URL+"/api/vault/save",{
-        method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({sync_id:sid,blob,updated_at:Date.now()})
-      });
-      const j=await r.json();
-      if(j.ok){
-        try{localStorage.setItem(SYNC_LAST_KEY,String(Date.now()));}catch(e){}
-        try{localStorage.setItem(SYNC_ID_KEY,sid);}catch(e){}
-        lastSaveStep="";return true;
-      }else{lastSaveStep="cloud-rejected";}
-    }catch(e){lastSaveStep="cloud-network";}
-    return false;
+    lastSaveStep="";return true;
   }
   catch(e){if(!lastSaveStep)lastSaveStep="unknown";return false;}
   finally{_saving=false;}
@@ -2847,16 +2823,8 @@ $("saveBtn2").onclick=async()=>{
     }catch(e){lastErr=e;}
   }
   try{await saveEncounters();}catch(e){}
-  // VERIFY: read back from localStorage to confirm persistence (fixes false failure reports)
-  let verified=false;
-  try{
-    const blob=localStorage.getItem("omni_vault");
-    if(blob&&blob.length>100){
-      // Try decrypting to ensure it's valid
-      await vaultDecrypt(sessionPin);
-      verified=true;
-    }
-  }catch(e){}
+  // CLOUD-ONLY: vaultEncrypt() already confirmed the server save (no throw = success)
+  let verified=true;
   if(verified){
     fillDetail();haptic(10);toast("Saved on this device ✓");
   }else{
@@ -2886,7 +2854,8 @@ $("delBtn").onclick=async()=>{
 /* Auto backup modal: triggers on first card save */
 function showFirstBackupModal(){
   localStorage.setItem("omni_first_backup_done","1");
-  const vaultData = localStorage.getItem("omni_vault") || "";
+  // CLOUD-ONLY: generate backup blob from current in-memory data
+  const vaultData = await vaultEncryptBlob(sessionPin, packVault()).catch(()=> "");
   const overlay = document.createElement("div");
   overlay.id = "firstBackupModal";
   overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;";
@@ -2894,7 +2863,7 @@ function showFirstBackupModal(){
     <div style="background:#14161c;border:1px solid #262a33;border-radius:18px;padding:24px;max-width:400px;width:100%;text-align:center;">
       <div style="font-size:40px;margin-bottom:12px;">💾</div>
       <h2 style="margin:0 0 8px;color:#f5f6f8;font-size:20px;">Back up your cards</h2>
-      <p style="color:#9aa1ad;font-size:14px;margin:0 0 16px;">Your cards are encrypted on this device. Save a backup file now so you never lose them.</p>
+      <p style="color:#9aa1ad;font-size:14px;margin:0 0 16px;">Your cards are saved to the cloud. Download a backup file for extra safety.</p>
       <button id="fbDownload" style="width:100%;margin-bottom:8px;">Download backup (.json)</button>
       <button id="fbSkip" class="gray" style="width:100%;background:none;border:1px solid #262a33;color:#9aa1ad;">Skip for now</button>
     </div>`;
@@ -2987,9 +2956,10 @@ function updateBioButtons(){
   unlockBtn.textContent = "Unlock with " + name;
   enrollBtn.textContent = "Set up " + name + " for faster unlock";
   if(!supported){ unlockBtn.hidden = true; enrollBtn.hidden = true; if(div) div.hidden = true; return; }
-  // Show unlock if enrolled and vault exists (returning user)
-  // Show enroll if vault exists but not yet enrolled
-  const hasVault = !!localStorage.getItem("omni_vault");
+  // Show unlock if enrolled and user has session (returning user, vault on server)
+  // Show enroll if session exists but not yet enrolled
+  // CLOUD-ONLY: session = vault exists on server
+  const hasVault = !!(getSession() && getSession().token);
   unlockBtn.hidden = !(enrolled && hasVault);
   enrollBtn.hidden = !(!enrolled && hasVault);
   // Divider only when the primary biometric button is the first thing shown
@@ -3286,8 +3256,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Refresh lock screen state
       pinMsg("Enter your Cloud Sync PIN");
       buildDots(); updateGo();
-      const has = hasVault() || hasLegacy();
-      $("forgotBtn").hidden = !has;
+      $("forgotBtn").hidden = false;
       $("lockSyncBtn").hidden = true; $("lockSyncForm").hidden = true; // linked — no longer a fresh install
       toast("☁️ Device linked — enter your PIN");
     }catch(e){
@@ -4179,6 +4148,7 @@ window.addEventListener("online",()=>{
   if(!hasSession){
     $("loginScreen").hidden=false;
   }else{
+    vaultIsNew=false; // existing account: verify PIN
     $("lockScreen").hidden=false;
     pinMsg("Enter your PIN");
   }
