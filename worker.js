@@ -115,7 +115,7 @@ async function fireWebhook(env, kv, payload){
   }catch(e){ /* webhook failures are silent */ }
 }
 
-const DEFAULT_FLAGS = { shareLimits: false, invites: true, buyShares: false };
+const DEFAULT_FLAGS = { shareLimits: false, invites: true, buyShares: false, faceIdUnlock: false };
 async function getFlags(env) {
   try {
     const f = await env.OMNI_STATS.get("flags", "json");
@@ -228,7 +228,7 @@ export default {
         if (!(await ownerTokenValid(req, kv)) && b.key !== env.OWNER_KEY) return json({ error: "forbidden" }, 403);
         const cur = await getFlags(env);
         const upd = {};
-        for (const k of ["shareLimits", "invites", "buyShares"])
+        for (const k of ["shareLimits", "invites", "buyShares", "faceIdUnlock"])
           if (b.flags && typeof b.flags[k] === "boolean") upd[k] = b.flags[k];
         const next = { ...cur, ...upd };
         await kv.put("flags", JSON.stringify(next));
