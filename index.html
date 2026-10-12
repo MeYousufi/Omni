@@ -347,10 +347,26 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <input id="q_name" placeholder="Your name" autocomplete="name" aria-label="Your name">
       <input id="q_email" placeholder="Email address" autocomplete="email" inputmode="email" aria-label="Email address">
       <input id="q_phone" placeholder="Phone number" autocomplete="tel" inputmode="tel" aria-label="Phone number">
+      <input id="q_password" type="password" placeholder="Create a password (6+ characters)" autocomplete="new-password" aria-label="Create a password">
       <div class="vhint" id="q_hint"></div>
     </div>
     <button id="quickSave" style="width:100%;padding:15px;font-size:17px">Create account →</button>
     <button class="forgot" id="quickLoginBtn" style="margin-top:12px">Already have an account? Log in</button>
+  </div>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" hidden>
+  <div class="wrap" style="min-height:90vh;display:flex;flex-direction:column;justify-content:center">
+    <h1>Welcome back</h1>
+    <p class="muted">Log in to access your cards on this device.</p>
+    <div class="box">
+      <input id="l_email" placeholder="Email address" autocomplete="email" inputmode="email" aria-label="Email address">
+      <input id="l_password" type="password" placeholder="Password" autocomplete="current-password" aria-label="Password">
+      <div class="vhint" id="l_hint"></div>
+    </div>
+    <button id="loginBtn" style="width:100%;padding:15px;font-size:17px">Log in →</button>
+    <button class="forgot" id="loginCreateBtn" style="margin-top:12px">New here? Create an account</button>
   </div>
 </div>
 
@@ -930,6 +946,18 @@ async function vaultDecrypt(pin,vkey){
   const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:ub64(ivB64)},key,ub64(ctB64));
   return JSON.parse(td.decode(pt));
 }
+async function vaultDecryptBlob(pin,blob){
+  const parts=(blob||"").split(".");
+  let iter,saltB64,ivB64,ctB64;
+  if(parts.length===4&&parts[0]==="310k"){
+    iter=310000;saltB64=parts[1];ivB64=parts[2];ctB64=parts[3];
+  }else if(parts.length===3){
+    iter=120000;saltB64=parts[0];ivB64=parts[1];ctB64=parts[2];
+  }else throw new Error("bad blob");
+  const key=await deriveKey(pin,ub64(saltB64),iter);
+  const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:ub64(ivB64)},key,ub64(ctB64));
+  return JSON.parse(td.decode(pt));
+}
 /* ---------- encounter memory: separate encrypted store, local-only, same PIN ---------- */
 const ENC_VAULT_KEY="omni_vault_enc";
 let encounters=[];
@@ -1055,16 +1083,17 @@ async function pinDone(){
       }
       pinFailReset();haptic(15);
       if(onboarding){
-        // Register the new account on the server (duplicate check already done, this is idempotent)
-        try{
-          const rp=await fetch(STATS_URL+"/api/users/register",{method:"POST",headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({email:userProfile.email,phone:userProfile.phone,deviceId:myDeviceId()})});
-          const rj=await rp.json();
-          if(rj&&rj.ok){
-            try{localStorage.setItem("omni_user_registered",userProfile.email.toLowerCase()+"|"+userProfile.phone.replace(/\D/g,""));}catch(e){}
-          }
-        }catch(e){/* server unreachable — profile saved locally, will sync later */}
-        onboarding=false;pendingProfile=null;
+        // Account already created via /api/auth/register. Now upload the encrypted vault to the server
+        // so it can be restored on any device after login.
+        if(pendingAuth&&pendingAuth.token){
+          try{
+            const vb=await vaultEncryptBlob(pin,packVault());
+            await fetch(STATS_URL+"/api/auth/vault/save",{method:"POST",headers:{"Content-Type":"application/json"},
+              body:JSON.stringify({token:pendingAuth.token,blob:vb,updated_at:Date.now()})});
+          }catch(e){/* vault upload failed — will retry on next save */}
+          try{localStorage.setItem("omni_user_registered",userProfile.email.toLowerCase()+"|"+userProfile.phone.replace(/\D/g,""));}catch(e){}
+        }
+        onboarding=false;pendingProfile=null;pendingAuth=null;
         $("lockScreen").hidden=true;
         // Generate and show recovery key
         try{
@@ -1081,6 +1110,21 @@ async function pinDone(){
         return;
       }
       unlock();return;
+    }
+    // Server vault restore: user logged in on new device, decrypt server blob with PIN
+    if(window._serverVaultBlob){
+      try{
+        const decrypted=await vaultDecryptBlob(pin,window._serverVaultBlob);
+        unpackVault(decrypted);
+        sessionPin=pin;
+        // Save as local vault
+        await vaultEncrypt(pin,packVault());
+        window._serverVaultBlob=null;
+        pinFailReset();haptic(15);
+        unlock();return;
+      }catch(e){
+        throw new Error("bad pin"); // PIN didn't decrypt the server vault
+      }
     }
     if(hasVault()){
       unpackVault(await vaultDecrypt(pin));
@@ -1156,7 +1200,7 @@ $("welcomeRestoreBtn").onclick=()=>{
   try{$("lockSyncInput").focus();}catch(e){}
 };
 /* quick create: name + one contact method */
-let onboarding=false, pendingProfile=null;
+let onboarding=false, pendingProfile=null, pendingAuth=null;
 function validContact(v){
   v=v.trim();
   if(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v))return{type:"emails",val:v};
@@ -1165,40 +1209,114 @@ function validContact(v){
 }
 $("quickLoginBtn").onclick=()=>{
   $("quickScreen").hidden=true;
-  $("lockScreen").hidden=false;
-  pinMsg("Enter your PIN");
-  // Show the cloud restore option prominently for returning users
-  const rsb=$("lockSyncBtn");
-  if(rsb){rsb.hidden=false;rsb.textContent="☁️ Restore my cards from cloud";}
-  toast("Welcome back! Enter your PIN or restore from cloud");
+  $("loginScreen").hidden=false;
+  window.scrollTo(0,0);
+};
+$("loginCreateBtn").onclick=()=>{
+  $("loginScreen").hidden=true;
+  $("quickScreen").hidden=false;
+  window.scrollTo(0,0);
+};
+// Session management
+function saveSession(token, uid, name){
+  try{
+    localStorage.setItem("omni_session", JSON.stringify({token, uid, name, at: Date.now()}));
+  }catch(e){}
+}
+function getSession(){
+  try{
+    const s = localStorage.getItem("omni_session");
+    return s ? JSON.parse(s) : null;
+  }catch(e){ return null; }
+}
+function clearSession(){
+  try{ localStorage.removeItem("omni_session"); }catch(e){}
+}
+// Login handler
+$("loginBtn").onclick=async()=>{
+  const email=$("l_email").value.trim();
+  const password=$("l_password").value;
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){$("l_hint").textContent="Enter a valid email address.";return;}
+  if(!password){$("l_hint").textContent="Enter your password.";return;}
+  $("l_hint").textContent="Logging in…";
+  $("loginBtn").disabled=true;
+  try{
+    const r=await fetch(STATS_URL+"/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({email:email,password:password})});
+    const j=await r.json();
+    if(j&&j.ok){
+      saveSession(j.token, j.uid, j.name);
+      $("l_hint").textContent="";
+      $("loginScreen").hidden=true;
+      // Try to load vault from server
+      try{
+        const vr=await fetch(STATS_URL+"/api/auth/vault/load?token="+encodeURIComponent(j.token));
+        const vj=await vr.json();
+        if(vj&&vj.ok&&vj.blob){
+          // Vault found on server - go to PIN entry to decrypt
+          $("lockScreen").hidden=false;
+          pinMsg("Enter your PIN to unlock your cards");
+          // Store the server blob temporarily for after PIN entry
+          window._serverVaultBlob=vj.blob;
+          toast("Account found! Enter your PIN.");
+        }else{
+          // No vault on server - new device, no backup yet. Go to PIN setup.
+          $("lockScreen").hidden=false;
+          pinMsg("Set a "+pinLen()+"-digit PIN to protect your profile");
+          toast("Logged in! Set a PIN for this device.");
+        }
+      }catch(e){
+        $("lockScreen").hidden=false;
+        pinMsg("Enter your PIN");
+      }
+    }else{
+      $("l_hint").textContent=j.error==="invalid_credentials"?"Invalid email or password.":"Login failed. Try again.";
+    }
+  }catch(e){
+    $("l_hint").textContent="Cannot reach server. Check your connection.";
+  }
+  $("loginBtn").disabled=false;
 };
 $("quickSave").onclick=async()=>{
   const name=$("q_name").value.trim();
   const email=$("q_email").value.trim();
   const phone=$("q_phone").value.trim();
+  const password=$("q_password").value;
   if(!name){$("q_hint").textContent="Please enter your name.";$("q_name").classList.add("bad");return;}
   if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){$("q_hint").textContent="Enter a valid email address.";$("q_email").classList.add("bad");return;}
   if(!phone||phone.replace(/\D/g,"").length<7){$("q_hint").textContent="Enter a valid phone number.";$("q_phone").classList.add("bad");return;}
-  $("q_hint").textContent="";$("q_name").classList.remove("bad");$("q_email").classList.remove("bad");$("q_phone").classList.remove("bad");
-  // Check server for duplicates before proceeding
-  $("q_hint").textContent="Checking availability…";
+  if(!password||password.length<6){$("q_hint").textContent="Create a password (6+ characters).";$("q_password").classList.add("bad");return;}
+  $("q_hint").textContent="";$("q_name").classList.remove("bad");$("q_email").classList.remove("bad");$("q_phone").classList.remove("bad");$("q_password").classList.remove("bad");
+  // Create account on server with password
+  $("q_hint").textContent="Creating your account…";
+  $("quickSave").disabled=true;
   try{
-    const r=await fetch(STATS_URL+"/api/users/check",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({email:email,phone:phone})});
+    const r=await fetch(STATS_URL+"/api/auth/register",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({name:name,email:email,phone:phone,password:password,deviceId:myDeviceId()})});
     const j=await r.json();
-    if(j&&!j.available){
-      const field=j.field==="email"?"email":"phone number";
-      $("q_hint").innerHTML="This "+field+" is already registered. <a href='#' id='q_loginLink' style='color:var(--accent)'>Log in instead</a>";
-      $("q_loginLink").onclick=(e)=>{e.preventDefault();$("quickScreen").hidden=true;$("lockScreen").hidden=false;pinMsg("Enter your PIN");toast("Welcome back! Enter your PIN or restore from cloud");};
-      return;
+    if(j&&j.ok){
+      // Save session
+      saveSession(j.token, j.uid, j.name);
+      $("q_hint").textContent="";
+      // Profile-only signup: no card is auto-created. Contact goes to the user profile.
+      pendingProfile={name:name,phone:phone,email:email};
+      pendingAuth={uid:j.uid,token:j.token};
+      onboarding=true;
+      $("quickScreen").hidden=true;$("lockScreen").hidden=false;
+      pinMsg("Set a "+pinLen()+"-digit PIN to protect your profile");
+    }else if(j&&j.error==="email_taken"){
+      $("q_hint").innerHTML="This email is already registered. <a href='#' id='q_loginLink' style='color:var(--accent)'>Log in instead</a>";
+      $("q_loginLink").onclick=(e)=>{e.preventDefault();$("quickScreen").hidden=true;$("loginScreen").hidden=false;};
+    }else if(j&&j.error==="phone_taken"){
+      $("q_hint").innerHTML="This phone number is already registered. <a href='#' id='q_loginLink' style='color:var(--accent)'>Log in instead</a>";
+      $("q_loginLink").onclick=(e)=>{e.preventDefault();$("quickScreen").hidden=true;$("loginScreen").hidden=false;};
+    }else{
+      $("q_hint").textContent=j.error==="password_min_6"?"Password must be 6+ characters.":"Account creation failed. Try again.";
     }
-  }catch(e){/* server unreachable — proceed anyway, will verify on profile save */}
-  $("q_hint").textContent="";
-  // Profile-only signup: no card is auto-created. Contact goes to the user profile.
-  pendingProfile={name:name,phone:phone,email:email};
-  onboarding=true;
-  $("quickScreen").hidden=true;$("lockScreen").hidden=false;
-  pinMsg("Set a "+pinLen()+"-digit PIN to protect your profile");
+  }catch(e){
+    $("q_hint").textContent="Cannot reach server. Check your connection and try again.";
+  }
+  $("quickSave").disabled=false;
 };
 async function doLock(){
   // save any pending changes before wiping memory — but ALWAYS wipe even if save fails
