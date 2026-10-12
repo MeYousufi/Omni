@@ -1433,14 +1433,13 @@ async function collectPendingInvites(){
     if(!r.ok)return;
     const j=await r.json();
     if(j&&j.pending>0){
-      // Inviter rewards: first successful share bumps free cards 3→7, after that tokens each
+      // Inviter rewards: first successful share bumps free cards 3→7, every share gives 100 tokens
       const tpi=tokensPerInvite();
       let msg="";
       if(!userPlan.sharedOnce){
         userPlan.sharedOnce=true;
-        msg="🎉 Your cards bumped to 7 — a friend joined!";
-        const extra=Math.max(0,j.pending-1);
-        if(extra>0){userPlan.tokens=(userPlan.tokens||0)+extra*tpi;msg+=` +${extra*tpi} tokens`;}
+        userPlan.tokens=(userPlan.tokens||0)+j.pending*tpi;
+        msg=`🎉 Your cards bumped to 7 +${j.pending*tpi} tokens — a friend joined!`;
       }else{
         userPlan.tokens=(userPlan.tokens||0)+j.pending*tpi;
         msg=`🎉 +${j.pending*tpi} tokens — a friend joined!`;
