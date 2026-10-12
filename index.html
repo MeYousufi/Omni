@@ -379,6 +379,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <div class="pinpad" id="pinpad"></div>
   <button class="forgot" id="forgotBtn" hidden>Forgot PIN? Reset everything</button>
   <button class="forgot" id="lockSyncBtn" style="margin-top:4px">☁️ Restore my cards from cloud</button>
+  <button class="forgot" id="lockCreateBtn" style="margin-top:4px">New here? Create an account</button>
   <div id="lockSyncForm" hidden style="margin-top:8px;width:100%;max-width:280px;">
     <div style="display:flex;gap:8px">
       <input id="lockSyncInput" placeholder="OMNI-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters" style="flex:1;margin:0;font-size:14px" aria-label="Sync ID">
@@ -1253,6 +1254,11 @@ function resetCheckBackup(){
   }
   el.innerHTML=html;
 }
+$("lockCreateBtn").onclick=()=>{
+  $("lockScreen").hidden=true;
+  $("quickScreen").hidden=false;
+  window.scrollTo(0,0);
+};
 $("forgotBtn").onclick=()=>{
   resetShowStep(1);
   $("resetModal").hidden=false;
