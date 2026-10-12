@@ -1334,15 +1334,9 @@ async function doLock(){
   $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("profileScreen").hidden=true;$("ownerScreen").hidden=true;$("backupScreen").hidden=true;$("welcomeScreen").hidden=true;$("lockScreen").hidden=false;applyLockBg();replayLogo();
 }
 function replayLogo(){
-  try{
-    const h=document.querySelector("#lockScreen h1.logo-anim");
-    if(!h)return;
-    h.style.animation="none";h.offsetHeight;
-    const o=h.querySelector(".logo-o"),r=h.querySelector(".logo-rest");
-    if(o){o.style.animation="none";o.offsetHeight;o.style.animation="";}
-    if(r){r.style.animation="none";r.offsetHeight;r.style.animation="";}
-    h.style.animation="";
-  }catch(e){}
+  // Disabled: animation replay was causing iOS rendering glitches (duplicate/flicker).
+  // Logo animates once on page load via CSS, then stays static.
+  return;
 }
 $("lockBtn").onclick=doLock;
 /* forgot PIN: 3-step safety flow */
