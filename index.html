@@ -733,6 +733,11 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
         </div>
       </div>
       <button class="small" id="refreshUserCount">Refresh</button>
+      <h3 class="sec" style="margin-top:16px;color:#e08080">Danger zone</h3>
+      <p class="muted" style="font-size:12px">Delete all accounts except the one tied to your invite code. Irreversible.</p>
+      <input id="wipeKeepCode" placeholder="Your invite code (e.g. 3VWU7K39)" autocomplete="off" autocapitalize="characters" style="margin-bottom:8px" aria-label="Keep code">
+      <button class="small" id="wipeAccountsBtn" style="background:#5a1f1f;border-color:#7a2a2a">Wipe all other accounts</button>
+      <p class="muted" id="wipeMsg" style="font-size:12px"></p>
       <h3 class="sec">Grant bonus shares</h3>
       <p class="muted">Enter the user's invite code (they'll find it in Dashboard → Invite friends).</p>
       <input id="grantCode" placeholder="Invite code (e.g. X7K2P9QA)" autocomplete="off" autocapitalize="characters" aria-label="User invite code">
@@ -1929,6 +1934,26 @@ document.addEventListener("DOMContentLoaded",()=>{
   const b=$("refreshUserCount");
   if(b)b.onclick=loadUserCount;
 });
+$("wipeAccountsBtn").onclick=async()=>{
+  const code=(($("wipeKeepCode").value||"").toUpperCase().trim());
+  const msg=$("wipeMsg");
+  if(!code){msg.textContent="Enter your invite code first.";msg.style.color="#e08080";return;}
+  if(!confirm("Delete ALL accounts except the one tied to "+code+"? This cannot be undone."))return;
+  if(!confirm("Last chance — type OK to confirm."))return;
+  msg.textContent="Wiping…";msg.style.color="#9aa1ad";
+  try{
+    const r=await fetch(STATS_URL+"/api/admin/wipe-accounts",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({owner_token:OWNER_TOKEN,keepCode:code,confirm:"WIPE-ALL-OTHERS"})});
+    const j=await r.json();
+    if(j&&j.ok){
+      msg.textContent="Done. Kept "+j.keptCode+" ("+j.keptUid.slice(0,8)+"…), deleted "+j.deletedCount+" accounts.";
+      msg.style.color="#7fd67f";
+      loadUserCount();
+    }else{
+      msg.textContent="Failed: "+(j.error||"unknown");msg.style.color="#e08080";
+    }
+  }catch(e){msg.textContent="Network error.";msg.style.color="#e08080";}
+};
 $("grantBtn").onclick=async()=>{
   const code=(($("grantCode").value||"").toUpperCase().trim());
   const amt=Math.max(1,Math.min(10000,parseInt($("grantAmt").value,10)||0));
