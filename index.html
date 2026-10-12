@@ -2560,11 +2560,8 @@ function renderCards(){
   const q=searchQ.toLowerCase();
   const list=profiles.filter(p=>!q||(p.label+" "+p.name+" "+p.org).toLowerCase().includes(q));
   $("emptyMsg").hidden=list.length>0;
-  // backup nudge: show if cards exist and no backup in 30 days
-  const lastB=parseInt(localStorage.getItem("omni_last_backup")||"0");
-  const showNudge=profiles.length>0&&(Date.now()-lastB)>30*86400000;
-  $("backupNudge").hidden=!showNudge;
-  if(showNudge)$("backupNudgeText").textContent=lastB===0?"💾 Back up your cards to keep them safe.":"💾 It's been a while since your last backup.";
+  // Cloud-only: vault auto-saves to server on every change — no backup nudge needed
+  try{$("backupNudge").hidden=true;}catch(e){}
   if(activeWallet>=list.length)activeWallet=-1;
   const PEEK=58, FULL=190;
   if(activeWallet<0){
