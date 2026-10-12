@@ -1,1 +1,29 @@
-{"dependencies":{"@capacitor-community/barcode-scanner":"^4.0.0","@capacitor-community/biometric-auth":"^6.0.0","@capacitor-community/in-app-purchase":"^6.0.0","@capacitor-community/nfc":"^6.0.0","@capacitor/app":"^6.0.0","@capacitor/biometrics":"^6.0.0","@capacitor/browser":"^6.0.0","@capacitor/contacts":"^6.0.0","@capacitor/core":"^6.0.0","@capacitor/haptics":"^6.0.0","@capacitor/share":"^6.0.0","@capacitor/splash-screen":"^6.0.0"},"description":"OMNI — Tap to share digital contact card","devDependencies":{"@capacitor/cli":"^6.0.0"},"main":"index.js","name":"omni-tap","scripts":{"android":"npx cap open android","build":"cp ../index.html www/ && cp ../manifest.json www/ 2>/dev/null; echo 'Web assets copied to www/'","ios":"npx cap open ios","sync":"npx cap sync"},"version":"1.0.0"}
+{
+  "dependencies": {
+    "@capacitor-community/barcode-scanner": "^4.0.0",
+    "@capacitor-community/biometric-auth": "^6.0.0",
+    "@capacitor-community/in-app-purchase": "^6.0.0",
+    "@capacitor-community/nfc": "^6.0.0",
+    "@capacitor/app": "^6.0.0",
+    "@capacitor/biometrics": "^6.0.0",
+    "@capacitor/browser": "^6.0.0",
+    "@capacitor/contacts": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/haptics": "^6.0.0",
+    "@capacitor/share": "^6.0.0",
+    "@capacitor/splash-screen": "^6.0.0"
+  },
+  "description": "OMNI \u2014 Tap to share digital contact card",
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  },
+  "main": "index.js",
+  "name": "omni-tap",
+  "scripts": {
+    "android": "npx cap open android",
+    "build": "mkdir -p www && cp ../index.html www/ 2>/dev/null; cp ../manifest.json www/ 2>/dev/null; cp ../sw.js www/ 2>/dev/null; cp ../privacy.html www/ 2>/dev/null; cp ../terms.html www/ 2>/dev/null; cp ../icon-192.png www/ 2>/dev/null; cp ../icon-512.png www/ 2>/dev/null; cp ../apple-touch-icon.png www/ 2>/dev/null; cp native-bridge.js www/ 2>/dev/null; echo 'Web assets copied to www/'",
+    "ios": "npx cap open ios",
+    "sync": "npx cap sync"
+  },
+  "version": "1.0.0"
+}
