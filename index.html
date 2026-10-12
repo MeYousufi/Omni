@@ -3052,13 +3052,19 @@ function updateBioButtons(){
   enrollBtn.textContent = "Set up " + name + " for faster unlock";
   if(heroBtn) heroBtn.textContent = "Unlock with " + name;
   const hasVault = !!(getSession() && getSession().token);
-  // Owner-controlled Face ID hero: prominent button when flag is ON and user enrolled
-  const showHero = !!(FLAGS.faceIdUnlock && supported && enrolled && hasVault);
+  // Owner-controlled: entire biometric UI hidden when flag is OFF
+  const bioAllowed = !!(FLAGS.faceIdUnlock && supported && hasVault);
+  if(hero) hero.hidden = true;
+  if(!bioAllowed){
+    unlockBtn.hidden = true; enrollBtn.hidden = true;
+    if(div) div.hidden = true;
+    return;
+  }
+  // Flag ON: hero for enrolled users, subtle buttons otherwise
+  const showHero = !!(enrolled);
   if(hero) hero.hidden = !showHero;
-  if(!supported){ unlockBtn.hidden = true; enrollBtn.hidden = true; if(div) div.hidden = true; return; }
-  // Hide the subtle buttons when hero is showing (avoid duplication)
-  unlockBtn.hidden = showHero || !(enrolled && hasVault);
-  enrollBtn.hidden = !(!enrolled && hasVault);
+  unlockBtn.hidden = showHero || !enrolled;
+  enrollBtn.hidden = enrolled;
   if(div) div.hidden = unlockBtn.hidden;
 }
 
