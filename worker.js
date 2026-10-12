@@ -448,6 +448,19 @@ export default {
         return json({ ok: true, updated_at: updatedAt });
       }
 
+      // Authenticated vault delete: wipe cloud vault (for PIN reset)
+      if (p === "/api/auth/vault/delete" && req.method === "POST") {
+        let b = {};
+        try { b = await req.json(); } catch (e) {}
+        const token = String(b.token || "").slice(0, 64);
+        const vkey = String(b.vkey || "main").slice(0, 32);
+        if (!token) return json({ error: "no token" }, 401);
+        const sess = await kv.get("auth:session:" + token, "json");
+        if (!sess || sess.expires < Date.now())
+          return json({ error: "invalid_session" }, 401);
+        await kv.delete("auth:vault:" + sess.uid + ":" + vkey);
+        return json({ ok: true });
+      }
       // Authenticated vault load: download vault by session (cloud-only storage)
       if (p === "/api/auth/vault/load" && req.method === "GET") {
         const token = String(url.searchParams.get("token") || "").slice(0, 64);
