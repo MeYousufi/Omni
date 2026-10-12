@@ -717,11 +717,41 @@ export default {
       if (p === "/api/owner/status" && req.method === "GET") {
         return json({ hasOwner: !!(await kv.get("owner:hash")) });
       }
-      /* Owner: real-time user stats (never deletes info) */
+      /* Client reports its plan tier (for owner stats) */
+      if (p === "/api/plan/report" && req.method === "POST") {
+        let b = {};
+        try { b = await req.json(); } catch (e) {}
+        const token = String(b.token || "").slice(0, 64);
+        const tier = String(b.tier || "free").toLowerCase().slice(0, 16);
+        if (!token || !["free","pro","premium"].includes(tier))
+          return json({ error: "bad request" }, 400);
+        const sess = await kv.get("auth:session:" + token, "json");
+        if (!sess || sess.expires < Date.now())
+          return json({ error: "invalid_session" }, 401);
+        await kv.put("plan:" + sess.uid, tier);
+        return json({ ok: true, tier });
+      }
+      /* Owner: real-time user stats with plan breakdown */
       if (p === "/api/users/stats" && req.method === "GET") {
         if (!(await ownerTokenValid(req, kv))) return json({ error: "forbidden" }, 403);
         const total = parseInt((await kv.get("users:count")) || "0", 10) || 0;
-        return json({ total, at: new Date().toISOString() });
+        // Count by plan tier
+        const plans = { free: 0, pro: 0, premium: 0 };
+        try {
+          let cursor = undefined;
+          do {
+            const res = await kv.list({ prefix: "plan:", cursor });
+            for (const k of res.keys) {
+              const t = await kv.get(k.name);
+              if (t === "pro") plans.pro++;
+              else if (t === "premium") plans.premium++;
+              else plans.free++;
+            }
+            cursor = res.cursor;
+            if (res.list_complete) break;
+          } while (cursor);
+        } catch (e) {}
+        return json({ total, plans, at: new Date().toISOString() });
       }
       if (p === "/api/owner/change" && req.method === "POST") {
         // Must have a valid owner token (proves current ownership)
