@@ -1132,8 +1132,35 @@ async function pinDone(){
         throw new Error("bad pin"); // PIN didn't decrypt the server vault
       }
     }
-    // CLOUD-ONLY: download vault from server, decrypt with PIN
+    // CLOUD-ONLY: download vault from server, decrypt with PIN.
+    // MIGRATION: if a local vault exists (pre-cloud-only), upload it first.
     try{
+      const localBlob=localStorage.getItem("omni_vault");
+      if(localBlob&&localBlob.length>100){
+        try{
+          // Verify PIN decrypts the local vault before migrating
+          const localData=await vaultDecryptBlob(pin,localBlob);
+          // Upload to server
+          const sess=getSession();
+          if(sess&&sess.token){
+            await fetch(STATS_URL+"/api/auth/vault/save",{
+              method:"POST",headers:{"Content-Type":"application/json"},
+              body:JSON.stringify({token:sess.token,blob:localBlob,updated_at:Date.now(),vkey:"main"})
+            });
+            // Migration complete: remove local vault
+            localStorage.removeItem("omni_vault");
+            localStorage.removeItem("omni_vault_bak");
+            unpackVault(localData);
+            await loadEncounters(pin);
+            sessionPin=pin;pinFailReset();haptic(15);
+            if(!localStorage.getItem("omni_pinlen"))localStorage.setItem("omni_pinlen",String(pin.length));
+            toast("Migrated to cloud ✓");
+            unlock();return;
+          }
+        }catch(me){
+          // Local vault exists but PIN didn't decrypt it - fall through to server attempt
+        }
+      }
       const vaultData=await vaultDecrypt(pin);
       unpackVault(vaultData);
       await loadEncounters(pin);
@@ -1141,9 +1168,7 @@ async function pinDone(){
       if(!localStorage.getItem("omni_pinlen"))localStorage.setItem("omni_pinlen",String(pin.length));
       unlock();return;
     }catch(e){
-      // No vault on server or wrong PIN - will fall through to error handling
       if(e.message==="no session - login required") throw e;
-      // Otherwise treat as bad PIN (vault exists but PIN didn't decrypt)
       throw new Error("bad pin");
     }
     // legacy plaintext migration: verify against old hash, then encrypt
