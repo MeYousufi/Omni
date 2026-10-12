@@ -879,7 +879,7 @@ function ping(ev){
 /* ---------- encrypted vault (AES-GCM, PIN-derived key) ---------- */
 let sessionPin=null; // PIN kept in memory only, never in storage
 const te=new TextEncoder(), td=new TextDecoder();
-const b64=a=>btoa(String.fromCharCode(...new Uint8Array(a)));
+const b64=a=>{const u=new Uint8Array(a);let s="";for(let i=0;i<u.length;i+=8192){s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));}return btoa(s);};
 const ub64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 async function deriveKey(pin,salt,iterations){
   iterations=iterations||310000; // OWASP 2023 minimum for PBKDF2-SHA256
