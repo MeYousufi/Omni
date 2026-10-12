@@ -397,6 +397,10 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <div id="lockScreen" hidden>
   <div id="lockBg" aria-hidden="true"></div>
   <h1 class="logo-anim"><span class="logo-o">O</span><span class="logo-rest">MNI</span></h1>
+  <div id="faceIdHero" hidden style="width:100%;max-width:320px;margin:6px 0 4px">
+    <button id="faceIdHeroBtn" style="width:100%;padding:18px;font-size:19px;font-weight:700;background:linear-gradient(120deg,#6ea8ff,#a78bfa);border:none;border-radius:16px;color:#fff;box-shadow:0 4px 24px rgba(110,168,255,.35)">Unlock with Face ID</button>
+    <div style="text-align:center;margin-top:14px;font-size:15px;letter-spacing:.35em;color:var(--muted);opacity:.7">or enter your PIN</div>
+  </div>
   <button id="bioUnlockBtn" hidden style="margin-top:22px;width:100%;max-width:280px;font-size:16px;padding:14px;min-height:52px">Unlock with biometrics</button>
   <button id="bioEnrollBtn" class="gray" hidden style="margin-top:18px;width:100%;max-width:280px;font-size:13px;">Set up biometrics for faster unlock</button>
   <div id="bioDivider" class="muted" hidden style="margin:14px 0 0;font-size:12px">or enter your PIN</div>
@@ -710,6 +714,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
         <button class="small" id="grantPremBtn" style="flex:1">Premium</button>
       </div>
       <div class="togglerow"><span>Lock screen photo<br><span class="muted" style="font-size:12px">Profile photo behind the PIN pad</span></span><label class="switch"><input type="checkbox" id="tgLockPhoto" aria-label="Toggle lock screen photo"><span class="sl"></span></label></div>
+      <div class="togglerow"><span>Face ID unlock<br><span class="muted" style="font-size:12px">Show "Unlock with Face ID" button on PIN screen</span></span><label class="switch"><input type="checkbox" id="tgFaceId" aria-label="Toggle Face ID unlock"><span class="sl"></span></label></div>
       <div style="margin:8px 0 12px"><button class="small" id="lockPhotoBtn">Change lock screen photo</button><input type="file" id="lockPhotoInput" accept="image/*" hidden></div>
       <h3 class="sec">Users</h3>
       <p style="font-size:32px;font-weight:800;margin:8px 0" id="ownerUserCount">—</p>
@@ -1535,7 +1540,7 @@ function numSetting(k,def){return def;}
 function applyNumSettings(){
   // retired: share numbers replaced by subscription plans
 }
-let FLAGS={shareLimits:false,invites:false,buyShares:false};
+let FLAGS={shareLimits:false,invites:false,buyShares:false,faceIdUnlock:false};
 function fridayWeekId(d){
   const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());
   x.setDate(x.getDate()-((x.getDay()-5+7)%7));
@@ -1874,7 +1879,21 @@ $("grantFreeBtn").onclick=()=>ownerGrantPlan("free");
 $("grantProBtn").onclick=()=>ownerGrantPlan("pro");
 $("grantPremBtn").onclick=()=>ownerGrantPlan("premium");
 /* owner flag toggles (legacy share toggles removed; pricing managed above) */
+try{
+  const tg=$("tgFaceId");
+  if(tg){tg.checked=!!FLAGS.faceIdUnlock;}
+}catch(e){}
 const _snb=$("saveNumbersBtn");if(_snb)_snb.onclick=()=>{toast("Removed — plans replace share numbers");};
+$("tgFaceId").onchange=async e=>{
+  const on=e.target.checked;
+  try{
+    const r=await fetch(STATS_URL+"/api/flags",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({owner_token:OWNER_TOKEN,flags:{faceIdUnlock:on}})});
+    const j=await r.json();
+    if(j&&j.ok){FLAGS=Object.assign({},FLAGS,j.flags);toast(on?"Face ID unlock ON":"Face ID unlock OFF");}
+    else{e.target.checked=!on;toast("Failed to save");}
+  }catch(err){e.target.checked=!on;toast("Network error");}
+};
 $("tgLockPhoto").onchange=e=>{
   try{
     if(e.target.checked){localStorage.setItem("omni_lockphoto","1");cacheLockBg();}
@@ -3026,18 +3045,20 @@ function updateBioButtons(){
   const enrolled = localStorage.getItem("omni_bio_cred");
   const supported = !!window.PublicKeyCredential;
   const unlockBtn = $("bioUnlockBtn"), enrollBtn = $("bioEnrollBtn"), div = $("bioDivider");
+  const hero = $("faceIdHero"), heroBtn = $("faceIdHeroBtn");
   if(!unlockBtn || !enrollBtn) return;
   const name = bioName();
   unlockBtn.textContent = "Unlock with " + name;
   enrollBtn.textContent = "Set up " + name + " for faster unlock";
-  if(!supported){ unlockBtn.hidden = true; enrollBtn.hidden = true; if(div) div.hidden = true; return; }
-  // Show unlock if enrolled and user has session (returning user, vault on server)
-  // Show enroll if session exists but not yet enrolled
-  // CLOUD-ONLY: session = vault exists on server
+  if(heroBtn) heroBtn.textContent = "Unlock with " + name;
   const hasVault = !!(getSession() && getSession().token);
-  unlockBtn.hidden = !(enrolled && hasVault);
+  // Owner-controlled Face ID hero: prominent button when flag is ON and user enrolled
+  const showHero = !!(FLAGS.faceIdUnlock && supported && enrolled && hasVault);
+  if(hero) hero.hidden = !showHero;
+  if(!supported){ unlockBtn.hidden = true; enrollBtn.hidden = true; if(div) div.hidden = true; return; }
+  // Hide the subtle buttons when hero is showing (avoid duplication)
+  unlockBtn.hidden = showHero || !(enrolled && hasVault);
   enrollBtn.hidden = !(!enrolled && hasVault);
-  // Divider only when the primary biometric button is the first thing shown
   if(div) div.hidden = unlockBtn.hidden;
 }
 
@@ -3075,6 +3096,11 @@ if("NDEFReader" in window){
 
 // Wire up biometric buttons
 document.addEventListener("DOMContentLoaded", () => {
+  const hb = $("faceIdHeroBtn");
+  if(hb) hb.onclick = async () => {
+    const ok = await bioUnlock();
+    if(ok){ /* bioUnlock handles unlock */ }
+  };
   const ub = $("bioUnlockBtn"), eb = $("bioEnrollBtn");
   if(ub) ub.onclick = async () => {
     const ok = await bioUnlock();
