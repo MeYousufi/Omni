@@ -2001,12 +2001,15 @@ const _snb=$("saveNumbersBtn");if(_snb)_snb.onclick=()=>{toast("Removed — plan
   sl.addEventListener("input",()=>{
     const v=parseInt(sl.value,10)||0;
     FLAGS.glassLevel=v; applyGlassLevel();
+    try{localStorage.setItem("omni_glass_level",String(v));}catch(e){}
     if(lb)lb.textContent=labelFor(v);
   });
   // Save button: persist only when user is happy (no auto-save on slide)
   const saveBtn=$("glassSaveBtn");
   async function doSaveGlass(v){
     saveBtn.disabled=true;saveBtn.textContent="Saving…";
+    // Diagnostic: log token state
+    console.log("[Glass] Save tapped, token exists:", !!OWNER_TOKEN, "len:", (OWNER_TOKEN||"").length);
     try{
       const r=await fetch(STATS_URL+"/api/flags",{method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({owner_token:OWNER_TOKEN,flags:{glassLevel:v}})});
@@ -2045,8 +2048,15 @@ const _snb=$("saveNumbersBtn");if(_snb)_snb.onclick=()=>{toast("Removed — plan
       }
     }catch(e){}
   };
-  // Init position from flags
-  try{sl.value=Math.max(0,Math.min(100,Number(FLAGS.glassLevel)||60));if(lb)lb.textContent=labelFor(parseInt(sl.value,10));}catch(e){}
+  // Init position from localStorage (user's last choice) or flags
+  try{
+    const saved=localStorage.getItem("omni_glass_level");
+    const initial=saved!==null?parseInt(saved,10):(Number(FLAGS.glassLevel)||60);
+    sl.value=Math.max(0,Math.min(100,initial));
+    FLAGS.glassLevel=parseInt(sl.value,10);
+    applyGlassLevel();
+    if(lb)lb.textContent=labelFor(parseInt(sl.value,10));
+  }catch(e){}
 })();
 $("tgFaceId").onchange=async e=>{
   const on=e.target.checked;
