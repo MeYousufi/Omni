@@ -115,7 +115,7 @@ async function fireWebhook(env, kv, payload){
   }catch(e){ /* webhook failures are silent */ }
 }
 
-const DEFAULT_FLAGS = { shareLimits: false, invites: true, buyShares: false, faceIdUnlock: false };
+const DEFAULT_FLAGS = { shareLimits: false, invites: true, buyShares: false, faceIdUnlock: false, glassLevel: 60 };
 async function getFlags(env) {
   try {
     const f = await env.OMNI_STATS.get("flags", "json");
@@ -230,6 +230,8 @@ export default {
         const upd = {};
         for (const k of ["shareLimits", "invites", "buyShares", "faceIdUnlock"])
           if (b.flags && typeof b.flags[k] === "boolean") upd[k] = b.flags[k];
+        if (b.flags && typeof b.flags.glassLevel === "number")
+          upd.glassLevel = Math.max(0, Math.min(100, Math.round(b.flags.glassLevel)));
         const next = { ...cur, ...upd };
         await kv.put("flags", JSON.stringify(next));
         return json({ ok: true, flags: next });
