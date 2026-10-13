@@ -88,14 +88,18 @@ async function ownerTokenValid(req, kv){
       try{ const b = await req.clone().json(); tok = b.owner_token || tok; }catch(e){}
     }
     if(tok && tok.length >= 16){
-      const v = await kv.get("owner:token:" + tok);
-      // Token stores the generation; must match current generation
-      // (password change bumps generation, invalidating old tokens)
-      if(v){
-        const gen = (await kv.get("owner:gen")) || "0";
-        // Legacy tokens stored "1" — treat as gen 0
-        if(v === "1") return gen === "0";
-        if(v === gen) return true;
+      // Retry once for KV propagation delay (login write may not be visible yet)
+      for(let attempt=0; attempt<2; attempt++){
+        const v = await kv.get("owner:token:" + tok);
+        // Token stores the generation; must match current generation
+        // (password change bumps generation, invalidating old tokens)
+        if(v){
+          const gen = (await kv.get("owner:gen")) || "0";
+          // Legacy tokens stored "1" — treat as gen 0
+          if(v === "1") return gen === "0";
+          if(v === gen) return true;
+        }
+        if(attempt===0) await new Promise(r=>setTimeout(r,500));
       }
     }
   }catch(e){}
