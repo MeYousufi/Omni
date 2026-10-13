@@ -750,12 +750,12 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       </div>
       <div style="margin-bottom:12px;padding:12px;border:1px solid var(--line);border-radius:12px">
         <div style="font-size:14px;font-weight:700;margin-bottom:10px">Liquid Glass</div>
-        <div id="glassPill" style="background:#2c2c2e;border-radius:28px;padding:14px 18px;display:flex;align-items:center;gap:14px;position:relative">
+        <div id="glassPill" style="background:#2c2c2e;border-radius:28px;padding:12px 12px;display:flex;align-items:center;gap:8px;position:relative">
           <svg width="32" height="32" viewBox="0 0 36 36" fill="none" stroke="#8e8e93" stroke-width="2.5" opacity=".7">
             <rect x="4" y="8" width="18" height="18" rx="5"/><rect x="14" y="12" width="18" height="18" rx="5"/>
           </svg>
-          <div style="flex:1;position:relative;height:32px;display:flex;align-items:center">
-            <div style="position:absolute;left:0;right:0;height:6px;border-radius:3px;background:#48484a"></div>
+          <div style="flex:1;position:relative;height:32px;display:flex;align-items:center;margin:0 -4px">
+            <div style="position:absolute;left:24px;right:24px;height:6px;border-radius:3px;background:#48484a"></div>
             <div id="glassTick1" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:4px;height:4px;border-radius:50%;background:#636366"></div>
             <div id="glassTick2" style="position:absolute;left:75%;top:50%;transform:translate(-50%,-50%);width:4px;height:4px;border-radius:50%;background:#636366"></div>
             <input type="range" id="glassSlider" min="0" max="100" value="60" step="1" aria-label="Glass intensity"
@@ -2005,13 +2005,14 @@ const _snb=$("saveNumbersBtn");if(_snb)_snb.onclick=()=>{toast("Removed — plan
   });
   // Save button: persist only when user is happy (no auto-save on slide)
   const saveBtn=$("glassSaveBtn");
-  if(saveBtn)saveBtn.onclick=async()=>{
-    const v=parseInt(sl.value,10)||0;
+  async function doSaveGlass(v){
     saveBtn.disabled=true;saveBtn.textContent="Saving…";
     try{
       const r=await fetch(STATS_URL+"/api/flags",{method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({owner_token:OWNER_TOKEN,flags:{glassLevel:v}})});
       if(r.status===403){
+        // Remember what he wanted, then re-login
+        try{sessionStorage.setItem("omni_pending_glass",String(v));}catch(e){}
         try{sessionStorage.removeItem("omni_owner_token");localStorage.removeItem("omni_owner_unlocked");}catch(e){}
         OWNER_TOKEN=null;
         toast("Session expired — enter owner password");
@@ -2024,10 +2025,25 @@ const _snb=$("saveNumbersBtn");if(_snb)_snb.onclick=()=>{toast("Removed — plan
         return;
       }
       const j=await r.json();
-      if(j&&j.ok){FLAGS=Object.assign({},FLAGS,j.flags);toast("Glass saved ✓");}
+      if(j&&j.ok){
+        FLAGS=Object.assign({},FLAGS,j.flags);
+        try{sessionStorage.removeItem("omni_pending_glass");}catch(e){}
+        toast("Glass saved ✓");
+      }
       else toast("Failed to save");
     }catch(e){toast("Network error");}
     finally{saveBtn.disabled=false;saveBtn.textContent="Save glass level";}
+  }
+  if(saveBtn)saveBtn.onclick=()=>{doSaveGlass(parseInt(sl.value,10)||0);};
+  // Auto-retry pending save after successful re-login
+  window._retryPendingGlass=async()=>{
+    try{
+      const pv=sessionStorage.getItem("omni_pending_glass");
+      if(pv!==null&&OWNER_TOKEN){
+        sessionStorage.removeItem("omni_pending_glass");
+        await doSaveGlass(parseInt(pv,10)||0);
+      }
+    }catch(e){}
   };
   // Init position from flags
   try{sl.value=Math.max(0,Math.min(100,Number(FLAGS.glassLevel)||60));if(lb)lb.textContent=labelFor(parseInt(sl.value,10));}catch(e){}
@@ -3901,6 +3917,7 @@ async function ownerAuth(){
       try{sessionStorage.setItem("omni_owner_token",OWNER_TOKEN);}catch(e){}
       try{localStorage.setItem("omni_owner_unlocked","1");}catch(e){}
       renderCreditBoxes();toast("Owner controls unlocked");
+      try{if(window._retryPendingGlass)window._retryPendingGlass();}catch(e){}
       return true;
     }else if(j.needSetup){toast("No owner password set yet.");return false;}
     else{toast("Wrong password.");return false;}
