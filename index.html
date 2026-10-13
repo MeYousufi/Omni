@@ -930,6 +930,55 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- STANDALONE MODALS FOR NAV MENU ITEMS -->
+<div id="reportModal" class="modal" hidden role="dialog" aria-label="Report an issue">
+  <div class="box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 class="sec" style="margin:0">Report an issue</h3>
+      <button class="iconbtn small" id="reportModalClose" aria-label="Close">✕</button>
+    </div>
+    <h3 class="sec" style="margin-top:0">What's wrong?</h3>
+    <textarea id="issueText" placeholder="Describe the issue…" style="width:100%;min-height:90px;margin:4px 0" aria-label="Issue description"></textarea>
+    <button class="small" id="issueSendBtn" style="width:100%">Send report</button>
+    <p class="muted" style="font-size:12px;margin-top:6px">App version and device info are attached automatically.</p>
+  </div>
+</div>
+<div id="helpModal" class="modal" hidden role="dialog" aria-label="Help and support">
+  <div class="box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 class="sec" style="margin:0">Help & support</h3>
+      <button class="iconbtn small" id="helpModalClose" aria-label="Close">✕</button>
+    </div>
+    <h3 class="sec" style="margin-top:0">FAQ</h3>
+    <details style="margin:8px 0"><summary style="font-size:14px">How do I share my card?</summary><p class="muted" style="font-size:13px">Tap "Share my card" on the home screen, or open a card and use the Share button. The other person gets your contact details instantly.</p></details>
+    <details style="margin:8px 0"><summary style="font-size:14px">How do invites work?</summary><p class="muted" style="font-size:13px">Share your invite code from Dashboard → Invite friends. Your friend gets 7 days of Pro free, and you earn 100 tokens per friend.</p></details>
+    <details style="margin:8px 0"><summary style="font-size:14px">What are tokens for?</summary><p class="muted" style="font-size:13px">Tokens unlock premium card designs (Aurora, Obsidian Gold, Royale) under Dashboard → Invite friends → Premium designs.</p></details>
+    <details style="margin:8px 0"><summary style="font-size:14px">Is my data private?</summary><p class="muted" style="font-size:13px">Yes. Everything is encrypted on your phone with your PIN before it's stored or synced. We can't read your data.</p></details>
+    <div class="statrow" style="margin-top:8px"><span>App version</span><b id="helpAppVer">1.0</b></div>
+  </div>
+</div>
+<div id="legalModal" class="modal" hidden role="dialog" aria-label="Legal info">
+  <div class="box" style="max-height:80vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 class="sec" style="margin:0">Legal info</h3>
+      <button class="iconbtn small" id="legalModalClose" aria-label="Close">✕</button>
+    </div>
+    <h3 class="sec" style="margin-top:0">Privacy Policy</h3>
+    <p class="muted" style="font-size:13px"><b>Last updated: October 11, 2026</b></p>
+    <p class="muted" style="font-size:13px"><b>What we collect:</b> OMNI encrypts all your card data on your device with your PIN before storage or sync. We never see your PIN, your cards, or your contacts. When you use Cloud Sync, we store only the encrypted blob — we cannot decrypt it.</p>
+    <p class="muted" style="font-size:13px"><b>Analytics:</b> We collect anonymous aggregate counts (total users, cards created) via our stats service. No personal identifiers are attached. If you use a referral code, we store the code mapping to award tokens — this is the only account-linked data we hold.</p>
+    <p class="muted" style="font-size:13px"><b>Data retention:</b> Your encrypted data stays on our servers until you delete your account or disable Cloud Sync. Anonymous analytics are retained indefinitely in aggregate form.</p>
+    <p class="muted" style="font-size:13px"><b>Your rights (GDPR/CCPA):</b> You can request your data anytime. You can delete your account and all cloud data from Data controls → Delete account. Contact us at hello@omni-tap.com for data requests.</p>
+    <p class="muted" style="font-size:13px"><b>Contact:</b> hello@omni-tap.com</p>
+    <p class="muted" style="font-size:13px">Full policy: <a href="https://omni-tap.com/privacy.html" target="_blank" style="color:var(--accent)">omni-tap.com/privacy.html</a></p>
+    <h3 class="sec" style="margin-top:12px">Terms of Service</h3>
+    <p class="muted" style="font-size:13px"><b>Last updated: October 11, 2026</b></p>
+    <p class="muted" style="font-size:13px">OMNI is provided as-is. You're responsible for keeping your PIN safe — if you forget it and have no backup or recovery key, your data can't be recovered.</p>
+    <p class="muted" style="font-size:13px"><b>Subscriptions:</b> Pro ($4.99/month) and Premium ($9.99/month) are billed via the app store on your device. Subscriptions auto-renew unless cancelled at least 24 hours before the current period ends. Manage or cancel in your App Store/Play Store account settings. Tokens have no cash value and are non-refundable except as required by law.</p>
+    <p class="muted" style="font-size:13px"><b>Acceptable use:</b> Don't use OMNI for spam, harassment, fraud, or illegal activity. We may suspend accounts that violate this.</p>
+    <p class="muted" style="font-size:13px"><b>Governing law:</b> These terms are governed by the laws of the State of Kansas, USA.</p>
+  </div>
+</div>
 <script>
 const $=id=>document.getElementById(id);
 function formatPhone(p){
@@ -4414,55 +4463,6 @@ window.addEventListener("online",()=>{
 // Service worker disabled: prevents stale-cache black screens (2026-10-13)
 </script>
 <!-- Native bridge: loaded only in Capacitor native app -->
-<!-- STANDALONE MODALS FOR NAV MENU ITEMS -->
-<div id="reportModal" class="modal" hidden role="dialog" aria-label="Report an issue">
-  <div class="box">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <h3 class="sec" style="margin:0">Report an issue</h3>
-      <button class="iconbtn small" id="reportModalClose" aria-label="Close">✕</button>
-    </div>
-    <h3 class="sec" style="margin-top:0">What's wrong?</h3>
-    <textarea id="issueText" placeholder="Describe the issue…" style="width:100%;min-height:90px;margin:4px 0" aria-label="Issue description"></textarea>
-    <button class="small" id="issueSendBtn" style="width:100%">Send report</button>
-    <p class="muted" style="font-size:12px;margin-top:6px">App version and device info are attached automatically.</p>
-  </div>
-</div>
-<div id="helpModal" class="modal" hidden role="dialog" aria-label="Help and support">
-  <div class="box">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <h3 class="sec" style="margin:0">Help & support</h3>
-      <button class="iconbtn small" id="helpModalClose" aria-label="Close">✕</button>
-    </div>
-    <h3 class="sec" style="margin-top:0">FAQ</h3>
-    <details style="margin:8px 0"><summary style="font-size:14px">How do I share my card?</summary><p class="muted" style="font-size:13px">Tap "Share my card" on the home screen, or open a card and use the Share button. The other person gets your contact details instantly.</p></details>
-    <details style="margin:8px 0"><summary style="font-size:14px">How do invites work?</summary><p class="muted" style="font-size:13px">Share your invite code from Dashboard → Invite friends. Your friend gets 7 days of Pro free, and you earn 100 tokens per friend.</p></details>
-    <details style="margin:8px 0"><summary style="font-size:14px">What are tokens for?</summary><p class="muted" style="font-size:13px">Tokens unlock premium card designs (Aurora, Obsidian Gold, Royale) under Dashboard → Invite friends → Premium designs.</p></details>
-    <details style="margin:8px 0"><summary style="font-size:14px">Is my data private?</summary><p class="muted" style="font-size:13px">Yes. Everything is encrypted on your phone with your PIN before it's stored or synced. We can't read your data.</p></details>
-    <div class="statrow" style="margin-top:8px"><span>App version</span><b id="helpAppVer">1.0</b></div>
-  </div>
-</div>
-<div id="legalModal" class="modal" hidden role="dialog" aria-label="Legal info">
-  <div class="box" style="max-height:80vh;overflow-y:auto">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <h3 class="sec" style="margin:0">Legal info</h3>
-      <button class="iconbtn small" id="legalModalClose" aria-label="Close">✕</button>
-    </div>
-    <h3 class="sec" style="margin-top:0">Privacy Policy</h3>
-    <p class="muted" style="font-size:13px"><b>Last updated: October 11, 2026</b></p>
-    <p class="muted" style="font-size:13px"><b>What we collect:</b> OMNI encrypts all your card data on your device with your PIN before storage or sync. We never see your PIN, your cards, or your contacts. When you use Cloud Sync, we store only the encrypted blob — we cannot decrypt it.</p>
-    <p class="muted" style="font-size:13px"><b>Analytics:</b> We collect anonymous aggregate counts (total users, cards created) via our stats service. No personal identifiers are attached. If you use a referral code, we store the code mapping to award tokens — this is the only account-linked data we hold.</p>
-    <p class="muted" style="font-size:13px"><b>Data retention:</b> Your encrypted data stays on our servers until you delete your account or disable Cloud Sync. Anonymous analytics are retained indefinitely in aggregate form.</p>
-    <p class="muted" style="font-size:13px"><b>Your rights (GDPR/CCPA):</b> You can request your data anytime. You can delete your account and all cloud data from Data controls → Delete account. Contact us at hello@omni-tap.com for data requests.</p>
-    <p class="muted" style="font-size:13px"><b>Contact:</b> hello@omni-tap.com</p>
-    <p class="muted" style="font-size:13px">Full policy: <a href="https://omni-tap.com/privacy.html" target="_blank" style="color:var(--accent)">omni-tap.com/privacy.html</a></p>
-    <h3 class="sec" style="margin-top:12px">Terms of Service</h3>
-    <p class="muted" style="font-size:13px"><b>Last updated: October 11, 2026</b></p>
-    <p class="muted" style="font-size:13px">OMNI is provided as-is. You're responsible for keeping your PIN safe — if you forget it and have no backup or recovery key, your data can't be recovered.</p>
-    <p class="muted" style="font-size:13px"><b>Subscriptions:</b> Pro ($4.99/month) and Premium ($9.99/month) are billed via the app store on your device. Subscriptions auto-renew unless cancelled at least 24 hours before the current period ends. Manage or cancel in your App Store/Play Store account settings. Tokens have no cash value and are non-refundable except as required by law.</p>
-    <p class="muted" style="font-size:13px"><b>Acceptable use:</b> Don't use OMNI for spam, harassment, fraud, or illegal activity. We may suspend accounts that violate this.</p>
-    <p class="muted" style="font-size:13px"><b>Governing law:</b> These terms are governed by the laws of the State of Kansas, USA.</p>
-  </div>
-</div>
 <script>
 if(window.Capacitor&&window.Capacitor.isNativePlatform()){
   var s=document.createElement("script");
