@@ -70,6 +70,27 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
   #lockScreen h1{font-size:28px}
 }
 .forgot{background:none;color:var(--muted);font-size:15px;margin-top:18px;text-decoration:underline;padding:14px 20px;box-shadow:none;border:0;min-height:44px}
+/* Liquid Glass system: owner-controlled glossiness via --glass-blur, --glass-bg, --glass-sat */
+:root{
+  --glass-blur:12px;
+  --glass-sat:1.4;
+  --glass-bg:rgba(20,25,38,.55);
+  --glass-border:rgba(255,255,255,.12);
+  --glass-highlight:inset 0 1px 0 rgba(255,255,255,.15);
+}
+.glass{
+  background:var(--glass-bg);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));
+  backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));
+  border:1px solid var(--glass-border);
+  box-shadow:var(--glass-highlight), 0 8px 32px rgba(0,0,0,.25);
+}
+/* Apply glass to key surfaces */
+.wcard{ -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat)); backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat)); }
+.navmenu, .sheet, .modal{
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));
+  backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-sat));
+}
 /* Premium lock screen: choreographed, tactile, refined */
 #lockScreen{justify-content:center;padding-top:0;position:relative;overflow:hidden}
 #lockScreen::before{content:"";position:absolute;inset:0;pointer-events:none;
@@ -746,6 +767,22 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       </div>
       <div class="togglerow"><span>Lock screen photo<br><span class="muted" style="font-size:12px">Profile photo behind the PIN pad</span></span><label class="switch"><input type="checkbox" id="tgLockPhoto" aria-label="Toggle lock screen photo"><span class="sl"></span></label></div>
       <div class="togglerow"><span>Face ID unlock<br><span class="muted" style="font-size:12px">Show "Unlock with Face ID" button on PIN screen</span></span><label class="switch"><input type="checkbox" id="tgFaceId" aria-label="Toggle Face ID unlock"><span class="sl"></span></label></div>
+      <div style="margin:12px 0">
+        <div style="font-size:14px;font-weight:600;margin-bottom:8px">Liquid Glass <span class="muted" style="font-weight:400;font-size:12px">— how glossy the app looks</span></div>
+        <div style="background:#1e2536;border-radius:20px;padding:14px 18px;display:flex;align-items:center;gap:14px">
+          <span style="font-size:20px;opacity:.5">◐</span>
+          <input type="range" id="glassSlider" min="0" max="100" value="60" step="1" aria-label="Glass intensity"
+            style="flex:1;-webkit-appearance:none;appearance:none;height:6px;border-radius:3px;background:linear-gradient(90deg,#6ea8ff,#a78bfa);outline:none">
+          <span style="font-size:20px">◑</span>
+        </div>
+        <div class="muted" style="font-size:12px;margin-top:6px;text-align:center" id="glassLabel">Clear is more transparent and tinted</div>
+      </div>
+      <style>
+        #glassSlider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;border-radius:50%;
+          background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.4);cursor:pointer;border:none}
+        #glassSlider::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#fff;
+          box-shadow:0 2px 12px rgba(0,0,0,.4);cursor:pointer;border:none}
+      </style>
       <div style="margin:8px 0 12px"><button class="small" id="lockPhotoBtn">Change lock screen photo</button><input type="file" id="lockPhotoInput" accept="image/*" hidden></div>
       <h3 class="sec">Users</h3>
       <p style="font-size:32px;font-weight:800;margin:8px 0" id="ownerUserCount">—</p>
@@ -1577,7 +1614,7 @@ function numSetting(k,def){return def;}
 function applyNumSettings(){
   // retired: share numbers replaced by subscription plans
 }
-let FLAGS={shareLimits:false,invites:false,buyShares:false,faceIdUnlock:false};
+let FLAGS={shareLimits:false,invites:false,buyShares:false,faceIdUnlock:false,glassLevel:60};
 function fridayWeekId(d){
   const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());
   x.setDate(x.getDate()-((x.getDay()-5+7)%7));
@@ -1593,6 +1630,21 @@ async function loadFlags(){
     try{const c=JSON.parse(localStorage.getItem("omni_flags")||"{}");if(c.f)FLAGS=Object.assign({},FLAGS,c.f);}catch(e2){}
   }
   applyNumSettings();
+  try{applyGlassLevel();}catch(e){}
+}
+/* Liquid Glass: map owner 0-100 level to blur, transparency, saturation */
+function applyGlassLevel(){
+  const lvl = Math.max(0, Math.min(100, Number(FLAGS.glassLevel) || 0));
+  const root = document.documentElement;
+  // 0 = clear/tinted (minimal blur, more transparent), 100 = frosted (heavy blur, milky)
+  const blur = (4 + (lvl / 100) * 20).toFixed(1);           // 4px -> 24px
+  const alpha = (0.25 + (lvl / 100) * 0.45).toFixed(2);     // .25 -> .70
+  const sat = (1.1 + (lvl / 100) * 0.8).toFixed(2);          // 1.1 -> 1.9
+  const borderA = (0.06 + (lvl / 100) * 0.14).toFixed(2);    // subtle -> defined
+  root.style.setProperty("--glass-blur", blur + "px");
+  root.style.setProperty("--glass-bg", "rgba(20,25,38," + alpha + ")");
+  root.style.setProperty("--glass-sat", sat);
+  root.style.setProperty("--glass-border", "rgba(255,255,255," + borderA + ")");
 }
 function updateCreditUI(){
   try{const bar=$("creditBar");if(bar)bar.hidden=true;}catch(e){}
@@ -1921,6 +1973,29 @@ try{
   if(tg){tg.checked=!!FLAGS.faceIdUnlock;}
 }catch(e){}
 const _snb=$("saveNumbersBtn");if(_snb)_snb.onclick=()=>{toast("Removed — plans replace share numbers");};
+/* Liquid Glass slider: live preview, saves on release */
+(function(){
+  const sl=$("glassSlider"), lb=$("glassLabel");
+  if(!sl)return;
+  const labelFor=v=>v<30?"Clear is more transparent and tinted":v<70?"Balanced glass": "Frosted — soft and milky";
+  sl.addEventListener("input",()=>{
+    const v=parseInt(sl.value,10)||0;
+    FLAGS.glassLevel=v; applyGlassLevel();
+    if(lb)lb.textContent=labelFor(v);
+  });
+  sl.addEventListener("change",async()=>{
+    const v=parseInt(sl.value,10)||0;
+    try{
+      const r=await fetch(STATS_URL+"/api/flags",{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({owner_token:OWNER_TOKEN,flags:{glassLevel:v}})});
+      const j=await r.json();
+      if(j&&j.ok){FLAGS=Object.assign({},FLAGS,j.flags);toast("Glass saved");}
+      else toast("Failed to save");
+    }catch(e){toast("Network error");}
+  });
+  // Init position from flags
+  try{sl.value=Math.max(0,Math.min(100,Number(FLAGS.glassLevel)||60));if(lb)lb.textContent=labelFor(parseInt(sl.value,10));}catch(e){}
+})();
 $("tgFaceId").onchange=async e=>{
   const on=e.target.checked;
   try{
