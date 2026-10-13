@@ -3897,7 +3897,8 @@ $("shareBtn").onclick=async()=>{if(!consumeShare())return;haptic(10);
 $("linkBtn").onclick=async()=>{
   if(!consumeShare())return;
   stat("nfc");
-  const data=chosen();
+  let data;
+  try{data=chosen();}catch(e){toast("Couldn't read card data");return;}
   let url=null;
   // Try short cloud link first (fits on any NFC sticker)
   // Payload is encrypted client-side; the key stays in the URL fragment (never sent to server)
@@ -3916,10 +3917,17 @@ $("linkBtn").onclick=async()=>{
   }
   let copied=false;
   try{await navigator.clipboard.writeText(url);copied=true;}catch(e){}
-  $("qr").style.display="block";$("qr").innerHTML="";
-  if(typeof QRCode!=="undefined")new QRCode($("qr"),{text:url,width:168,height:168,correctLevel:QRCode.CorrectLevel.M});
-  else $("qr").innerHTML="<p style='color:#000;padding:10px'>QR needs internet on first load.</p>";
+  const qrEl=$("qr");
+  qrEl.style.display="block";qrEl.innerHTML="";
+  qrEl.style.textAlign="center";qrEl.style.margin="16px 0";qrEl.style.padding="12px";
+  qrEl.style.background="#fff";qrEl.style.borderRadius="12px";
+  try{
+    if(typeof QRCode!=="undefined"){new QRCode(qrEl,{text:url,width:168,height:168,correctLevel:QRCode.CorrectLevel.M});}
+    else{qrEl.innerHTML="<p style='color:#000;padding:10px'>QR needs internet on first load.</p>";}
+  }catch(e){qrEl.innerHTML="<p style='color:#c00;padding:10px'>QR failed: "+(e.message||e)+"</p>";}
   $("qrDlBtn").hidden=false;
+  // Scroll QR into view so user sees it
+  setTimeout(()=>{try{qrEl.scrollIntoView({behavior:"smooth",block:"center"});}catch(e){}},100);
   // NFC status: browsers can't write NFC tags directly (iOS especially)
   const nfcOK="NDEFReader" in window;
   const nn=$("nfcNote");
