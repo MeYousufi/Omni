@@ -2000,11 +2000,16 @@ const _snb=$("saveNumbersBtn");if(_snb)_snb.onclick=()=>{toast("Removed — plan
       const r=await fetch(STATS_URL+"/api/flags",{method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({owner_token:OWNER_TOKEN,flags:{glassLevel:v}})});
       if(r.status===403){
-        // Stale token — clear and prompt for owner password again
+        // Stale token — clear and show owner password prompt
         try{sessionStorage.removeItem("omni_owner_token");localStorage.removeItem("omni_owner_unlocked");}catch(e){}
         OWNER_TOKEN=null;
-        toast("Session expired — enter owner password again");
-        setTimeout(()=>{try{location.reload();}catch(e){}},1200);
+        toast("Session expired — enter owner password");
+        try{
+          $("ownerOpen").hidden=true;
+          $("ownerLocked").hidden=false;
+          const pw=$("ownerPwInput");
+          if(pw){pw.value="";pw.focus();}
+        }catch(e){}
         return;
       }
       const j=await r.json();
