@@ -887,6 +887,14 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     </div>
     <button class="small gray" id="shareInviteBtn" style="width:100%;margin-top:8px">Share invite link</button>
   </div>
+
+
+
+
+  </details>
+  
+  <details class="dashgroup" id="dgRedeem">
+    <summary><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2.5 2.5 0 0 0 0 5v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2.5 2.5 0 0 0 0-5z"/><path d="M13 5v2"/><path d="M13 11v2"/><path d="M13 17v2"/></svg></span><span>Redeem referral code</span></summary>
 <div class="box" id="redeemBox">
     <h3 class="sec" style="margin-top:0">Redeem referral code</h3>
     <p class="muted">New here? Enter a friend's invite code — you'll earn 7 cards plus 7 days of Pro trial.</p>
@@ -896,6 +904,9 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     </div>
     <p class="muted" id="redeemMsg" style="font-size:12px;margin-top:4px"></p>
   </div>
+  </details>
+  <details class="dashgroup" id="dgSig">
+    <summary><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/><path d="M14 15h4"/><path d="M14 18h2"/></svg></span><span>Email signature <span class="advbadge">PRO</span></span></summary>
 <div class="box" id="sigBox">
     <h3 class="sec" style="margin-top:0">Email signature <span class="advbadge">PRO</span></h3>
     <p class="muted">Generate a branded signature from your profile.</p>
@@ -903,18 +914,22 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <div id="sigPreview" hidden style="margin-top:12px;padding:12px;background:#fff;border-radius:12px;color:#000;"></div>
     <button class="small" id="sigCopy" hidden style="width:100%;margin-top:8px">Copy HTML</button>
   </div>
-<details class="box" id="shopBox" style="padding:12px">
-    <summary style="font-size:15px;font-weight:600;cursor:pointer;list-style:none">Premium designs</summary>
+  </details>
+  <details class="dashgroup" id="dgShop">
+    <summary><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 1 0 9 9"/><circle cx="8.5" cy="10.5" r="1" fill="#fff"/><circle cx="12" cy="7.5" r="1" fill="#fff"/><circle cx="15.5" cy="10.5" r="1" fill="#fff"/></svg></span><span>Premium designs</span></summary>
+<div class="box">
     <div class="statrow"><span>Your tokens</span><b id="shopTokens">0</b></div>
     <div id="shopList"></div>
+  </div>
   </details>
-<details class="box" id="tokenBox" style="padding:12px;margin-top:8px">
-    <summary style="font-size:15px;font-weight:600;cursor:pointer;list-style:none">Buy tokens</summary>
+  <details class="dashgroup" id="dgTokens">
+    <summary><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M9 9.5c0-1 1.3-1.8 3-1.8s3 .8 3 1.8-1.3 1.7-3 1.9-3 .9-3 1.9 1.3 1.8 3 1.8 3-.8 3-1.8"/></svg></span><span>Buy tokens</span></summary>
+<div class="box">
     <p class="muted">Earn 100 tokens per friend who joins, or buy a pack.</p>
     <div id="packList"></div>
+  </div>
   </details>
-  </details>
-  <details class="dashgroup" id="dgData">
+<details class="dashgroup" id="dgData">
     <summary><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><span>Data controls</span></summary>
 <div class="box">
     <h3 class="sec" style="margin-top:0">Your data</h3>
@@ -2413,6 +2428,9 @@ function renderPlanBox(){
     const pt=$("planTrial");
     if(isTrialing()){pt.hidden=false;pt.textContent=`Pro trial ends in ${trialDaysLeft()} day(s) — upgrade to keep Pro features.`;}
     else pt.hidden=true;
+    // Hide Email signature for free users (Pro/Premium only)
+    const dgSig=$("dgSig");
+    if(dgSig) dgSig.style.display=(t==="pro"||t==="premium")?"":"none";
   }catch(e){}
 }
 /* Stripe subscriptions — worker endpoint pending; falls back gracefully */
