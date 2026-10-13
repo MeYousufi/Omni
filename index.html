@@ -70,15 +70,46 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
   #lockScreen h1{font-size:28px}
 }
 .forgot{background:none;color:var(--muted);font-size:15px;margin-top:18px;text-decoration:underline;padding:14px 20px;box-shadow:none;border:0;min-height:44px}
-/* Premium lock screen: balanced, spacious, fits one screen */
-#lockScreen{justify-content:center;padding-top:0}
-#lockScreen h1{font-size:52px;margin:0 0 18px;letter-spacing:.16em}
-#lockScreen .muted{font-size:13px;margin-bottom:10px;letter-spacing:.28em;opacity:.75}
-#lockScreen .dots{gap:14px;margin:18px 0 20px}
-#lockScreen .dot{width:14px;height:14px}
-#lockScreen .pinpad{grid-template-columns:repeat(3,minmax(72px,82px));gap:12px;max-width:290px}
-#lockScreen .pinpad button{max-width:82px;max-height:82px;font-size:26px;background:#161b28;border:1px solid #2a3040}
-#lockScreen .pinpad button:active{background:#1e2536}
+/* Premium lock screen: choreographed, tactile, refined */
+#lockScreen{justify-content:center;padding-top:0;position:relative;overflow:hidden}
+#lockScreen::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(110,168,255,.08),transparent 70%),
+             radial-gradient(ellipse 60% 40% at 50% 100%,rgba(167,139,250,.06),transparent 70%);}
+#lockScreen h1{font-size:54px;margin:0 0 20px;letter-spacing:.18em;
+  background:linear-gradient(120deg,#8ab4ff,#c4b5fd 50%,#8ab4ff);background-size:200% auto;
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  animation:logoShine 6s linear infinite, fadeUp .7s cubic-bezier(.22,1,.36,1) both;
+  filter:drop-shadow(0 0 24px rgba(110,168,255,.25));}
+@keyframes logoShine{to{background-position:200% center}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+#lockScreen .muted{font-size:13px;margin-bottom:12px;letter-spacing:.32em;opacity:.7;
+  animation:fadeUp .7s .1s cubic-bezier(.22,1,.36,1) both}
+#lockScreen .dots{gap:16px;margin:20px 0 24px;animation:fadeUp .7s .18s cubic-bezier(.22,1,.36,1) both}
+#lockScreen .dot{width:15px;height:15px;border-width:2px;
+  transition:all .25s cubic-bezier(.34,1.56,.64,1)}
+#lockScreen .dot.on{transform:scale(1.25);
+  background:linear-gradient(135deg,#6ea8ff,#a78bfa);border-color:transparent;
+  box-shadow:0 0 16px rgba(110,168,255,.6)}
+#lockScreen .dots.shake{animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+#lockScreen .pinpad{grid-template-columns:repeat(3,minmax(72px,84px));gap:14px;max-width:300px;
+  animation:fadeUp .7s .26s cubic-bezier(.22,1,.36,1) both}
+#lockScreen .pinpad button{max-width:84px;max-height:84px;font-size:27px;font-weight:500;
+  background:linear-gradient(145deg,#1a2030,#141926);
+  border:1px solid rgba(255,255,255,.08);color:#f5f6f8;
+  box-shadow:0 2px 12px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.06);
+  transition:transform .12s cubic-bezier(.34,1.56,.64,1), background .15s, box-shadow .15s;
+  position:relative;overflow:hidden}
+#lockScreen .pinpad button::after{content:"";position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.15),transparent 70%);
+  opacity:0;transition:opacity .15s}
+#lockScreen .pinpad button:active{transform:scale(.92);background:linear-gradient(145deg,#232b40,#1a2030);
+  box-shadow:0 0 20px rgba(110,168,255,.3)}
+#lockScreen .pinpad button:active::after{opacity:1}
+#lockScreen #lockAuthLinks{animation:fadeIn .8s .4s both}
+#lockScreen .forgot{transition:opacity .2s}
+#lockScreen .forgot:hover{opacity:1}
 #lockAuthLinks{margin-top:14px !important;gap:4px !important}
 #lockAuthLinks .forgot{margin:0 !important;padding:10px !important;min-height:40px !important;font-size:14px;opacity:.7}
 /* cards */
@@ -1214,6 +1245,12 @@ async function pinDone(){
     }
     const f=pinFailRecord();
     pinMsg(f.lockUntil>Date.now()?"Too many tries — wait 30s":"Wrong PIN — try again");
+    // Shake the dots for tactile wrong-PIN feedback
+    try{
+      const dots=document.querySelector("#lockScreen .dots");
+      if(dots){dots.classList.remove("shake");void dots.offsetWidth;dots.classList.add("shake");}
+      if(navigator.vibrate)navigator.vibrate(80);
+    }catch(e){}
   }
 }
 function unlock(){
