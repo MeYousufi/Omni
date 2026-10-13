@@ -389,17 +389,27 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <!-- WELCOME (first run) -->
 <div id="welcomeScreen" hidden>
   <div class="wrap" style="min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
-    <h1 style="font-size:46px;letter-spacing:.2em;margin:0 0 8px;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow))">OMNI</h1>
-    <div class="muted" style="letter-spacing:.1em;margin-bottom:24px">SHARE ONLY WHAT YOU CHOOSE</div>
-    <div class="box" style="text-align:left;max-width:340px">
-      <p>📇 <b>Create cards</b> for yourself or your business</p>
-      <p>🔐 <b>Lock them</b> behind your PIN — encrypted on this device</p>
-      <p>👆 <b>Share</b> via tap, QR, or straight to contacts</p>
+    <h1 style="font-size:52px;letter-spacing:.2em;margin:0 0 8px;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#a78bfa,#6ea8ff);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow));animation:shimmer 3s linear infinite">OMNI</h1>
+    <div class="muted" style="letter-spacing:.15em;margin-bottom:28px;font-size:13px">SHARE ONLY WHAT YOU CHOOSE</div>
+    <div style="display:flex;flex-direction:column;gap:12px;max-width:340px;width:100%;margin-bottom:24px">
+      <div class="glass" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;text-align:left">
+        <div style="font-size:28px">📇</div>
+        <div><b>Create cards</b><div class="muted" style="font-size:13px">For yourself or your business</div></div>
+      </div>
+      <div class="glass" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;text-align:left">
+        <div style="font-size:28px">🔐</div>
+        <div><b>Lock them</b><div class="muted" style="font-size:13px">Encrypted with your PIN</div></div>
+      </div>
+      <div class="glass" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;text-align:left">
+        <div style="font-size:28px">👆</div>
+        <div><b>Share</b><div class="muted" style="font-size:13px">Tap, QR, or straight to contacts</div></div>
+      </div>
     </div>
-    <button id="welcomeGo" style="margin-top:12px;padding:14px 40px;font-size:17px">Get started</button>
-    <button class="forgot" id="welcomeRestoreBtn" style="margin-top:10px">☁️ Already use OMNI? Restore my cards</button>
+    <button id="welcomeGo" style="margin-top:4px;padding:16px 48px;font-size:17px;border-radius:16px">Get started</button>
+    <button class="forgot" id="welcomeRestoreBtn" style="margin-top:12px">☁️ Already use OMNI? Restore my cards</button>
   </div>
 </div>
+<style>@keyframes shimmer{to{background-position:200% center}}</style>
 
 <!-- QUICK CREATE (first card, 3 steps) -->
 <div id="quickScreen" hidden>
@@ -657,6 +667,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <div id="moreShare" hidden style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
       <button id="vcfBtn" class="gray" style="width:100%">Save .vcf file</button>
       <button id="linkBtn" class="gray" style="width:100%">NFC / QR link</button>
+      <button id="walletBtn" class="gray" style="width:100%"> Add to Apple Wallet</button>
       <button id="nfcWriteBtn" class="gray" style="width:100%" hidden>📲 Write to NFC Tag</button>
       <button id="qrDlBtn" class="gray" style="width:100%" hidden>Save QR image</button>
     </div>
@@ -2715,7 +2726,9 @@ function renderCards(){
       d.style.zIndex=list.length-i;
       if(p.cover){d.style.backgroundImage=`url("${p.cover}")`;d.style.backgroundPosition=p.coverPos||"50% 50%";}
       else{const c=p.color||"#4f8cff";d.style.background=`linear-gradient(135deg,${c},#141824 130%)`;}
-      d.innerHTML=`<div class="wdim" aria-hidden="true"></div><div class="wbrand">OMNI</div><div class="wring" aria-hidden="true"></div>`+
+      const avatarHtml = p.photo ? `<div style="position:absolute;top:14px;left:16px;width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,.3);z-index:2"><img src="${esc(p.photo)}" style="width:100%;height:100%;object-fit:cover"></div>`
+        : (p.name ? `<div style="position:absolute;top:14px;left:16px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;border:2px solid rgba(255,255,255,.3);z-index:2">${esc(initials(p.name))}</div>` : '');
+      d.innerHTML=`<div class="wdim" aria-hidden="true"></div><div class="wbrand">OMNI</div>${avatarHtml}<div class="wring" aria-hidden="true"></div>`+
         `${(()=>{const tc=contrastText(p.color||"#4f8cff");return `<div class="wtext"><div class="wlabel" style="color:${tc}">${esc(p.label||"Untitled")}</div><div class="wname" style="color:${tc}">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div></div>`;})()}`;
       d.onclick=()=>{activeWallet=i;renderCards();haptic(10);};
       d.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();d.click();}};
@@ -2730,7 +2743,9 @@ function renderCards(){
     top.style.top="0px";top.style.zIndex=10;
     if(p.cover){top.style.backgroundImage=`url("${p.cover}")`;top.style.backgroundPosition=p.coverPos||"50% 50%";}
     else{const c=p.color||"#4f8cff";top.style.background=`linear-gradient(135deg,${c},#141824 130%)`;}
-    top.innerHTML=`<div class="wdim" aria-hidden="true"></div><div class="wbrand">OMNI</div><div class="wring" aria-hidden="true"></div>`+
+    const topAvatar = p.photo ? `<div style="position:absolute;top:14px;left:16px;width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,.3);z-index:2"><img src="${esc(p.photo)}" style="width:100%;height:100%;object-fit:cover"></div>`
+      : (p.name ? `<div style="position:absolute;top:14px;left:16px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;border:2px solid rgba(255,255,255,.3);z-index:2">${esc(initials(p.name))}</div>` : '');
+    top.innerHTML=`<div class="wdim" aria-hidden="true"></div><div class="wbrand">OMNI</div>${topAvatar}<div class="wring" aria-hidden="true"></div>`+
       `${(()=>{const tc=contrastText(p.color||"#4f8cff");return `<div class="wtext"><div class="wlabel" style="color:${tc}">${esc(p.label||"Untitled")}</div><div class="wname" style="color:${tc}">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div></div>`;})()}`;
     top.onclick=()=>openDetail(p.id);
     g.appendChild(top);
@@ -4026,6 +4041,9 @@ $("moreShareBtn").onclick=()=>{
   $("moreShareBtn").innerHTML=open?"More ways to share ▴":"More ways to share ▾";
 };
 $("vcfBtn").onclick=()=>{if(!consumeShare())return;stat("vcf");downloadVcf();};
+$("walletBtn").onclick=()=>{
+  toast("Apple Wallet passes coming soon — needs Apple Developer Pass certificate");
+};
 $("shareBtn").onclick=async()=>{if(!consumeShare())return;haptic(10);
   stat("share");
   const file=new File([vcard(chosen(),curPic())],"OMNI.vcf",{type:"text/vcard"});
