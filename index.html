@@ -631,7 +631,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <div class="vhint" id="v_urls"></div>
     <textarea id="f_address" placeholder="Address"></textarea>
     <textarea id="f_notes" placeholder="Notes (not shared by default)"></textarea>
-    <div class="colorrow"><span class="muted">Card color</span><input type="color" id="f_color" value="#4f8cff"></div>
+    <div class="colorrow"><span class="muted">Card color</span><input type="color" id="f_color" value="#f5a623"></div>
     <div class="rowbtns">
       <button id="dupBtn" class="gray">Duplicate</button>
     </div>
@@ -2749,11 +2749,11 @@ function renderCards(){
       d.style.top=(i*PEEK)+"px";
       d.style.zIndex=list.length-i;
       if(p.cover){d.style.backgroundImage=`url("${p.cover}")`;d.style.backgroundPosition=p.coverPos||"50% 50%";}
-      else{const c=p.color||"#4f8cff";d.style.background=`linear-gradient(135deg,${c},#141824 130%)`;}
+      else{const c=p.color||"#f5a623";d.style.background=`linear-gradient(135deg,${c},#141824 130%)`;}
       const avatarHtml = p.photo ? `<div style="position:absolute;top:14px;left:16px;width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,.3);z-index:2"><img src="${esc(p.photo)}" style="width:100%;height:100%;object-fit:cover"></div>`
         : (p.name ? `<div style="position:absolute;top:14px;left:16px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;border:2px solid rgba(255,255,255,.3);z-index:2">${esc(initials(p.name))}</div>` : '');
       d.innerHTML=`<div class="wdim" aria-hidden="true"></div><div class="wbrand">OMNI</div>${avatarHtml}<div class="wring" aria-hidden="true"></div>`+
-        `${(()=>{const tc=contrastText(p.color||"#4f8cff");return `<div class="wtext"><div class="wlabel" style="color:${tc}">${esc(p.label||"Untitled")}</div><div class="wname" style="color:${tc}">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div></div>`;})()}`;
+        `${(()=>{const tc=contrastText(p.color||"#f5a623");return `<div class="wtext"><div class="wlabel" style="color:${tc}">${esc(p.label||"Untitled")}</div><div class="wname" style="color:${tc}">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div></div>`;})()}`;
       d.onclick=()=>{activeWallet=i;renderCards();haptic(10);};
       d.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();d.click();}};
       g.appendChild(d);
@@ -2766,11 +2766,11 @@ function renderCards(){
     top.className="wcard active";
     top.style.top="0px";top.style.zIndex=10;
     if(p.cover){top.style.backgroundImage=`url("${p.cover}")`;top.style.backgroundPosition=p.coverPos||"50% 50%";}
-    else{const c=p.color||"#4f8cff";top.style.background=`linear-gradient(135deg,${c},#141824 130%)`;}
+    else{const c=p.color||"#f5a623";top.style.background=`linear-gradient(135deg,${c},#141824 130%)`;}
     const topAvatar = p.photo ? `<div style="position:absolute;top:14px;left:16px;width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,.3);z-index:2"><img src="${esc(p.photo)}" style="width:100%;height:100%;object-fit:cover"></div>`
       : (p.name ? `<div style="position:absolute;top:14px;left:16px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;border:2px solid rgba(255,255,255,.3);z-index:2">${esc(initials(p.name))}</div>` : '');
     top.innerHTML=`<div class="wdim" aria-hidden="true"></div><div class="wbrand">OMNI</div>${topAvatar}<div class="wring" aria-hidden="true"></div>`+
-      `${(()=>{const tc=contrastText(p.color||"#4f8cff");return `<div class="wtext"><div class="wlabel" style="color:${tc}">${esc(p.label||"Untitled")}</div><div class="wname" style="color:${tc}">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div></div>`;})()}`;
+      `${(()=>{const tc=contrastText(p.color||"#f5a623");return `<div class="wtext"><div class="wlabel" style="color:${tc}">${esc(p.label||"Untitled")}</div><div class="wname" style="color:${tc}">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div></div>`;})()}`;
     top.onclick=()=>openDetail(p.id);
     g.appendChild(top);
     // detail panel (business card version of "Latest Transactions")
@@ -2810,7 +2810,7 @@ $("fabPlus").onclick=()=>{
     showUpgrade(`You've reached your ${lim} card limit`,`Upgrade to ${effectiveTier()==="free"?"Pro":"Premium"} for ${effectiveTier()==="free"?"12 cards":"unlimited cards"}.`);
     return;
   }
-  const p={id:Date.now(),label:"",name:"",org:"",phones:"",emails:"",urls:"",address:"",notes:"",pic:"",picPos:"50% 50%",cover:"",coverPos:"50% 50%",coverColor:"",color:"#4f8cff",_draft:true};
+  const p={id:Date.now(),label:"",name:"",org:"",phones:"",emails:"",urls:"",address:"",notes:"",pic:"",picPos:"50% 50%",cover:"",coverPos:"50% 50%",coverColor:"",color:"#f5a623",_draft:true};
   profiles.push(p);curId=p.id;openDetail(p.id);
 };
 function openDetail(id,toShare){
@@ -2862,7 +2862,7 @@ function renderFlip(){
   }
   // back: solid color only (no photo) — Naweed's design
   fb.style.backgroundImage="";
-  fb.style.background=p.color||p.coverColor||"#4f8cff";
+  fb.style.background=p.color||p.coverColor||"#f5a623";
   fb.style.borderColor=p.coverColor||"";
   let back="";
   if(p.title)back+=`<div class="flabel">${esc(p.title)}</div>`;
@@ -2876,7 +2876,7 @@ function fillDetail(){
   const p=getP();if(!p)return;
   $("detailTitle").textContent=p.label||"New card";
   ["label","name","org","phones","emails","urls","address","notes"].forEach(k=>$("f_"+k).value=p[k]||"");
-  $("f_color").value=p.color||"#4f8cff";
+  $("f_color").value=p.color||"#f5a623";
   renderPic();
   renderCover();
   renderFlip();
