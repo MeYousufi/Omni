@@ -698,7 +698,8 @@ export default {
           return json({ error: "password must be 8+ characters" }, 400);
         await kv.put("owner:hash", await sha256hex("omni-owner:" + pw));
         const token = genId(32);
-        await kv.put("owner:token:" + token, "1", { expirationTtl: 86400 });
+        const curGen = (await kv.get("owner:gen")) || "0";
+        await kv.put("owner:token:" + token, curGen, { expirationTtl: 86400 });
         return json({ ok: true, token });
       }
 
@@ -712,7 +713,8 @@ export default {
         if (pwHash.length !== hash.length || pwHash !== hash)
           return json({ ok: false });
         const token = genId(32);
-        await kv.put("owner:token:" + token, "1", { expirationTtl: 86400 });
+        const curGen = (await kv.get("owner:gen")) || "0";
+        await kv.put("owner:token:" + token, curGen, { expirationTtl: 86400 });
         return json({ ok: true, token });
       }
 
