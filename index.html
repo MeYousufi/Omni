@@ -532,8 +532,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <button class="navitem" id="navDash"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg></span>Dashboard</button>
     <button class="navitem" id="navOwner"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18h18"/><path d="M4 18l-1.5-9L7 12l5-7 5 7 4.5-3L20 18"/></svg></span>Owner controls</button>
     <button class="navitem" id="navBackup"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg></span>Back up</button>
-    <button class="navitem" id="navConnect"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span>Connect</button>
-    <button class="navitem" id="navLock"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>Lockout</button>
+    <button class="navitem" id="navLock"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>Lock</button>
   </aside>
 </div>
 
@@ -543,7 +542,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <h3 class="sec" style="margin-top:0">Share <span id="presentCardName"></span></h3>
     <div id="presentQr"></div>
     <p class="muted" id="presentEmpty" hidden style="text-align:center">Add contact info to this card before sharing.</p>
-    <button id="presentShareSys" style="width:100%;padding:15px;font-size:17px">Share…</button>
+    <button id="presentShareSys" style="width:100%;padding:15px;font-size:17px">Share via…</button>
     <button id="presentVcf" class="gray" style="width:100%;margin-top:8px">Save .vcf file</button>
     <button id="presentCopyLink" class="gray" style="width:100%;margin-top:8px">Copy link</button>
     <button id="presentNfc" class="gray" style="width:100%;margin-top:8px" hidden>Write to NFC tag</button>
@@ -665,7 +664,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <div id="qr"></div>
     <p class="muted" id="nfcNote" hidden style="text-align:center"></p>
     <div id="creditBar" class="creditbar" hidden></div>
-    <button id="shareBtn" style="width:100%;padding:15px;font-size:17px">Share…</button>
+    <button id="shareBtn" style="width:100%;padding:15px;font-size:17px">Share via…</button>
     <button id="moreShareBtn" class="gray small" style="width:100%;margin-top:8px" aria-expanded="false">More ways to share ▾</button>
     <div id="moreShare" hidden style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
       <button id="vcfBtn" class="gray" style="width:100%">Save .vcf file</button>
@@ -727,7 +726,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <div class="backrow"><button class="iconbtn" id="ownerBack" aria-label="Back to cards">← Back</button></div>
   <div class="brand"><h1>Owner controls</h1></div>
 <div class="box" id="ownerBox">
-    <h3 class="sec" style="margin-top:0">Owner controls</h3>
     <p class="muted" style="font-size:12px;margin-top:0">Owner password is separate from your card PIN — it unlocks these controls only.</p>
     <div id="ownerLocked">
       <p class="muted">Restricted area.</p>
@@ -788,9 +786,9 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <div class="togglerow"><span>Pro price ($/mo)</span><input id="setProPrice" type="number" min="0.99" max="999" step="0.01" style="width:90px" aria-label="Pro monthly price"></div>
       <div class="togglerow"><span>Premium price ($/mo)</span><input id="setPremPrice" type="number" min="0.99" max="999" step="0.01" style="width:90px" aria-label="Premium monthly price"></div>
       <div class="togglerow"><span>Tokens per invite</span><input id="setTokensPerInvite" type="number" min="1" max="10000" style="width:90px" aria-label="Tokens earned per invite"></div>
-      <div class="togglerow"><span>Aurora template (🪙)</span><input id="setTplAurora" type="number" min="1" max="100000" style="width:90px" aria-label="Aurora template token price"></div>
-      <div class="togglerow"><span>Obsidian Gold (🪙)</span><input id="setTplObsidian" type="number" min="1" max="100000" style="width:90px" aria-label="Obsidian template token price"></div>
-      <div class="togglerow"><span>Royale template (🪙)</span><input id="setTplRoyale" type="number" min="1" max="100000" style="width:90px" aria-label="Royale template token price"></div>
+      <div class="togglerow"><span>Aurora template </span><input id="setTplAurora" type="number" min="1" max="100000" style="width:90px" aria-label="Aurora template token price"></div>
+      <div class="togglerow"><span>Obsidian Gold </span><input id="setTplObsidian" type="number" min="1" max="100000" style="width:90px" aria-label="Obsidian template token price"></div>
+      <div class="togglerow"><span>Royale template </span><input id="setTplRoyale" type="number" min="1" max="100000" style="width:90px" aria-label="Royale template token price"></div>
       <button class="small" id="savePricingBtn" style="width:100%;margin:4px 0 12px">Save pricing</button>
       <p class="muted" id="pricingMsg" style="font-size:12px"></p>
       <h3 class="sec">Test plans</h3>
@@ -879,7 +877,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <div class="wrap" id="dashScreen" hidden>
   <div class="backrow"><button class="iconbtn" id="dashBack">← Back</button></div>
   <div class="brand"><h1>Dashboard</h1></div>
-  <div class="muted" style="letter-spacing:.08em;font-size:11px">HOW YOUR APP IS DOING</div>
+  <div class="muted" style="letter-spacing:.08em;font-size:11px">YOUR ACCOUNT</div>
     <details class="dashgroup" id="dgAccount">
     <summary><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg></span><span>My account</span></summary>
 <div class="box" id="planBox">
@@ -921,7 +919,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <input id="inviteLink" readonly style="flex:1;margin:0" aria-label="Your invite code">
       <button class="small" id="copyInvite" style="flex:none">Copy</button>
     </div>
-    <button class="small gray" id="shareInviteBtn" style="width:100%;margin-top:8px">Share invite link…</button>
+    <button class="small gray" id="shareInviteBtn" style="width:100%;margin-top:8px">Share invite link</button>
   </div>
 <div class="box" id="redeemBox">
     <h3 class="sec" style="margin-top:0">Redeem referral code</h3>
@@ -974,8 +972,8 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <div class="box">
     <h3 class="sec" style="margin-top:0">FAQ</h3>
     <details style="margin:8px 0"><summary style="font-size:14px">How do I share my card?</summary><p class="muted" style="font-size:13px">Tap "Share my card" on the home screen, or open a card and use the Share button. The other person gets your contact details instantly.</p></details>
-    <details style="margin:8px 0"><summary style="font-size:14px">How do invites work?</summary><p class="muted" style="font-size:13px">Share your invite code from Dashboard → Sharing. Your friend gets 7 days of Pro free, and you earn 100 tokens per friend.</p></details>
-    <details style="margin:8px 0"><summary style="font-size:14px">What are tokens for?</summary><p class="muted" style="font-size:13px">Tokens unlock premium card designs (Aurora, Obsidian Gold, Royale) under Dashboard → Sharing → Premium designs.</p></details>
+    <details style="margin:8px 0"><summary style="font-size:14px">How do invites work?</summary><p class="muted" style="font-size:13px">Share your invite code from Dashboard → Invite friends → Premium designs. Your friend gets 7 days of Pro free, and you earn 100 tokens per friend.</p></details>
+    <details style="margin:8px 0"><summary style="font-size:14px">What are tokens for?</summary><p class="muted" style="font-size:13px">Tokens unlock premium card designs (Aurora, Obsidian Gold, Royale) under Dashboard → Invite friends → Premium designs.</p></details>
     <details style="margin:8px 0"><summary style="font-size:14px">Is my data private?</summary><p class="muted" style="font-size:13px">Yes. Everything is encrypted on your phone with your PIN before it's stored or synced. We can't read your data.</p></details>
     <div class="statrow" style="margin-top:8px"><span>App version</span><b id="helpAppVer">1.0</b></div>
   </div>
@@ -988,13 +986,13 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <p class="muted" style="font-size:13px"><b>What we collect:</b> OMNI encrypts all your card data on your device with your PIN before storage or sync. We never see your PIN, your cards, or your contacts. When you use Cloud Sync, we store only the encrypted blob — we cannot decrypt it.</p>
     <p class="muted" style="font-size:13px"><b>Analytics:</b> We collect anonymous aggregate counts (total users, cards created) via our stats service. No personal identifiers are attached. If you use a referral code, we store the code mapping to award tokens — this is the only account-linked data we hold.</p>
     <p class="muted" style="font-size:13px"><b>Data retention:</b> Your encrypted data stays on our servers until you delete your account or disable Cloud Sync. Anonymous analytics are retained indefinitely in aggregate form.</p>
-    <p class="muted" style="font-size:13px"><b>Your rights (GDPR/CCPA):</b> You can export your data anytime (Back up → Download). You can delete your account and all cloud data from Data controls → Delete account. Contact us at hello@omni-tap.com for data requests.</p>
+    <p class="muted" style="font-size:13px"><b>Your rights (GDPR/CCPA):</b> You can export your data anytime (Back up → Export my data). You can delete your account and all cloud data from Data controls → Delete account. Contact us at hello@omni-tap.com for data requests.</p>
     <p class="muted" style="font-size:13px"><b>Contact:</b> hello@omni-tap.com</p>
     <p class="muted" style="font-size:13px">Full policy: <a href="https://omni-tap.com/privacy.html" target="_blank" style="color:var(--accent)">omni-tap.com/privacy.html</a></p>
     <h3 class="sec" style="margin-top:12px">Terms of Service</h3>
     <p class="muted" style="font-size:13px"><b>Last updated: October 11, 2026</b></p>
     <p class="muted" style="font-size:13px">OMNI is provided as-is. You're responsible for keeping your PIN safe — if you forget it and have no backup or recovery key, your data can't be recovered.</p>
-    <p class="muted" style="font-size:13px"><b>Subscriptions:</b> Pro ($4.99/month) and Premium ($9.99/month) are billed via Apple App Store or Google Play. Subscriptions auto-renew unless cancelled at least 24 hours before the current period ends. Manage or cancel in your App Store/Play Store account settings. Tokens have no cash value and are non-refundable except as required by law.</p>
+    <p class="muted" style="font-size:13px"><b>Subscriptions:</b> Pro ($4.99/month) and Premium ($9.99/month) are billed via the app store on your device. Subscriptions auto-renew unless cancelled at least 24 hours before the current period ends. Manage or cancel in your App Store/Play Store account settings. Tokens have no cash value and are non-refundable except as required by law.</p>
     <p class="muted" style="font-size:13px"><b>Acceptable use:</b> Don't use OMNI for spam, harassment, fraud, or illegal activity. We may suspend accounts that violate this.</p>
     <p class="muted" style="font-size:13px"><b>Governing law:</b> These terms are governed by the laws of the State of Kansas, USA.</p>
     <p class="muted" style="font-size:13px"><b>Contact:</b> hello@omni-tap.com</p>
@@ -1006,6 +1004,17 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 const $=id=>document.getElementById(id);
+function formatPhone(p){
+  if(!p) return p;
+  const d=String(p).replace(/\D/g,"");
+  if(d.length===10) return "("+d.slice(0,3)+") "+d.slice(3,6)+"-"+d.slice(6);
+  if(d.length===11&&d[0]==="1") return "+1 ("+d.slice(1,4)+") "+d.slice(4,7)+"-"+d.slice(7);
+  return p;
+}
+function properCase(s){
+  if(!s) return s;
+  return String(s).toLowerCase().replace(/\b\w/g,ch=>ch.toUpperCase());
+}
 const PUBLIC_URL="https://omni-tap.com/";
 const STATS_URL="https://omni-stats.mny2199wellness.workers.dev";
 // Owner auth is password-based now; token stored in memory after login.
@@ -2379,17 +2388,18 @@ function checkTrialExpired(){
 function planCardHTML(tier){
   const d=PLAN_DEFS[tier], cur=effectiveTier()===tier;
   const price=tier==="pro"?proPrice():tier==="premium"?premiumPrice():0;
+  const priceStr=price?("$"+Number(price).toFixed(2)+"/mo"):"Free";
   const feats=tier==="free"
     ? ["Unlimited shares","3 cards (7 after first invite)","Profile picture + logo"]
     : tier==="pro"
     ? ["Unlimited shares","12 cards","Everything allowed","All premium templates","Email signature"]
     : ["Unlimited shares","Unlimited cards","Advanced analytics","Custom branding","Priority support"];
   return `<div style="border:1px solid ${cur?"#0a84ff":"var(--line)"};border-radius:14px;padding:14px;background:${cur?"#0a84ff18":"transparent"}">
-    <div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:17px">${d.name}</b><b style="font-size:17px">${price?"$"+price+"/mo":"Free"}</b></div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:17px">${d.name}</b><b style="font-size:17px">${priceStr}</b></div>
     <div style="font-size:13px;color:var(--muted);margin:8px 0">${feats.map(f=>"✓ "+f).join("<br>")}</div>
     ${cur?`<div style="color:#0a84ff;font-weight:700">Current plan</div>`
       : tier==="free"?`<div class="muted" style="font-size:12px">Included</div>`
-      : `<button class="small" style="width:100%" onclick="subscribePlan('${tier}')">Choose ${d.name} — $${price}/mo</button>`}
+      : `<button class="small" style="width:100%" onclick="subscribePlan('${tier}')">Choose ${d.name} — ${priceStr}</button>`}
   </div>`;
 }
 function showUpgrade(title,sub){
@@ -2789,12 +2799,12 @@ function renderCards(){
     panel.className="wdetail";
     panel.style.top=(FULL+12)+"px";
     let rows="";
-    lines(p.phones).forEach(v=>rows+=`<a class="wrow" href="tel:${esc(v.replace(/\s/g,""))}"><span class="wico">📞</span><span><b>Call</b><i>${esc(v)}</i></span><span class="wchev">›</span></a>`);
+    lines(p.phones).forEach(v=>rows+=`<a class="wrow" href="tel:${esc(v.replace(/\s/g,""))}"><span class="wico">📞</span><span><b>Call</b><i>${esc(formatPhone(v))}</i></span><span class="wchev">›</span></a>`);
     lines(p.emails).forEach(v=>rows+=`<a class="wrow" href="mailto:${esc(v)}"><span class="wico">✉️</span><span><b>Email</b><i>${esc(v)}</i></span><span class="wchev">›</span></a>`);
     let socialBtns="";
     lines(p.urls).forEach(v=>{const u=/^https?:/i.test(v)?v:"https://"+v;const sb=socialButton(u);if(sb){socialBtns+=sb;}else{rows+=`<a class="wrow" href="${esc(u)}" target="_blank" rel="noopener"><span class="wico">🌐</span><span><b>Website</b><i>${esc(v)}</i></span><span class="wchev">›</span></a>`;}});
     if(socialBtns)rows+=`<div class="wrow" style="flex-wrap:wrap;gap:4px"><span class="wico">🔗</span><span style="flex:1;min-width:200px"><b>Links</b><br>${socialBtns}</span></div>`;
-    if(p.address)rows+=`<div class="wrow"><span class="wico">📍</span><span><b>Address</b><i>${esc(p.address)}</i></span></div>`;
+    if(p.address)rows+=`<a class="wrow" href="https://maps.google.com/?q=${encodeURIComponent(p.address)}" target="_blank" rel="noopener"><span class="wico">📍</span><span><b>Address</b><i>${esc(properCase(p.address))}</i></span><span class="wchev">›</span></a>`;
     if(p.notes)rows+=`<div class="wrow"><span class="wico">📝</span><span><b>Notes</b><i>${esc(p.notes)}</i></span></div>`;
     panel.innerHTML=`<div class="wdetail-head"><b>Contact details</b><button class="wclose" aria-label="Back to cards">✕</button></div>`+
       (rows||`<p class="muted" style="padding:12px">No contact info yet.</p>`)+
@@ -3080,7 +3090,13 @@ function readFields(){
   const p=getP();if(!p)return;
   ["label","name","org","phones","emails","urls","address","notes"].forEach(k=>p[k]=$("f_"+k).value.trim());
   p.color=$("f_color").value;
-  if(!p.label)p.label=p.name||"Untitled";
+  // Require a name — don't allow nameless "Untitled" cards
+  if(!p.label&&!p.name){
+    toast("Please add a name for this card");
+    try{$("f_name").focus();}catch(e){}
+    return;
+  }
+  if(!p.label)p.label=p.name;
   // auto-detect primary contact method if not set (for safe share defaults)
   if(!p.primary){
     if(lines(p.phones).length)p.primary="phones";
@@ -3775,7 +3791,6 @@ try{
   if(!ownerEnabled){$("navOwner").style.display="none";}
 }catch(e){}
 $("navBackup").onclick=()=>{closeNavMenu();openBackup();};
-$("navConnect").onclick=()=>{closeNavMenu();window.location.href="mailto:hello@omni-tap.com?subject=OMNI%20Question";};
 $("navLock").onclick=()=>{closeNavMenu();$("lockBtn").onclick();};
 
 /* ---------- profile view ---------- */
