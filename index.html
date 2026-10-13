@@ -749,20 +749,31 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
         <button class="small gray" id="chPwBtn" style="width:100%;margin-top:8px">Change password</button>
       </div>
       <div style="margin-bottom:12px;padding:12px;border:1px solid var(--line);border-radius:12px">
-        <div style="font-size:14px;font-weight:700;margin-bottom:8px">Liquid Glass <span class="muted" style="font-weight:400;font-size:12px">— how glossy the app looks</span></div>
-        <div style="background:#1e2536;border-radius:20px;padding:14px 18px;display:flex;align-items:center;gap:14px">
-          <span style="font-size:20px;opacity:.5">◐</span>
-          <input type="range" id="glassSlider" min="0" max="100" value="60" step="1" aria-label="Glass intensity"
-            style="flex:1;-webkit-appearance:none;appearance:none;height:6px;border-radius:3px;background:linear-gradient(90deg,#6ea8ff,#a78bfa);outline:none">
-          <span style="font-size:20px">◑</span>
+        <div style="font-size:14px;font-weight:700;margin-bottom:10px">Liquid Glass</div>
+        <div id="glassPill" style="background:#2c2c2e;border-radius:28px;padding:16px 20px;display:flex;align-items:center;gap:16px;position:relative">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="#8e8e93" stroke-width="2.5" opacity=".7">
+            <rect x="4" y="8" width="18" height="18" rx="5"/><rect x="14" y="12" width="18" height="18" rx="5"/>
+          </svg>
+          <div style="flex:1;position:relative;height:36px;display:flex;align-items:center">
+            <div style="position:absolute;left:0;right:0;height:8px;border-radius:4px;background:#48484a"></div>
+            <div id="glassTick1" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:5px;height:5px;border-radius:50%;background:#636366"></div>
+            <div id="glassTick2" style="position:absolute;left:75%;top:50%;transform:translate(-50%,-50%);width:5px;height:5px;border-radius:50%;background:#636366"></div>
+            <input type="range" id="glassSlider" min="0" max="100" value="60" step="1" aria-label="Glass intensity"
+              style="position:absolute;left:0;right:0;width:100%;-webkit-appearance:none;appearance:none;height:36px;background:transparent;outline:none;margin:0;cursor:pointer">
+          </div>
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="#8e8e93" opacity=".7">
+            <rect x="4" y="8" width="18" height="18" rx="5"/><rect x="14" y="12" width="18" height="18" rx="5"/>
+          </svg>
         </div>
-        <div class="muted" style="font-size:12px;margin-top:6px;text-align:center" id="glassLabel">Clear is more transparent and tinted</div>
+        <div class="muted" style="font-size:13px;margin-top:10px" id="glassLabel">Clear is more transparent and tinted</div>
       </div>
       <style>
-        #glassSlider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;border-radius:50%;
-          background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.4);cursor:pointer;border:none}
-        #glassSlider::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#fff;
-          box-shadow:0 2px 12px rgba(0,0,0,.4);cursor:pointer;border:none}
+        #glassSlider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:52px;height:36px;border-radius:18px;
+          background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.35);cursor:pointer;border:none}
+        #glassSlider::-moz-range-thumb{width:52px;height:36px;border-radius:18px;background:#fff;
+          box-shadow:0 2px 10px rgba(0,0,0,.35);cursor:pointer;border:none}
+        #glassSlider::-webkit-slider-runnable-track{background:transparent}
+        #glassSlider::-moz-range-track{background:transparent}
       </style>
       <h3 class="sec">Plans & pricing</h3>
       <p class="muted" style="font-size:12px">Adjust live — changes apply app-wide on next open.</p>
@@ -1988,6 +1999,14 @@ const _snb=$("saveNumbersBtn");if(_snb)_snb.onclick=()=>{toast("Removed — plan
     try{
       const r=await fetch(STATS_URL+"/api/flags",{method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({owner_token:OWNER_TOKEN,flags:{glassLevel:v}})});
+      if(r.status===403){
+        // Stale token — clear and prompt for owner password again
+        try{sessionStorage.removeItem("omni_owner_token");localStorage.removeItem("omni_owner_unlocked");}catch(e){}
+        OWNER_TOKEN=null;
+        toast("Session expired — enter owner password again");
+        setTimeout(()=>{try{location.reload();}catch(e){}},1200);
+        return;
+      }
       const j=await r.json();
       if(j&&j.ok){FLAGS=Object.assign({},FLAGS,j.flags);toast("Glass saved");}
       else toast("Failed to save");
