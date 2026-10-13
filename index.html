@@ -389,17 +389,27 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <!-- WELCOME (first run) -->
 <div id="welcomeScreen" hidden>
   <div class="wrap" style="min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
-    <h1 style="font-size:46px;letter-spacing:.2em;margin:0 0 8px;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow))">OMNI</h1>
-    <div class="muted" style="letter-spacing:.1em;margin-bottom:24px">SHARE ONLY WHAT YOU CHOOSE</div>
-    <div class="box" style="text-align:left;max-width:340px">
-      <p>📇 <b>Create cards</b> for yourself or your business</p>
-      <p>🔐 <b>Lock them</b> behind your PIN — encrypted on this device</p>
-      <p>👆 <b>Share</b> via tap, QR, or straight to contacts</p>
+    <h1 style="font-size:52px;letter-spacing:.2em;margin:0 0 8px;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#a78bfa,#6ea8ff);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow));animation:shimmer 3s linear infinite">OMNI</h1>
+    <div class="muted" style="letter-spacing:.15em;margin-bottom:28px;font-size:13px">SHARE ONLY WHAT YOU CHOOSE</div>
+    <div style="display:flex;flex-direction:column;gap:12px;max-width:340px;width:100%;margin-bottom:24px">
+      <div class="glass" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;text-align:left">
+        <div style="font-size:28px">📇</div>
+        <div><b>Create cards</b><div class="muted" style="font-size:13px">For yourself or your business</div></div>
+      </div>
+      <div class="glass" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;text-align:left">
+        <div style="font-size:28px">🔐</div>
+        <div><b>Lock them</b><div class="muted" style="font-size:13px">Encrypted with your PIN</div></div>
+      </div>
+      <div class="glass" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;text-align:left">
+        <div style="font-size:28px">👆</div>
+        <div><b>Share</b><div class="muted" style="font-size:13px">Tap, QR, or straight to contacts</div></div>
+      </div>
     </div>
-    <button id="welcomeGo" style="margin-top:12px;padding:14px 40px;font-size:17px">Get started</button>
-    <button class="forgot" id="welcomeRestoreBtn" style="margin-top:10px">☁️ Already use OMNI? Restore my cards</button>
+    <button id="welcomeGo" style="margin-top:4px;padding:16px 48px;font-size:17px;border-radius:16px">Get started</button>
+    <button class="forgot" id="welcomeRestoreBtn" style="margin-top:12px">☁️ Already use OMNI? Restore my cards</button>
   </div>
 </div>
+<style>@keyframes shimmer{to{background-position:200% center}}</style>
 
 <!-- QUICK CREATE (first card, 3 steps) -->
 <div id="quickScreen" hidden>
@@ -434,16 +444,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 </div>
 
 <!-- BACKUP PROMPT (after first save) -->
-<div id="backupPrompt" class="modal" hidden role="dialog" aria-label="Back up your card">
-  <div class="box">
-    <h3 class="sec" style="margin-top:0">Save your recovery key</h3>
-    <p>If you forget your PIN, this key is the <b>only</b> way to get your cards back. Write it down and keep it somewhere safe — not on this phone.</p>
-    <div id="recoveryKeyDisplay" style="font-family:monospace;font-size:15px;letter-spacing:1px;background:#1a1e26;border:1px dashed var(--accent);border-radius:12px;padding:16px;margin:12px 0;text-align:center;word-break:break-all;user-select:all"></div>
-    <button id="rkCopy" style="width:100%" class="gray">Copy key</button>
-    <button id="bpNow" style="width:100%;margin-top:8px">Back up now</button>
-    <button id="bpLater" class="gray" style="width:100%;margin-top:8px">I've saved it — continue</button>
-  </div>
-</div>
+
 
 <!-- LOCK -->
 <div id="lockScreen" hidden>
@@ -531,7 +532,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <button class="navitem" id="navProfile"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg></span>Profile</button>
     <button class="navitem" id="navDash"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg></span>Dashboard</button>
     <button class="navitem" id="navOwner"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18h18"/><path d="M4 18l-1.5-9L7 12l5-7 5 7 4.5-3L20 18"/></svg></span>Owner controls</button>
-    <button class="navitem" id="navBackup"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg></span>Back up</button>
     <button class="navitem" id="navLock"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>Lock</button>
   </aside>
 </div>
@@ -574,12 +574,10 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 
 <!-- HOME -->
 <div class="wrap" id="homeScreen" hidden>
-  <div class="brand"><h1>OMNI</h1><div><button class="iconbtn" id="menuBtn" aria-label="Open menu" aria-haspopup="true">☰</button><span id="legacyHeaderBtns" style="display:none"><button class="iconbtn small" id="ownerBtn" aria-label="Owner controls">👑</button><button class="iconbtn small" id="dashBtn" aria-label="Open dashboard">📊</button><button class="iconbtn small" id="backupBtn" aria-label="Back up cards">Back up</button><button class="iconbtn" id="lockBtn" aria-label="Lockout">Lock</button></span></div></div>
+  <div class="brand"><h1>OMNI</h1><div><button class="iconbtn" id="menuBtn" aria-label="Open menu" aria-haspopup="true">☰</button><span id="legacyHeaderBtns" style="display:none"><button class="iconbtn small" id="ownerBtn" aria-label="Owner controls">👑</button><button class="iconbtn small" id="dashBtn" aria-label="Open dashboard">📊</button><button class="iconbtn" id="lockBtn" aria-label="Lockout">Lock</button></span></div></div>
   <button id="presentShareBtn" class="present-share" aria-label="Share your card now">Share my card</button>
   <div id="offlineBar" class="box" hidden style="border-color:#7a5a2b;text-align:center;padding:10px">📴 Offline — you can view and share saved cards.<br><span class="muted">Backing up and cloud stats need internet.</span></div>
   <div id="backupNudge" class="box" hidden style="border-color:#7a5a2b;background:linear-gradient(160deg,#1d1812,#14110c)">
-    <span id="backupNudgeText">💾 Back up your cards to keep them safe.</span><br>
-    <button class="small" id="nudgeBackup" style="margin-top:8px">Back up now</button>
     <button class="small gray" id="nudgeDismiss">Later</button>
   </div>
   <div id="memNudgeBox"></div>
@@ -669,6 +667,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <div id="moreShare" hidden style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
       <button id="vcfBtn" class="gray" style="width:100%">Save .vcf file</button>
       <button id="linkBtn" class="gray" style="width:100%">NFC / QR link</button>
+      <button id="walletBtn" class="gray" style="width:100%"> Add to Apple Wallet</button>
       <button id="nfcWriteBtn" class="gray" style="width:100%" hidden>📲 Write to NFC Tag</button>
       <button id="qrDlBtn" class="gray" style="width:100%" hidden>Save QR image</button>
     </div>
@@ -837,42 +836,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   </div>
 </div>
 <!-- BACK UP -->
-<div class="wrap" id="backupScreen" hidden>
-  <div class="backrow"><button class="iconbtn" id="backupBack" aria-label="Back to cards">← Back</button></div>
-  <div class="brand"><h1>Back up</h1></div>
-<div class="box" id="syncBox">
-    <h3 class="sec" style="margin-top:0">Cloud Sync</h3>
-    <p class="muted" id="syncStatus">Keep your cards safe and in sync across all your browsers and devices. Your data stays encrypted — only your PIN can unlock it.</p>
-    <div id="syncOff">
-      <button class="small" id="syncEnableBtn" style="width:100%">Enable Cloud Sync</button>
-      <div style="margin-top:12px">
-        <p class="muted" style="margin-bottom:6px">Already have a Sync ID from another device?</p>
-        <div style="display:flex;gap:8px">
-          <input id="syncLinkInput" placeholder="OMNI-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters" style="flex:1;margin:0" aria-label="Sync ID">
-          <button class="small gray" id="syncLinkBtn" style="flex:none">Link</button>
-        </div>
-      </div>
-    </div>
-    <div id="syncOn" hidden>
-      <div class="statrow"><span>🔑 Sync ID</span><b id="syncIdDisplay" style="font-family:monospace"></b></div>
-      <div class="statrow"><span>🕐 Last synced</span><b id="syncLastDisplay">—</b></div>
-      <p class="muted" style="font-size:12px">Write down your Sync ID — it's the only way to link a new device.</p>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="small" id="syncNowBtn" style="flex:1">Sync now</button>
-        <button class="small gray" id="syncDisableBtn" style="flex:1">Disable</button>
-      </div>
-      <p class="muted" id="syncMsg" style="text-align:center"></p>
-    </div>
-  </div>
-<div class="box" id="fileBackupBox">
-    <h3 class="sec" style="margin-top:0">File backup</h3>
-    <p class="muted">Download an encrypted copy of your cards, or import one.</p>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button class="small" id="fileDownloadBtn" style="flex:1">Download backup</button>
-      <button class="small gray" id="fileImportBtn" style="flex:1">Import backup</button>
-    </div>
-  </div>
-</div>
 <!-- DASHBOARD -->
 <div class="wrap" id="dashScreen" hidden>
   <div class="backrow"><button class="iconbtn" id="dashBack">← Back</button></div>
@@ -986,7 +949,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <p class="muted" style="font-size:13px"><b>What we collect:</b> OMNI encrypts all your card data on your device with your PIN before storage or sync. We never see your PIN, your cards, or your contacts. When you use Cloud Sync, we store only the encrypted blob — we cannot decrypt it.</p>
     <p class="muted" style="font-size:13px"><b>Analytics:</b> We collect anonymous aggregate counts (total users, cards created) via our stats service. No personal identifiers are attached. If you use a referral code, we store the code mapping to award tokens — this is the only account-linked data we hold.</p>
     <p class="muted" style="font-size:13px"><b>Data retention:</b> Your encrypted data stays on our servers until you delete your account or disable Cloud Sync. Anonymous analytics are retained indefinitely in aggregate form.</p>
-    <p class="muted" style="font-size:13px"><b>Your rights (GDPR/CCPA):</b> You can export your data anytime (Back up → Export my data). You can delete your account and all cloud data from Data controls → Delete account. Contact us at hello@omni-tap.com for data requests.</p>
+    <p class="muted" style="font-size:13px"><b>Your rights (GDPR/CCPA):</b> You can request your data anytime. You can delete your account and all cloud data from Data controls → Delete account. Contact us at hello@omni-tap.com for data requests.</p>
     <p class="muted" style="font-size:13px"><b>Contact:</b> hello@omni-tap.com</p>
     <p class="muted" style="font-size:13px">Full policy: <a href="https://omni-tap.com/privacy.html" target="_blank" style="color:var(--accent)">omni-tap.com/privacy.html</a></p>
     <h3 class="sec" style="margin-top:12px">Terms of Service</h3>
@@ -1232,7 +1195,6 @@ async function pinDone(){
           const rkCt=await crypto.subtle.encrypt({name:"AES-GCM",iv:rkIv},rkKey,te.encode(rk));
           localStorage.setItem("omni_recovery","310k."+b64(rkSalt)+"."+b64(rkIv)+"."+b64(rkCt));
         }catch(e){}
-        $("backupPrompt").hidden=false;
         return;
       }
       unlock();return;
@@ -1509,7 +1471,7 @@ async function doLock(){
   $("lockSyncBtn").hidden=has;$("lockSyncForm").hidden=true;
   const locked=pinLockedLeft();
   if(locked>0)pinMsg("Too many tries — wait "+locked+"s");
-  $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("profileScreen").hidden=true;$("ownerScreen").hidden=true;$("backupScreen").hidden=true;$("welcomeScreen").hidden=true;$("lockScreen").hidden=false;applyLockBg();replayLogo();
+  $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("profileScreen").hidden=true;$("ownerScreen").hidden=true;$("welcomeScreen").hidden=true;$("lockScreen").hidden=false;applyLockBg();replayLogo();
 }
 function replayLogo(){
   // Disabled: animation replay was causing iOS rendering glitches (duplicate/flicker).
@@ -1586,7 +1548,7 @@ $("resetRestore").onclick=()=>{
           pinMsg("Set a "+(localStorage.getItem("omni_pinlen")||"6")+"-digit PIN");
           $("forgotBtn").hidden=true;
           $("lockSyncBtn").hidden=false; // no vault on disk yet — cloud restore stays available
-          $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("profileScreen").hidden=true;$("ownerScreen").hidden=true;$("backupScreen").hidden=true;$("welcomeScreen").hidden=true;$("lockScreen").hidden=false;
+          $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("profileScreen").hidden=true;$("ownerScreen").hidden=true;$("welcomeScreen").hidden=true;$("lockScreen").hidden=false;
           try{applyLockBg();}catch(e){}
           updateGo();
         }
@@ -2194,7 +2156,7 @@ $("dashBtn").onclick=async()=>{
     $("st_cards").textContent=s.cards||0;
     $("st_shares").textContent=(s.share||0)+(s.vcf||0)+(s.nfc||0);
   }catch(e){/* Insights removed */}
-  $("homeScreen").hidden=true;$("profileScreen").hidden=true;$("ownerScreen").hidden=true;$("backupScreen").hidden=true;$("dashScreen").hidden=false;window.scrollTo(0,0);
+  $("homeScreen").hidden=true;$("profileScreen").hidden=true;$("ownerScreen").hidden=true;$("dashScreen").hidden=false;window.scrollTo(0,0);
   // share credits: refresh flags + boxes
   try{await loadFlags();}catch(e){}
   renderCreditBoxes();
@@ -2232,17 +2194,6 @@ $("issueSendBtn").onclick=()=>{
   toast("Opening email…");
 };
 
-/* backup prompt after onboarding */
-$("bpNow").onclick=async()=>{
-  $("backupPrompt").hidden=true;
-  unlock();
-  $("backupBtn").click();
-};
-$("bpLater").onclick=()=>{
-  localStorage.setItem("omni_last_backup","0"); // ensure nudge shows
-  $("backupPrompt").hidden=true;
-  unlock();
-};
 // Recovery key: shown at signup, stored encrypted with PIN
 function genRecoveryKey(){
   const alpha="ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -2775,7 +2726,9 @@ function renderCards(){
       d.style.zIndex=list.length-i;
       if(p.cover){d.style.backgroundImage=`url("${p.cover}")`;d.style.backgroundPosition=p.coverPos||"50% 50%";}
       else{const c=p.color||"#4f8cff";d.style.background=`linear-gradient(135deg,${c},#141824 130%)`;}
-      d.innerHTML=`<div class="wdim" aria-hidden="true"></div><div class="wbrand">OMNI</div><div class="wring" aria-hidden="true"></div>`+
+      const avatarHtml = p.photo ? `<div style="position:absolute;top:14px;left:16px;width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,.3);z-index:2"><img src="${esc(p.photo)}" style="width:100%;height:100%;object-fit:cover"></div>`
+        : (p.name ? `<div style="position:absolute;top:14px;left:16px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;border:2px solid rgba(255,255,255,.3);z-index:2">${esc(initials(p.name))}</div>` : '');
+      d.innerHTML=`<div class="wdim" aria-hidden="true"></div><div class="wbrand">OMNI</div>${avatarHtml}<div class="wring" aria-hidden="true"></div>`+
         `${(()=>{const tc=contrastText(p.color||"#4f8cff");return `<div class="wtext"><div class="wlabel" style="color:${tc}">${esc(p.label||"Untitled")}</div><div class="wname" style="color:${tc}">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div></div>`;})()}`;
       d.onclick=()=>{activeWallet=i;renderCards();haptic(10);};
       d.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();d.click();}};
@@ -2790,7 +2743,9 @@ function renderCards(){
     top.style.top="0px";top.style.zIndex=10;
     if(p.cover){top.style.backgroundImage=`url("${p.cover}")`;top.style.backgroundPosition=p.coverPos||"50% 50%";}
     else{const c=p.color||"#4f8cff";top.style.background=`linear-gradient(135deg,${c},#141824 130%)`;}
-    top.innerHTML=`<div class="wdim" aria-hidden="true"></div><div class="wbrand">OMNI</div><div class="wring" aria-hidden="true"></div>`+
+    const topAvatar = p.photo ? `<div style="position:absolute;top:14px;left:16px;width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,.3);z-index:2"><img src="${esc(p.photo)}" style="width:100%;height:100%;object-fit:cover"></div>`
+      : (p.name ? `<div style="position:absolute;top:14px;left:16px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;border:2px solid rgba(255,255,255,.3);z-index:2">${esc(initials(p.name))}</div>` : '');
+    top.innerHTML=`<div class="wdim" aria-hidden="true"></div><div class="wbrand">OMNI</div>${topAvatar}<div class="wring" aria-hidden="true"></div>`+
       `${(()=>{const tc=contrastText(p.color||"#4f8cff");return `<div class="wtext"><div class="wlabel" style="color:${tc}">${esc(p.label||"Untitled")}</div><div class="wname" style="color:${tc}">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div></div>`;})()}`;
     top.onclick=()=>openDetail(p.id);
     g.appendChild(top);
@@ -2836,7 +2791,7 @@ $("fabPlus").onclick=()=>{
 };
 function openDetail(id,toShare){
   curId=id;
-  $("homeScreen").hidden=true;$("profileScreen").hidden=true;$("dashScreen").hidden=true;$("ownerScreen").hidden=true;$("backupScreen").hidden=true;$("detailScreen").hidden=false;
+  $("homeScreen").hidden=true;$("profileScreen").hidden=true;$("dashScreen").hidden=true;$("ownerScreen").hidden=true;$("detailScreen").hidden=false;
   fillDetail();window.scrollTo(0,0);
   if(toShare)setTimeout(()=>{const s=$("shareBox");if(s&&!s.hidden){const d=$("dgShareCard");if(d)d.open=true;s.scrollIntoView({behavior:"smooth",block:"center"});}},120);
 }
@@ -3758,7 +3713,7 @@ $("dashBtn").onclick = async function(e){
 $("ownerBtn").onclick=async()=>{
   // Open the dedicated owner screen (auth handled by caller via ownerAuth)
   $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;
-  $("profileScreen").hidden=true;$("backupScreen").hidden=true;$("ownerScreen").hidden=false;
+  $("profileScreen").hidden=true;$("ownerScreen").hidden=false;
   window.scrollTo(0,0);
 };
 
@@ -3790,13 +3745,12 @@ try{
   if(location.search.includes("owner=1")){localStorage.setItem("omni_owner_mode","1");}
   if(!ownerEnabled){$("navOwner").style.display="none";}
 }catch(e){}
-$("navBackup").onclick=()=>{closeNavMenu();openBackup();};
 $("navLock").onclick=()=>{closeNavMenu();$("lockBtn").onclick();};
 
 /* ---------- profile view ---------- */
 function openProfile(){
   $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;
-  $("ownerScreen").hidden=true;$("backupScreen").hidden=true;
+  $("ownerScreen").hidden=true;
   $("profileScreen").hidden=false;window.scrollTo(0,0);
   renderPic();
   $("profileInfo").innerHTML=
@@ -3856,7 +3810,7 @@ function openProfile(){
   };
   $("profileChangePin").onclick=()=>{
     $("profileScreen").hidden=true;
-    $("backupScreen").hidden=false;
+    
     window.scrollTo(0,0);
     // Scroll to the PIN section and expand it
     setTimeout(()=>{
@@ -3872,18 +3826,12 @@ $("profileBack").onclick=()=>{$("profileScreen").hidden=true;$("homeScreen").hid
 /* ---------- owner controls view ---------- */
 function openOwner(){
   $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;
-  $("profileScreen").hidden=true;$("backupScreen").hidden=true;
+  $("profileScreen").hidden=true;
   $("ownerScreen").hidden=false;window.scrollTo(0,0);
 }
 $("ownerBack").onclick=()=>{$("ownerScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
 
 /* ---------- backup view ---------- */
-function openBackup(){
-  $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;
-  $("profileScreen").hidden=true;$("ownerScreen").hidden=true;
-  $("backupScreen").hidden=false;window.scrollTo(0,0);
-}
-$("backupBack").onclick=()=>{$("backupScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
 $("fileDownloadBtn").onclick=()=>{$("backupBtn").onclick();};
 $("fileImportBtn").onclick=()=>{$("importInput").click();};
 
@@ -4093,6 +4041,9 @@ $("moreShareBtn").onclick=()=>{
   $("moreShareBtn").innerHTML=open?"More ways to share ▴":"More ways to share ▾";
 };
 $("vcfBtn").onclick=()=>{if(!consumeShare())return;stat("vcf");downloadVcf();};
+$("walletBtn").onclick=()=>{
+  toast("Apple Wallet passes coming soon — needs Apple Developer Pass certificate");
+};
 $("shareBtn").onclick=async()=>{if(!consumeShare())return;haptic(10);
   stat("share");
   const file=new File([vcard(chosen(),curPic())],"OMNI.vcf",{type:"text/vcard"});
