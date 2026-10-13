@@ -773,10 +773,8 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <p class="muted" style="font-size:12px">Adjust live — changes apply app-wide on next open.</p>
       <div class="togglerow"><span>Pro price ($/mo)</span><input id="setProPrice" type="number" min="0.99" max="999" step="0.01" style="width:90px" aria-label="Pro monthly price"></div>
       <div class="togglerow"><span>Premium price ($/mo)</span><input id="setPremPrice" type="number" min="0.99" max="999" step="0.01" style="width:90px" aria-label="Premium monthly price"></div>
-      <div class="togglerow"><span>Tokens per invite</span><input id="setTokensPerInvite" type="number" min="1" max="10000" style="width:90px" aria-label="Tokens earned per invite"></div>
-      <div class="togglerow"><span>Midnight template </span><input id="setTplAurora" type="number" min="1" max="100000" style="width:90px" aria-label="Midnight template token price"></div>
-      <div class="togglerow"><span>Gold Foil </span><input id="setTplObsidian" type="number" min="1" max="100000" style="width:90px" aria-label="Gold Foil template token price"></div>
-      <div class="togglerow"><span>Neon template </span><input id="setTplRoyale" type="number" min="1" max="100000" style="width:90px" aria-label="Neon template token price"></div>
+
+
       <button class="small" id="savePricingBtn" style="width:100%;margin:4px 0 12px">Save pricing</button>
       <p class="muted" id="pricingMsg" style="font-size:12px"></p>
       <h3 class="sec">Test plans</h3>
@@ -836,7 +834,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <h3 class="sec" style="margin-top:0">Your plan</h3>
     <div class="statrow"><span>Plan</span><b id="planName">Free</b></div>
     <div class="statrow"><span>Cards</span><b id="planCards">0 / 3</b></div>
-    <div class="statrow"><span>Tokens</span><b id="planTokens">0</b></div>
+
     <div id="planBenefits" class="muted" style="font-size:13px;margin-top:8px;line-height:1.7"></div>
     <div id="planTrial" class="muted" style="font-size:12px;margin-top:4px" hidden></div>
     <button class="small" id="planUpgradeBtn" style="width:100%;margin-top:8px">View plans</button>
@@ -865,8 +863,8 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <summary><span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4"/><path d="M5 12v8h14v-8"/><path d="M12 8v12"/><path d="M12 8s-4.5 0-5.5-2.5C5.7 3.7 8 3 9 4.5 10 6 12 8 12 8z"/><path d="M12 8s4.5 0 5.5-2.5C18.3 3.7 16 3 15 4.5 14 6 12 8 12 8z"/></svg></span><span>Invite friends</span></summary>
 <div class="box" id="inviteBox" hidden>
     <h3 class="sec" style="margin-top:0">Invite friends</h3>
-    <p class="muted">Share your invite link — you'll earn <b><span id="inviteTokenRate">100</span> tokens</b> per friend plus access to 7 cards. Tokens can buy premium card designs. Your friend earns a free Pro trial.</p>
-    <div class="statrow"><span>Your tokens</span><b id="bonusBal">0</b></div>
+    <p class="muted">Share your invite link — unlock premium designs as friends join: <b>7 invites → Midnight</b>, <b>15 → Gold Foil</b>, <b>30 → Neon</b>. Plus access to 7 cards. Your friend earns a free Pro trial.</p>
+    <div class="statrow"><span>Successful invites</span><b id="inviteCount">0</b></div>
     <div style="display:flex;gap:8px;margin-top:10px">
       <input id="inviteLink" readonly style="flex:1;margin:0" aria-label="Your invite code">
       <button class="small" id="copyInvite" style="flex:none">Copy</button>
@@ -905,16 +903,16 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
       <span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 1 0 9 9"/><circle cx="8.5" cy="10.5" r="1" fill="#fff"/><circle cx="12" cy="7.5" r="1" fill="#fff"/><circle cx="15.5" cy="10.5" r="1" fill="#fff"/></svg></span>
       <b style="font-size:17px">Premium designs</b>
-      <span class="muted" style="margin-left:auto;font-size:13px"><b id="shopTokens" style="color:#f5a623">0</b> tokens</span>
+
     </div>
     <div id="shopList"></div>
   </div>
-  <div class="dashgroup" id="dgTokens" style="padding:16px 18px;border-color:rgba(245,166,35,.45);background:linear-gradient(160deg,#1a1410,#12100c)">
+  <div class="dashgroup" id="dgDesigns" style="padding:16px 18px;border-color:rgba(245,166,35,.45);background:linear-gradient(160deg,#1a1410,#12100c)">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
       <span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f5a623" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M9 9.5c0-1 1.3-1.8 3-1.8s3 .8 3 1.8-1.3 1.7-3 1.9-3 .9-3 1.9 1.3 1.8 3 1.8 3-.8 3-1.8"/></svg></span>
-      <b style="font-size:17px">Buy tokens</b>
+      <b style="font-size:17px">Premium designs</b>
     </div>
-    <p class="muted" style="margin:0 0 8px">Friends who join earn you 100 tokens each. Need more now? Grab a pack below.</p>
+    <p class="muted" style="margin:0 0 8px">Own them forever with one purchase. Or invite friends to unlock them free — 7 invites for Midnight, 15 for Gold Foil, 30 for Neon.</p>
     <div id="packList"></div>
   </div>
   </details>
@@ -955,8 +953,8 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     </div>
     <h3 class="sec" style="margin-top:0">FAQ</h3>
     <details style="margin:8px 0"><summary style="font-size:14px">How do I share my card?</summary><p class="muted" style="font-size:13px">Tap "Share my card" on the home screen, or open a card and use the Share button. The other person gets your contact details instantly.</p></details>
-    <details style="margin:8px 0"><summary style="font-size:14px">How do invites work?</summary><p class="muted" style="font-size:13px">Share your invite code from Dashboard → Invite friends. Your friend gets 7 days of Pro free, and you earn 100 tokens per friend.</p></details>
-    <details style="margin:8px 0"><summary style="font-size:14px">What are tokens for?</summary><p class="muted" style="font-size:13px">Tokens unlock premium card designs (Midnight, Gold Foil, Neon) under Dashboard → Invite friends → Premium designs.</p></details>
+    <details style="margin:8px 0"><summary style="font-size:14px">How do invites work?</summary><p class="muted" style="font-size:13px">Share your invite code from Dashboard → Invite friends. Your friend gets 7 days of Pro free, and you unlock premium designs: 7 invites for Midnight, 15 for Gold Foil, 30 for Neon.</p></details>
+    <details style="margin:8px 0"><summary style="font-size:14px">How do I get premium designs?</summary><p class="muted" style="font-size:13px">Buy them directly under Dashboard → Premium designs (Midnight $0.99, Gold Foil $1.99, Neon $2.99), invite friends to unlock them free, or get them all included with Pro or Premium.</p></details>
     <details style="margin:8px 0"><summary style="font-size:14px">Is my data private?</summary><p class="muted" style="font-size:13px">Yes. Everything is encrypted on your phone with your PIN before it's stored or synced. We can't read your data.</p></details>
     <div class="statrow" style="margin-top:8px"><span>App version</span><b id="helpAppVer">1.0</b></div>
   </div>
@@ -970,7 +968,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <h3 class="sec" style="margin-top:0">Privacy Policy</h3>
     <p class="muted" style="font-size:13px"><b>Last updated: October 11, 2026</b></p>
     <p class="muted" style="font-size:13px"><b>What we collect:</b> OMNI encrypts all your card data on your device with your PIN before storage or sync. We never see your PIN, your cards, or your contacts. When you use Cloud Sync, we store only the encrypted blob — we cannot decrypt it.</p>
-    <p class="muted" style="font-size:13px"><b>Analytics:</b> We collect anonymous aggregate counts (total users, cards created) via our stats service. No personal identifiers are attached. If you use a referral code, we store the code mapping to award tokens — this is the only account-linked data we hold.</p>
+    <p class="muted" style="font-size:13px"><b>Analytics:</b> We collect anonymous aggregate counts (total users, cards created) via our stats service. No personal identifiers are attached. If you use a referral code, we store the code mapping to award design unlocks — this is the only account-linked data we hold.</p>
     <p class="muted" style="font-size:13px"><b>Data retention:</b> Your encrypted data stays on our servers until you delete your account or disable Cloud Sync. Anonymous analytics are retained indefinitely in aggregate form.</p>
     <p class="muted" style="font-size:13px"><b>Your rights (GDPR/CCPA):</b> You can request your data anytime. You can delete your account and all cloud data from Data controls → Delete account. Contact us at hello@omni-tap.com for data requests.</p>
     <p class="muted" style="font-size:13px"><b>Contact:</b> hello@omni-tap.com</p>
@@ -978,7 +976,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <h3 class="sec" style="margin-top:12px">Terms of Service</h3>
     <p class="muted" style="font-size:13px"><b>Last updated: October 11, 2026</b></p>
     <p class="muted" style="font-size:13px">OMNI is provided as-is. You're responsible for keeping your PIN safe — if you forget it and have no backup or recovery key, your data can't be recovered.</p>
-    <p class="muted" style="font-size:13px"><b>Subscriptions:</b> Pro ($4.99/month) and Premium ($6.99/month) are billed via the app store on your device. Subscriptions auto-renew unless cancelled at least 24 hours before the current period ends. Manage or cancel in your App Store/Play Store account settings. Tokens have no cash value and are non-refundable except as required by law.</p>
+    <p class="muted" style="font-size:13px"><b>Subscriptions:</b> Pro ($4.99/month) and Premium ($6.99/month) are billed via the app store on your device. Subscriptions auto-renew unless cancelled at least 24 hours before the current period ends. Manage or cancel in your App Store/Play Store account settings. Design purchases are one-time and non-refundable except as required by law.</p>
     <p class="muted" style="font-size:13px"><b>Acceptable use:</b> Don't use OMNI for spam, harassment, fraud, or illegal activity. We may suspend accounts that violate this.</p>
     <p class="muted" style="font-size:13px"><b>Governing law:</b> These terms are governed by the laws of the State of Kansas, USA.</p>
   </div>
@@ -1795,19 +1793,28 @@ async function collectPendingInvites(){
     if(!r.ok)return;
     const j=await r.json();
     if(j&&j.pending>0){
-      // Inviter rewards: first successful share bumps free cards 3→7, every share gives 100 tokens.
-      // 'pending' from the worker is already a TOKEN count (claim adds 100, owner grant adds token amounts) — do NOT multiply again.
-      const reward=Math.round(j.pending);
+      // Inviter rewards: first successful share bumps free cards 3→7.
+      // Design unlocks: 7 invites → Midnight, 15 → Gold Foil, 30 → Neon.
+      const newInvites=Math.round(j.pending);
+      userPlan.invites=(userPlan.invites||0)+newInvites;
       let msg="";
       if(!userPlan.sharedOnce){
         userPlan.sharedOnce=true;
-        userPlan.tokens=(userPlan.tokens||0)+reward;
-        msg=`Your cards bumped to 7 +${reward} tokens — a friend joined!`;
+        msg=`Your cards bumped to 7 — a friend joined!`;
       }else{
-        userPlan.tokens=(userPlan.tokens||0)+reward;
-        msg=`+${reward} tokens — a friend joined!`;
+        msg=`A friend joined! (${userPlan.invites} invites)`;
+      }
+      // Check design unlock thresholds
+      if(!userPlan.templates)userPlan.templates=[];
+      const thresholds=[{count:7,id:"aurora",name:"Midnight"},{count:15,id:"obsidian",name:"Gold Foil"},{count:30,id:"royale",name:"Neon"}];
+      for(const th of thresholds){
+        if(userPlan.invites>=th.count&&!userPlan.templates.includes(th.id)){
+          userPlan.templates.push(th.id);
+          msg+=` You unlocked ${th.name}!`;
+        }
       }
       await saveAll();
+      renderDesignShop();
       toast(msg);
     }
   }catch(e){}
@@ -1881,7 +1888,7 @@ function renderCreditBoxes(){
   const bb=$("buyBox");if(bb)bb.hidden=true;
   try{
     $("inviteLink").value=myInviteCode();
-    $("bonusBal").textContent=(userPlan.tokens||0)+" tokens";
+    const ic=$("inviteCount");if(ic)ic.textContent=userPlan.invites||0;
     const ib=$("inviteBonusAmt");if(ib)ib.textContent=tokensPerInvite();
     const itr=$("inviteTokenRate");if(itr)itr.textContent=tokensPerInvite();
   }catch(e){}
@@ -1920,7 +1927,7 @@ $("savePricingBtn").onclick=async()=>{
   const res=await setFlags(vals);
   if(res.ok){
     msg.textContent="Pricing updated — applies app-wide.";
-    fillPricing();renderCreditBoxes();renderTokenShop();renderPlanBox();
+    fillPricing();renderCreditBoxes();renderDesignShop();renderPlanBox();
   }else{
     msg.textContent="Couldn't save: "+(res.error||"network error");
   }
@@ -2179,7 +2186,7 @@ $("dashBtn").onclick=async()=>{
   try{await loadFlags();}catch(e){}
   renderCreditBoxes();
   renderPlanBox();
-  renderTokenShop();
+  renderDesignShop();
   // Data controls status
   try{
     $("dataSyncStatus").textContent=syncEnabled()?"On ✓":"Off";
@@ -2406,12 +2413,12 @@ function renderPlanBox(){
     const lim=cardLimit(), n=profiles.filter(p=>!p._draft).length;
     $("planCards").textContent=lim===Infinity?"Unlimited":`${n} / ${lim}`;
     const tb=tokenBalance();
-    $("planTokens").textContent=tb===Infinity?"∞":tb;
+
     // benefits list
     const ben={
       free:["✓ Unlimited sharing","✓ 3 cards (7 after first invite)","✓ Profile picture & logo"],
-      pro:["✓ Unlimited sharing","✓ 12 cards","✓ Unlimited tokens","✓ Premium templates","✓ Email signature"],
-      premium:["✓ Unlimited sharing","✓ Unlimited cards","✓ Unlimited tokens","✓ Premium templates","✓ Advanced analytics","✓ Custom branding","✓ Priority support"]
+      pro:["✓ Unlimited sharing","✓ 12 cards","✓ All premium designs","✓ Email signature"],
+      premium:["✓ Unlimited sharing","✓ Unlimited cards","✓ All premium designs","✓ Advanced analytics","✓ Custom branding","✓ Priority support"]
     }[t]||[];
     $("planBenefits").innerHTML=ben.join("<br>");
     const pt=$("planTrial");
@@ -2464,21 +2471,20 @@ async function ownerGrantPlan(tier){
 }
 /* ---------- premium templates + token shop ---------- */
 const PREMIUM_TEMPLATES=[
-  {id:"aurora",name:"Midnight",desc:"Deep dark gradient",color:"#8b5cf6",coverColor:"#1e1b4b"},
-  {id:"obsidian",name:"Gold Foil",desc:"Black and gold luxury",color:"#d4af37",coverColor:"#0a0a0a"},
-  {id:"royale",name:"Neon",desc:"Bright signature glow",color:"#0a84ff",coverColor:"#0d1b2a"}
+  {id:"aurora",name:"Midnight",desc:"Deep dark gradient",color:"#8b5cf6",coverColor:"#1e1b4b",price:0.99,iap:"com.omnitap.design.midnight"},
+  {id:"obsidian",name:"Gold Foil",desc:"Black and gold luxury",color:"#d4af37",coverColor:"#0a0a0a",price:1.99,iap:"com.omnitap.design.goldfoil"},
+  {id:"royale",name:"Neon",desc:"Bright signature glow",color:"#0a84ff",coverColor:"#0d1b2a",price:2.99,iap:"com.omnitap.design.neon"}
 ];
 function templateDef(id){const t=PREMIUM_TEMPLATES.find(x=>x.id===id);if(t)t.cost=templateCost(id);return t;}
-const TOKEN_PACKS=[
-  {tokens:1700,price:1.99},
-  {tokens:3500,price:3.99},
-  {tokens:9000,price:9.99}
+const DESIGN_PRODUCTS=[
+  {id:"aurora",price:0.99,iap:"com.omnitap.design.midnight"},
+  {id:"obsidian",price:1.99,iap:"com.omnitap.design.goldfoil"},
+  {id:"royale",price:2.99,iap:"com.omnitap.design.neon"}
 ];
 function ownedTemplates(){return (userPlan.templates||[]);}
-function renderTokenShop(){
+function renderDesignShop(){
   try{
     const tb=tokenBalance();
-    $("shopTokens").textContent=tb===Infinity?"∞":tb;
     $("shopList").innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">`+PREMIUM_TEMPLATES.map(t0=>{
       const t=templateDef(t0.id);
       const owned=ownedTemplates().includes(t.id)||tb===Infinity;
@@ -2486,32 +2492,44 @@ function renderTokenShop(){
         <div style="height:64px;background:linear-gradient(135deg,${t.color},${t.coverColor})"></div>
         <div style="padding:10px">
           <b style="font-size:14px">${t.name}</b>
-          <div class="muted" style="font-size:11px;margin-top:2px">${t.cost} tokens</div>
+          <div class="muted" style="font-size:11px;margin-top:2px">$${t.price.toFixed(2)} — yours forever</div>
           ${owned?`<div style="color:#4ade80;font-size:12px;margin-top:4px">Owned</div><button class="small" style="width:100%;margin-top:4px" onclick="applyTemplate('${t.id}')">Apply</button>`
-          :`<button class="small" style="width:100%;margin-top:6px" onclick="buyTemplate('${t.id}')">Get</button>`}
+          :`<button class="small" style="width:100%;margin-top:6px" onclick="buyTemplate('${t.id}')">Buy — $${t.price.toFixed(2)}</button>`}
         </div>
       </div>`;
     }).join("")+`</div>`;
-    $("packList").innerHTML=TOKEN_PACKS.map((p,i)=>
-      `<button class="small" style="width:100%;margin:4px 0" onclick="buyTokens(${i})">${p.tokens.toLocaleString()} tokens — $${p.price}</button>`
-    ).join("");
   }catch(e){}
 }
 async function buyTemplate(id){
   const t=templateDef(id);if(!t)return;
   const tb=tokenBalance();
-  if(tb!==Infinity&&(userPlan.tokens||0)<t.cost){
-    showUpgrade("Not enough tokens",`"${t.name}" costs ${t.cost} tokens. Earn tokens by inviting friends, or get unlimited tokens with Pro.`);
+  // Pro/Premium get all designs free
+  if(tb===Infinity){
+    if(!userPlan.templates)userPlan.templates=[];
+    if(!userPlan.templates.includes(id))userPlan.templates.push(id);
+    const p=getP();
+    if(p){p.color=t.color;p.coverColor=t.coverColor;p.templateId=id;}
+    await saveAll();renderDesignShop();renderPlanBox();renderCards();renderFlip();
+    toast(`"${t.name}" applied ✓`);
     return;
   }
-  const p=getP();
-  if(!p){toast("Select a card first");return;}
-  if(tb!==Infinity){userPlan.tokens-=t.cost;}
-  if(!userPlan.templates)userPlan.templates=[];
-  if(!userPlan.templates.includes(id))userPlan.templates.push(id);
-  p.color=t.color;p.coverColor=t.coverColor;p.templateId=id;
-  await saveAll();renderTokenShop();renderPlanBox();renderCards();renderFlip();
-  toast(`"${t.name}" applied ✓`);
+  // Native IAP purchase (App Store / Play Store)
+  if(window.OMNI_NATIVE&&window.omniPurchaseDesign){
+    try{
+      if(window.omniHaptic)await window.omniHaptic('MEDIUM');
+      const r=await window.omniPurchaseDesign(t.iap);
+      if(r.ok){
+        if(window.omniNotify)await window.omniNotify();
+        if(!userPlan.templates)userPlan.templates=[];
+        if(!userPlan.templates.includes(id))userPlan.templates.push(id);
+        await saveAll();renderDesignShop();renderPlanBox();
+        toast(`"${t.name}" is yours forever ✓`);
+      }else{toast("Purchase failed: "+(r.error||"cancelled"));}
+    }catch(e){toast("Purchase unavailable right now");}
+    return;
+  }
+  // Web fallback
+  toast("Design purchases aren't live on web yet — coming soon");
 }
 function applyTemplate(id){
   const t=templateDef(id);if(!t)return;
@@ -2520,24 +2538,7 @@ function applyTemplate(id){
   p.color=t.color;p.coverColor=t.coverColor;p.templateId=id;
   saveAll().then(()=>{renderCards();renderFlip();toast(`"${t.name}" applied ✓`);});
 }
-async function buyTokens(i){
-  const pack=TOKEN_PACKS[i];if(!pack)return;
-  // Native IAP (App Store / Play Store)
-  if(window.OMNI_NATIVE&&window.omniPurchaseTokens){
-    try{
-      if(window.omniHaptic)await window.omniHaptic('MEDIUM');
-      const r=await window.omniPurchaseTokens(i);
-      if(r.ok){
-        if(window.omniNotify)await window.omniNotify();
-        toast(`+${r.tokens} tokens added! ✓`);
-        await syncSubscriptionStatus();
-      }else{toast("Purchase failed: "+(r.error||"cancelled"));}
-    }catch(e){toast("Purchase unavailable right now");}
-    return;
-  }
-  // Web fallback (Stripe)
-  toast("Token purchases aren't live yet — coming soon");
-}
+
 // Vault format v2: {v:2, profiles:[...], userProfile:{...}}
 // Old vaults store just the profiles array — unpackVault handles both.
 function packVault(){return{v:2,profiles:profiles,userProfile:userProfile,plan:userPlan};}
