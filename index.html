@@ -4489,7 +4489,7 @@ window.addEventListener("online",()=>{
 })();
 
 /* ---------- PWA ---------- */
-if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{});}
+// Service worker disabled: prevents stale-cache black screens (2026-10-13)
 </script>
 <!-- Native bridge: loaded only in Capacitor native app -->
 <script>
