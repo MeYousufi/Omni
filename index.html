@@ -978,7 +978,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <h3 class="sec" style="margin-top:12px">Terms of Service</h3>
     <p class="muted" style="font-size:13px"><b>Last updated: October 11, 2026</b></p>
     <p class="muted" style="font-size:13px">OMNI is provided as-is. You're responsible for keeping your PIN safe — if you forget it and have no backup or recovery key, your data can't be recovered.</p>
-    <p class="muted" style="font-size:13px"><b>Subscriptions:</b> Pro ($4.99/month) and Premium ($9.99/month) are billed via the app store on your device. Subscriptions auto-renew unless cancelled at least 24 hours before the current period ends. Manage or cancel in your App Store/Play Store account settings. Tokens have no cash value and are non-refundable except as required by law.</p>
+    <p class="muted" style="font-size:13px"><b>Subscriptions:</b> Pro ($4.99/month) and Premium ($6.99/month) are billed via the app store on your device. Subscriptions auto-renew unless cancelled at least 24 hours before the current period ends. Manage or cancel in your App Store/Play Store account settings. Tokens have no cash value and are non-refundable except as required by law.</p>
     <p class="muted" style="font-size:13px"><b>Acceptable use:</b> Don't use OMNI for spam, harassment, fraud, or illegal activity. We may suspend accounts that violate this.</p>
     <p class="muted" style="font-size:13px"><b>Governing law:</b> These terms are governed by the laws of the State of Kansas, USA.</p>
   </div>
@@ -1910,7 +1910,7 @@ $("savePricingBtn").onclick=async()=>{
   const num=(id,def)=>{const v=parseFloat(($(id)||{}).value);return Number.isFinite(v)&&v>0?v:def;};
   const vals={
     proPrice:num("setProPrice",4.99),
-    premiumPrice:num("setPremPrice",9.99),
+    premiumPrice:num("setPremPrice",6.99),
     tokensPerInvite:Math.round(num("setTokensPerInvite",100)),
     tpl_aurora:Math.round(num("setTplAurora",700)),
     tpl_obsidian:Math.round(num("setTplObsidian",1500)),
@@ -2308,7 +2308,7 @@ let userProfile={pic:null,picPos:"50% 50%",name:"",phone:"",email:"",cover:"",co
 const PLAN_DEFS={
   free:{name:"Free",price:0},
   pro:{name:"Pro",price:4.99},
-  premium:{name:"Premium",price:9.99}
+  premium:{name:"Premium",price:6.99}
 };
 /* owner-adjustable pricing (worker flags, with local defaults) */
 function flagNum(k,def){
@@ -2317,7 +2317,7 @@ function flagNum(k,def){
   return Number.isFinite(n)&&n>0?n:def;
 }
 function proPrice(){return flagNum("proPrice",4.99);}
-function premiumPrice(){return flagNum("premiumPrice",9.99);}
+function premiumPrice(){return flagNum("premiumPrice",6.99);}
 function tokensPerInvite(){return Math.round(flagNum("tokensPerInvite",100));}
 function templateCost(id){
   const defaults={aurora:700,obsidian:1500,royale:3000};
