@@ -14,9 +14,9 @@
 <title>OMNI</title>
 <style>
 *{touch-action:manipulation}
-:root{--bg:#07080c;--card:#12141b;--line:#232839;--text:#f5f6f8;--muted:#9aa1ad;--accent:#4f8cff;--accent2:#8b5cf6;--glow:rgba(79,140,255,.35)}
+:root{--bg:#07080c;--card:#12141b;--line:#232839;--text:#f5f6f8;--muted:#9aa1ad;--accent:#f5a623;--accent2:#e8941a;--glow:rgba(245,166,35,.35)}
 *{box-sizing:border-box}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);background-image:radial-gradient(700px 320px at 50% -60px,rgba(79,140,255,.12),transparent);min-height:100vh;background-attachment:fixed}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);background-image:radial-gradient(700px 320px at 50% -60px,rgba(245,166,35,.05),transparent);min-height:100vh;background-attachment:fixed}
 .wrap{max-width:480px;margin:0 auto;padding:calc(22px + env(safe-area-inset-top)) 16px calc(96px + env(safe-area-inset-bottom))}
 @media(min-width:700px){
   .wrap{max-width:860px}
@@ -25,14 +25,14 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
 .brand{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .brand h1{margin:0;font-size:24px;letter-spacing:.14em;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .brand span{color:var(--muted);font-size:11px;letter-spacing:.08em}
-.iconbtn{background:#1c2130;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:8px 12px;font-size:14px;margin:0;min-height:44px;display:inline-flex;align-items:center}
-select,input,textarea{width:100%;margin:6px 0;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0e1118;color:var(--text);font:inherit}
-select:focus,input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,140,255,.15)}
+.iconbtn{background:#1c2130;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:8px 12px;font-size:14px;margin:0;min-height:44px;display:inline-flex;align-items:center}
+select,input,textarea{width:100%;margin:6px 0;padding:12px;border-radius:16px;border:1px solid var(--line);background:#0e1118;color:var(--text);font:inherit}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,166,35,.18)}
 button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 input[type=color]{height:48px;padding:6px}
 textarea{min-height:56px}
-.box{background:linear-gradient(160deg,#141824,#0f1219);border:1px solid var(--line);border-radius:18px;padding:14px;margin:14px 0;box-shadow:0 8px 28px rgba(0,0,0,.35)}
-button{border:0;border-radius:12px;padding:12px 14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:650;margin:6px 6px 0 0;font:inherit;box-shadow:0 4px 14px rgba(79,140,255,.3)}
+.box{background:linear-gradient(160deg,#141824,#0f1219);border:1px solid var(--line);border-radius:16px;padding:14px;margin:14px 0;box-shadow:0 8px 28px rgba(0,0,0,.35)}
+button{border:0;border-radius:16px;padding:12px 14px;background:var(--accent);color:#1a1206;font-weight:700;margin:6px 6px 0 0;font:inherit;box-shadow:0 8px 24px rgba(0,0,0,.45)}
 button:active{transform:scale(.97)}
 button.gray{background:#232838;box-shadow:none;border:1px solid var(--line)}
 button.danger{background:linear-gradient(135deg,#7a2b2e,#5a2326);box-shadow:none}
@@ -43,7 +43,7 @@ label.chk input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent)
 label.chk span{line-height:1.45}
 .muted{color:var(--muted);font-size:13px}
 pre{white-space:pre-wrap;font:inherit;margin:0}
-#qr{background:#fff;padding:10px;border-radius:12px;width:fit-content;margin-top:12px;display:none;box-shadow:0 0 24px rgba(79,140,255,.25)}
+#qr{background:#fff;padding:10px;border-radius:16px;width:fit-content;margin-top:12px;display:none;box-shadow:0 8px 24px rgba(0,0,0,.45)}
 /* lock screen */
 #lockScreen{min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;position:relative;overflow:hidden}
 #lockScreen[hidden]{display:none}
@@ -94,14 +94,14 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 /* Premium lock screen: choreographed, tactile, refined */
 #lockScreen{justify-content:center;padding-top:0;position:relative;overflow:hidden}
 #lockScreen::before{content:"";position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(110,168,255,.08),transparent 70%),
-             radial-gradient(ellipse 60% 40% at 50% 100%,rgba(167,139,250,.06),transparent 70%);}
+  background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(245,166,35,.06),transparent 70%),
+             radial-gradient(ellipse 60% 40% at 50% 100%,rgba(245,166,35,.04),transparent 70%);}
 #lockScreen h1{font-size:54px;margin:0 0 20px;letter-spacing:.18em;
-  background:linear-gradient(120deg,#8ab4ff,#c4b5fd 50%,#8ab4ff);background-size:200% auto;
+  background:linear-gradient(120deg,#6ea8ff,#a78bfa);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-  animation:logoShine 6s linear infinite, fadeUp .7s cubic-bezier(.22,1,.36,1) both;
-  filter:drop-shadow(0 0 24px rgba(110,168,255,.25));}
-@keyframes logoShine{to{background-position:200% center}}
+  animation:fadeUp .7s cubic-bezier(.22,1,.36,1) both;
+  filter:drop-shadow(0 0 24px rgba(245,166,35,.25));}
+
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 #lockScreen .muted{font-size:13px;margin-bottom:12px;letter-spacing:.32em;opacity:.7;
@@ -110,8 +110,8 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 #lockScreen .dot{width:15px;height:15px;border-width:2px;
   transition:all .25s cubic-bezier(.34,1.56,.64,1)}
 #lockScreen .dot.on{transform:scale(1.25);
-  background:linear-gradient(135deg,#6ea8ff,#a78bfa);border-color:transparent;
-  box-shadow:0 0 16px rgba(110,168,255,.6)}
+  background:#f5a623;border-color:transparent;
+  box-shadow:0 0 16px rgba(245,166,35,.6)}
 #lockScreen .dots.shake{animation:shake .4s}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 #lockScreen .pinpad{grid-template-columns:repeat(3,minmax(72px,84px));gap:14px;max-width:300px;
@@ -136,9 +136,9 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 /* cards */
 .searchrow{display:flex;gap:8px;margin-top:10px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-top:12px}
-.pcard{background:linear-gradient(165deg,#151a26,#0d1017);border:1px solid transparent;border-radius:18px;overflow:hidden;text-align:center;padding:0 0 12px;cursor:pointer;transition:transform .12s;position:relative;
-  background:linear-gradient(#141824,#10131b) padding-box,linear-gradient(135deg,rgba(79,140,255,.55),rgba(139,92,246,.45)) border-box;border:1px solid transparent;
-  box-shadow:0 6px 22px rgba(0,0,0,.4),0 0 18px rgba(79,140,255,.12)}
+.pcard{background:linear-gradient(165deg,#151a26,#0d1017);border:1px solid transparent;border-radius:16px;overflow:hidden;text-align:center;padding:0 0 12px;cursor:pointer;transition:transform .12s;position:relative;
+  background:linear-gradient(#141824,#10131b) padding-box,linear-gradient(135deg,rgba(245,166,35,.5),rgba(245,166,35,.22)) border-box;border:1px solid transparent;
+  box-shadow:0 8px 24px rgba(0,0,0,.45)}
 .pcard:active{transform:scale(.97)}
 .pcard img{width:100%;height:120px;object-fit:cover;display:block;background:#1a1e26}
 .pcard .initials{width:100%;height:120px;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:800;color:#8ea6d8;background:linear-gradient(160deg,#161c2c,#0e1220)}
@@ -146,7 +146,7 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 .pcard .pname{color:var(--muted);font-size:13px;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* Apple Wallet style stacked cards */
 #walletStack{position:relative;margin-top:6px}
-.wcard{position:absolute;left:0;right:0;height:190px;border-radius:22px;overflow:hidden;cursor:pointer;
+.wcard{position:absolute;left:0;right:0;height:190px;border-radius:16px;overflow:hidden;cursor:pointer;
   background-size:cover;background-position:center;
   border:1px solid rgba(255,255,255,.14);
   box-shadow:0 -4px 18px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.18);
@@ -159,9 +159,9 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 .wcard .wname{font-size:13px;font-weight:500;color:rgba(255,255,255,.85);text-shadow:0 1px 6px rgba(0,0,0,.6);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wcard .wbrand{position:absolute;top:14px;left:18px;z-index:2;font-size:12px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,.92);text-shadow:0 1px 6px rgba(0,0,0,.55)}
 .wcard .wring{position:absolute;top:12px;right:16px;z-index:2;width:30px;height:30px;border-radius:50%;border:3px solid rgba(255,255,255,.85);box-shadow:0 0 10px rgba(0,0,0,.4)}
-.wcard.active{box-shadow:0 12px 34px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.22),0 0 24px rgba(79,140,255,.18)}
+.wcard.active{box-shadow:0 12px 34px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.22)}
 /* wallet detail panel (below selected card) */
-.wdetail{position:absolute;left:0;right:0;background:#141824;border:1px solid var(--line);border-radius:18px;overflow:hidden;animation:slideup .25s ease}
+.wdetail{position:absolute;left:0;right:0;background:#141824;border:1px solid var(--line);border-radius:16px;overflow:hidden;animation:slideup .25s ease}
 @keyframes slideup{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 .wdetail-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px;font-size:15px}
 .wclose{background:#232a3a;border:0;color:#fff;min-width:44px;min-height:44px;width:44px;height:44px;border-radius:50%;font-size:16px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
@@ -172,22 +172,22 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 .wrow .wchev{margin-left:auto;color:var(--muted);font-size:20px;flex:none}
 a.wrow:active{background:rgba(255,255,255,.05)}
 .wdetail-actions{display:flex;gap:10px;padding:14px 16px}
-.wact{flex:1;padding:13px;border:0;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#4f8cff,#8b5cf6);color:#fff}
+.wact{flex:1;padding:13px;border:0;border-radius:16px;font-size:15px;font-weight:700;cursor:pointer;background:#f5a623;color:#fff}
 .wact:last-child{background:#232a3a}
 .empty{color:var(--muted);text-align:center;margin:60px 0}
-.fab{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));right:24px;width:64px;height:64px;border-radius:50%;font-size:32px;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;margin:0;padding:0;box-shadow:0 6px 22px rgba(79,140,255,.45)}
+.fab{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));right:24px;width:64px;height:64px;border-radius:50%;font-size:32px;line-height:1;background:var(--accent);color:#1a1206;margin:0;padding:0;box-shadow:0 8px 24px rgba(0,0,0,.45)}
 /* present mode: one-tap share from home screen */
-.present-share{width:100%;padding:16px;font-size:18px;font-weight:700;margin:10px 0 2px;border-radius:16px;min-height:56px;box-shadow:0 6px 22px rgba(79,140,255,.45)}
+.present-share{width:100%;padding:16px;font-size:18px;font-weight:700;margin:10px 0 2px;border-radius:16px;min-height:56px;box-shadow:0 6px 22px rgba(245,166,35,.4)}
 #presentQr{display:flex;justify-content:center;margin:14px 0}
 #presentQr table,#presentQr canvas,#presentQr img{border-radius:8px}
 /* flip card */
 .flipwrap{perspective:1000px;margin-top:6px;cursor:pointer}
 .flipinner{position:relative;width:100%;height:230px;transition:transform .55s;transform-style:preserve-3d}
 .flipwrap.flipped .flipinner{transform:rotateY(180deg)}
-.flipfront,.flipback{position:absolute;top:0;left:0;right:0;bottom:0;height:230px;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:20px;overflow:hidden;
+.flipfront,.flipback{position:absolute;top:0;left:0;right:0;bottom:0;height:230px;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:16px;overflow:hidden;
   -webkit-transform:translateZ(0);transform:translateZ(0);
-  background:linear-gradient(#141824,#10131b) padding-box,linear-gradient(135deg,rgba(79,140,255,.6),rgba(139,92,246,.5)) border-box;border:1px solid transparent;
-  box-shadow:0 8px 30px rgba(0,0,0,.5),0 0 24px rgba(79,140,255,.15)}
+  background:linear-gradient(#141824,#10131b) padding-box,linear-gradient(135deg,rgba(245,166,35,.55),rgba(245,166,35,.25)) border-box;border:1px solid transparent;
+  box-shadow:0 8px 24px rgba(0,0,0,.45)}
 .flipfront{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:24px;position:relative;overflow:hidden;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
 .flipfront::before{content:"";position:absolute;top:-40%;right:-30%;width:70%;height:70%;border-radius:50%;
@@ -202,8 +202,7 @@ a.wrow:active{background:rgba(255,255,255,.05)}
 .flipfront .fcover-text .ftag{text-shadow:0 1px 8px rgba(0,0,0,.8)}
 .flipfront .fring::after{content:"";position:absolute;top:-11px;left:50%;width:9px;height:9px;background:var(--accent);border-radius:50%;transform:translateX(-50%)}
 .flipfront h2{margin:0;font-size:28px;font-weight:800;letter-spacing:.06em;position:relative;z-index:1;
-  background:linear-gradient(120deg,#8ab8ff,#c4a8ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-  text-shadow:0 2px 20px rgba(110,168,255,.25)}
+  color:#f5a623;}
 .flipfront .fsub{font-size:10px;letter-spacing:.32em;color:var(--accent);font-weight:700;margin-top:6px;position:relative;z-index:1;opacity:.9}
 .flipfront .ftag{margin-top:10px;font-size:14px;color:rgba(255,255,255,.88);font-weight:500;position:relative;z-index:1}
 .flipfront .ftag{color:var(--muted);font-size:12px;margin-top:6px}
@@ -236,22 +235,22 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .modal ul{margin:8px 0;padding-left:20px;color:var(--text)}
 .modal ul li{margin:4px 0}
 .modal input{margin:8px 0}
-#toast{position:fixed;bottom:calc(96px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(16px);background:#1c2130;border:1px solid var(--line);color:var(--text);padding:12px 22px;border-radius:14px;font-size:15px;opacity:0;transition:opacity .25s,transform .25s;z-index:200;pointer-events:none;white-space:normal;word-wrap:break-word;overflow-wrap:break-word;max-width:90vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+#toast{position:fixed;bottom:calc(96px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(16px);background:#1c2130;border:1px solid var(--line);color:var(--text);padding:12px 22px;border-radius:16px;font-size:15px;opacity:0;transition:opacity .25s,transform .25s;z-index:200;pointer-events:none;white-space:normal;word-wrap:break-word;overflow-wrap:break-word;max-width:90vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.4)}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .stickybar button{flex:1;margin:0;padding:14px;font-size:16px}
 /* dashboard */
 .statrow{display:flex;justify-content:space-between;align-items:center;padding:12px 4px;border-bottom:1px solid var(--line);font-size:16px}
 .statrow:last-child{border-bottom:0}
-.statrow b{font-size:20px;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.statrow b{font-size:20px;color:#f5a623}
 .statrow.sub{padding-left:18px;font-size:14px;color:var(--muted)}
 .statrow.sub b{font-size:16px}
 /* share credits */
-.creditbar{text-align:center;padding:10px 12px;margin:10px 0;background:#141926;border:1px dashed var(--line);border-radius:12px;font-size:14px;line-height:1.6}
+.creditbar{text-align:center;padding:10px 12px;margin:10px 0;background:#141926;border:1px dashed var(--line);border-radius:16px;font-size:14px;line-height:1.6}
 .togglerow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line);font-size:15px}
 .togglerow:last-child{border-bottom:0}
 .switch{position:relative;width:52px;height:30px;flex:none}
 .switch input{opacity:0;width:100%;height:100%;position:absolute;margin:0;cursor:pointer;z-index:2}
-.sl{position:absolute;inset:0;background:#2a3040;border-radius:20px;transition:.2s;pointer-events:none}
+.sl{position:absolute;inset:0;background:#2a3040;border-radius:16px;transition:.2s;pointer-events:none}
 .sl:before{content:"";position:absolute;width:24px;height:24px;left:3px;top:3px;background:#8a93a5;border-radius:50%;transition:.2s}
 .switch input:checked+.sl{background:linear-gradient(135deg,var(--accent),var(--accent2))}
 .switch input:checked+.sl:before{transform:translateX(22px);background:#fff}
@@ -262,23 +261,23 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 #reposCircle img{width:100%;height:100%;object-fit:cover;pointer-events:none}
 #reposOverlay p{color:var(--muted);margin:18px 0}
 /* ---------- encounter memory ---------- */
-.nudgecard{background:linear-gradient(160deg,#16241a,#10160f);border:1px solid #2d5a35;border-radius:14px;padding:12px 14px;margin:8px 0}
-.memcard{background:linear-gradient(160deg,#1c1830,#12101c);border:1px solid #4a3f6b;border-radius:14px;padding:12px 14px;margin:8px 0}
+.nudgecard{background:linear-gradient(160deg,#16241a,#10160f);border:1px solid #2d5a35;border-radius:16px;padding:12px 14px;margin:8px 0}
+.memcard{background:linear-gradient(160deg,#1c1830,#12101c);border:1px solid #4a3f6b;border-radius:16px;padding:12px 14px;margin:8px 0}
 .nudgecard h4,.memcard h4{margin:0 0 4px;font-size:14px}
 .nudgecard p,.memcard p{margin:0 0 8px;font-size:13px;color:var(--muted)}
 .nudgecard .rowbtns,.memcard .rowbtns{display:flex;gap:8px}
-.nudgecard button,.memcard button{flex:1;padding:9px;border-radius:10px;font-size:14px}
-.tlitem{background:#14161c;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:8px 0}
+.nudgecard button,.memcard button{flex:1;padding:9px;border-radius:8px;font-size:14px}
+.tlitem{background:#14161c;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:8px 0}
 .tlitem .tldate{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
 .tlitem h4{margin:4px 0;font-size:16px}
 .tlitem p{margin:4px 0;font-size:13px;color:var(--muted)}
 .tlitem .tlmeta{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
-.tlitem .tlmeta button{padding:7px 12px;font-size:13px;border-radius:10px}
+.tlitem .tlmeta button{padding:7px 12px;font-size:13px;border-radius:8px}
 .tlitem .tlmeta .gray{background:none;border:1px solid var(--line);color:var(--muted);box-shadow:none}
 .fudone{opacity:.55}
 .fudone h4{text-decoration:line-through}
 /* ---------- business card view ---------- */
-.bcard{width:100%;height:100%;border-radius:14px;overflow:hidden;position:relative;box-sizing:border-box;padding:18px;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.bcard{width:100%;height:100%;border-radius:16px;overflow:hidden;position:relative;box-sizing:border-box;padding:18px;display:flex;flex-direction:column;justify-content:center;gap:2px}
 .bcard .bc-fields{display:flex;flex-direction:column;gap:2px;min-height:0;overflow:hidden}
 .bc-photo{width:54px;height:54px;border-radius:50%;object-fit:cover;margin-bottom:6px}
 .bc-name{font-size:21px;font-weight:800;line-height:1.15}
@@ -287,7 +286,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .bc-line{font-size:12.5px;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* modern: dark gradient, accent bar */
 .tpl-modern{background:linear-gradient(135deg,#18244d,#0b1026);color:#fff;border:1px solid #2c3d6e}
-.tpl-modern::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:linear-gradient(180deg,#4f8cff,#a78bfa)}
+.tpl-modern::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:#f5a623}
 .tpl-modern .bc-title{color:#9ec1ff}
 /* classic: cream paper, serif, centered */
 .tpl-classic{background:#faf7f0;color:#1c1a16;border:1px solid #d9d0ba;text-align:center;font-family:Georgia,"Times New Roman",serif;align-items:center}
@@ -297,7 +296,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 /* bold: vibrant duotone */
 .tpl-bold{background:linear-gradient(135deg,#ff5e3a,#c81d5e);color:#fff;border:0}
 .tpl-bold .bc-name{font-size:24px;letter-spacing:.02em;text-transform:uppercase}
-.tpl-bold .bc-org{background:rgba(0,0,0,.25);display:inline-block;padding:2px 10px;border-radius:20px;font-size:12px;margin-top:4px}
+.tpl-bold .bc-org{background:rgba(0,0,0,.25);display:inline-block;padding:2px 10px;border-radius:16px;font-size:12px;margin-top:4px}
 /* minimal: near-black, hairline */
 .tpl-minimal{background:#0e0e12;color:#ececf1;border:1px solid #2a2a32;padding:22px}
 .tpl-minimal .bc-name{font-size:20px;font-weight:600;letter-spacing:.01em}
@@ -319,28 +318,28 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .bc-qrlabel{font-size:10px;opacity:.75;margin-top:4px}
 .bc-tap{margin-top:8px;font-size:12px;font-weight:700;text-align:center;opacity:.9}
 .rcvhint{text-align:center;color:#9aa1ad;font-size:13px;margin:8px 0 14px}
-.rcvbtn{display:block;text-align:center;padding:14px;border-radius:14px;background:linear-gradient(135deg,#4f8cff,#a78bfa);color:#fff;font-weight:700;text-decoration:none;margin:0 0 16px}
-.rcvlead{background:#14161c;border:1px solid #262a33;border-radius:18px;padding:16px;margin-top:16px}
+.rcvbtn{display:block;text-align:center;padding:14px;border-radius:16px;background:#f5a623;color:#fff;font-weight:700;text-decoration:none;margin:0 0 16px}
+.rcvlead{background:#14161c;border:1px solid #262a33;border-radius:16px;padding:16px;margin-top:16px}
 .rcvlead summary::-webkit-details-marker{display:none}
 .rcvlead h3{margin:0 0 8px;font-size:16px}
 .rcvlead p{color:#9aa1ad;font-size:13px;margin:0 0 12px}
-.rcvlead input{width:100%;margin:4px 0;padding:10px;border-radius:10px;border:1px solid #262a33;background:#0e1118;color:#fff;box-sizing:border-box}
-.rcvlead button{width:100%;margin-top:8px;padding:12px;border:0;border-radius:12px;background:linear-gradient(135deg,#4f8cff,#a78bfa);color:#fff;font-weight:600}
+.rcvlead input{width:100%;margin:4px 0;padding:10px;border-radius:8px;border:1px solid #262a33;background:#0e1118;color:#fff;box-sizing:border-box}
+.rcvlead button{width:100%;margin-top:8px;padding:12px;border:0;border-radius:8px;background:#f5a623;color:#fff;font-weight:600}
 .rcvlead .lmsg{font-size:13px;text-align:center;min-height:18px;color:#9aa1ad}
 .rcvfoot{text-align:center;margin-top:24px}
 .rcvfoot a{color:#9aa1ad}
 /* editor: template picker + preview */
 .tplpicker{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:6px 0}
-.tplbtn{padding:10px 4px;border-radius:10px;background:#0e1118;border:1px solid var(--line);color:var(--muted);font-size:13px;font-weight:600;min-height:44px}
+.tplbtn{padding:10px 4px;border-radius:8px;background:#0e1118;border:1px solid var(--line);color:var(--muted);font-size:13px;font-weight:600;min-height:44px}
 .tplbtn.on{border-color:var(--accent);color:#fff;background:#16203a}
 .bizprev{margin:8px 0;display:flex;flex-direction:column;gap:8px}
 .bizprev .bcard{aspect-ratio:3.5/2}
 .bizprev .plabel{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
 #frontPicker,#backPicker{display:flex;flex-wrap:wrap;gap:4px 10px;margin:4px 0 8px}
-#frontPicker .chk,#backPicker .chk{display:inline-flex;align-items:center;gap:6px;background:#0e1118;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;cursor:pointer;min-height:44px}
+#frontPicker .chk,#backPicker .chk{display:inline-flex;align-items:center;gap:6px;background:#0e1118;border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer;min-height:44px}
 #frontPicker .chk input,#backPicker .chk input{width:auto;margin:0}
 /* dashboard collapsible groups */
-.dashgroup{border:1px solid var(--line);border-radius:18px;margin:14px 0;background:linear-gradient(160deg,#10131b,#0c0e14);overflow:hidden}
+.dashgroup{border:1px solid var(--line);border-radius:16px;margin:14px 0;background:linear-gradient(160deg,#10131b,#0c0e14);overflow:hidden}
 .dashgroup>summary{padding:16px 18px;font-size:17px;font-weight:700;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;user-select:none;-webkit-user-select:none}
 .dashgroup>summary::-webkit-details-marker{display:none}
 .dashgroup>summary::after{content:"›";font-size:26px;line-height:1;color:var(--muted);transform:rotate(90deg);transition:transform .2s}
@@ -348,7 +347,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .dashgroup[open]>summary{border-bottom:1px solid var(--line)}
 .dashgroup .box{margin:12px}
 .dashinsights{border-color:#2a3350}
-.advbadge{font-size:11px;font-weight:700;color:var(--accent);background:rgba(79,140,255,.12);border:1px solid rgba(79,140,255,.35);padding:4px 12px;border-radius:20px;letter-spacing:.08em}
+.advbadge{font-size:11px;font-weight:700;color:var(--accent);background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.35);padding:4px 12px;border-radius:16px;letter-spacing:.08em}
 /* hamburger nav menu */
 .navmenu{position:fixed;inset:0;z-index:150}
 .navmenu[hidden]{display:none}
@@ -358,24 +357,24 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .navmenu.open .navmenu-panel{transform:translateX(0)}
 .navmenu-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .navmenu-title{font-size:17px;font-weight:700;letter-spacing:.04em}
-.navitem{display:flex;align-items:center;justify-content:flex-start;gap:14px;width:100%;background:#1c2130;border:1px solid var(--line);border-radius:12px;color:var(--text);padding:14px 16px;font-size:16px;min-height:52px;text-align:left;cursor:pointer}
+.navitem{display:flex;align-items:center;justify-content:flex-start;gap:14px;width:100%;background:#1c2130;border:1px solid var(--line);border-radius:16px;color:var(--text);padding:14px 16px;font-size:16px;min-height:52px;text-align:left;cursor:pointer}
 .navitem:active{background:#232a3d}
 .navicon{font-size:20px;width:28px;text-align:center;flex:none}
 /* tappable profile photos + action sheet */
 .tappable-photo{position:relative;cursor:pointer}
-.tappable-photo::after{content:"📷";position:absolute;right:8px;bottom:8px;width:36px;height:36px;border-radius:50%;background:rgba(10,12,20,.78);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:17px;pointer-events:none}
+.tappable-photo::after{content:"✎";position:absolute;right:8px;bottom:8px;width:36px;height:36px;border-radius:50%;background:rgba(10,12,20,.78);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:17px;pointer-events:none}
 #profileCoverShow.tappable-photo::after{right:12px;bottom:12px}
 .tappable-photo:active{opacity:.85}
 .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;display:flex;align-items:flex-end;justify-content:center}
 .sheet-backdrop[hidden]{display:none!important}
-.sheet{width:100%;max-width:520px;background:#141824;border:1px solid var(--line);border-bottom:none;border-radius:18px 18px 0 0;padding:10px 16px calc(20px + env(safe-area-inset-bottom));animation:sheetup .22s ease}
+.sheet{width:100%;max-width:520px;background:#141824;border:1px solid var(--line);border-bottom:none;border-radius:16px 18px 0 0;padding:10px 16px calc(20px + env(safe-area-inset-bottom));animation:sheetup .22s ease}
 @keyframes sheetup{from{transform:translateY(40px);opacity:.5}to{transform:none;opacity:1}}
 .sheet-title{text-align:center;font-weight:700;font-size:15px;padding:10px 0 6px;color:var(--muted)}
-.sheet-btn{display:block;width:100%;background:#1c2130;border:1px solid var(--line);border-radius:12px;color:var(--text);padding:15px;font-size:16px;margin:8px 0;cursor:pointer}
+.sheet-btn{display:block;width:100%;background:#1c2130;border:1px solid var(--line);border-radius:16px;color:var(--text);padding:15px;font-size:16px;margin:8px 0;cursor:pointer}
 .sheet-btn:active{background:#232a3d}
 .sheet-cancel{color:#ff8a8a}
 /* glassmorphic section icons */
-.glassicon{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.07);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.14);font-size:22px;vertical-align:middle;box-shadow:0 4px 18px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.12);flex:none}
+.plicon{display:inline-flex;align-items:center;justify-content:center;flex:none}
 .dashgroup>summary{display:flex;align-items:center;cursor:pointer;list-style:none}
 .dashgroup>summary::-webkit-details-marker{display:none}
 /* fullscreen photo viewer */
@@ -389,27 +388,14 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <!-- WELCOME (first run) -->
 <div id="welcomeScreen" hidden>
   <div class="wrap" style="min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
-    <h1 style="font-size:52px;letter-spacing:.2em;margin:0 0 8px;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#a78bfa,#6ea8ff);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow));animation:shimmer 3s linear infinite">OMNI</h1>
-    <div class="muted" style="letter-spacing:.15em;margin-bottom:28px;font-size:13px">SHARE ONLY WHAT YOU CHOOSE</div>
-    <div style="display:flex;flex-direction:column;gap:12px;max-width:340px;width:100%;margin-bottom:24px">
-      <div class="glass" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;text-align:left">
-        <div style="font-size:28px">📇</div>
-        <div><b>Create cards</b><div class="muted" style="font-size:13px">For yourself or your business</div></div>
-      </div>
-      <div class="glass" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;text-align:left">
-        <div style="font-size:28px">🔐</div>
-        <div><b>Lock them</b><div class="muted" style="font-size:13px">Encrypted with your PIN</div></div>
-      </div>
-      <div class="glass" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;text-align:left">
-        <div style="font-size:28px">👆</div>
-        <div><b>Share</b><div class="muted" style="font-size:13px">Tap, QR, or straight to contacts</div></div>
-      </div>
-    </div>
-    <button id="welcomeGo" style="margin-top:4px;padding:16px 48px;font-size:17px;border-radius:16px">Get started</button>
-    <button class="forgot" id="welcomeRestoreBtn" style="margin-top:12px">☁️ Already use OMNI? Restore my cards</button>
+    <h1 style="font-size:52px;letter-spacing:.2em;margin:0 0 8px;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow))">OMNI</h1>
+    <div class="muted" style="margin-bottom:28px;font-size:16px">Your card, in their phone, in one tap.</div>
+    <p class="muted" style="font-size:15px;margin:0 0 24px;max-width:300px">They get your details instantly — no app, no paper, no typing.</p>
+    <button id="welcomeGo" style="margin-top:4px;padding:16px 48px;font-size:17px;border-radius:16px">Create my first card →</button>
+    <button class="forgot" id="welcomeRestoreBtn" style="margin-top:12px">Already use OMNI? Restore my cards</button>
   </div>
 </div>
-<style>@keyframes shimmer{to{background-position:200% center}}</style>
+
 
 <!-- QUICK CREATE (first card, 3 steps) -->
 <div id="quickScreen" hidden>
@@ -451,7 +437,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <div id="lockBg" aria-hidden="true"></div>
   <h1 class="logo-anim"><span class="logo-o">O</span><span class="logo-rest">MNI</span></h1>
   <div id="faceIdHero" hidden style="width:100%;max-width:320px;margin:6px 0 4px">
-    <button id="faceIdHeroBtn" style="width:100%;padding:18px;font-size:19px;font-weight:700;background:linear-gradient(120deg,#6ea8ff,#a78bfa);border:none;border-radius:16px;color:#fff;box-shadow:0 4px 24px rgba(110,168,255,.35)">Unlock with Face ID</button>
+    <button id="faceIdHeroBtn" style="width:100%;padding:18px;font-size:19px;font-weight:700;background:#f5a623;border:none;border-radius:16px;color:#fff;box-shadow:0 4px 24px rgba(245,166,35,.35)">Unlock with Face ID</button>
     <div style="text-align:center;margin-top:14px;font-size:15px;letter-spacing:.35em;color:var(--muted);opacity:.7">or enter your PIN</div>
   </div>
   <button id="bioUnlockBtn" hidden style="margin-top:22px;width:100%;max-width:280px;font-size:16px;padding:14px;min-height:52px">Unlock with biometrics</button>
@@ -461,7 +447,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <div class="dots" id="dots"></div>
   <div class="pinpad" id="pinpad"></div>
   <div id="lockAuthLinks" style="margin-top:8px;display:flex;flex-direction:column;gap:4px;align-items:center">
-    <button class="forgot" id="lockSyncBtn" style="margin:0;padding:6px" hidden>☁️ Restore my cards from cloud</button>
+    <button class="forgot" id="lockSyncBtn" style="margin:0;padding:6px" hidden>Restore my cards from cloud</button>
     <button class="forgot" id="forgotBtn" hidden style="margin:0;padding:6px">Forgot PIN? Reset everything</button>
   </div>
   <div id="lockSyncForm" hidden style="margin-top:8px;width:100%;max-width:280px;">
@@ -498,7 +484,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <div id="resetStep2" hidden>
       <p><b>Before you wipe everything, check for a backup:</b></p>
       <div id="resetBackupStatus" class="muted" style="font-size:13px;margin:8px 0"></div>
-      <button id="resetRestore" style="width:100%">📥 I have a backup file — restore it instead</button>
+      <button id="resetRestore" style="width:100%">I have a backup file — restore it instead</button>
       <p class="muted" style="margin-top:12px;font-size:13px">No backup available? Only continue if you accept losing everything.</p>
       <div class="rowbtns">
         <button id="resetStep2Next" class="danger">No backup — continue to wipe</button>
@@ -529,13 +515,13 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <span class="navmenu-title">Menu</span>
       <button class="iconbtn small" id="navMenuClose" aria-label="Close menu">✕</button>
     </div>
-    <button class="navitem" id="navProfile"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg></span>Profile</button>
-    <button class="navitem" id="navDash"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg></span>Dashboard</button>
-    <button class="navitem" id="navReport"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5"/><circle cx="12" cy="18" r="0.5" fill="#fff"/></svg></span>Report an issue</button>
-    <button class="navitem" id="navHelp"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.4 2.3c-.8.3-.9 1-.9 1.7"/><circle cx="12" cy="17" r="0.5" fill="#fff"/></svg></span>Help & support</button>
-    <button class="navitem" id="navLegal"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg></span>Legal info</button>
-    <button class="navitem" id="navOwner"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18h18"/><path d="M4 18l-1.5-9L7 12l5-7 5 7 4.5-3L20 18"/></svg></span>Owner controls</button>
-    <button class="navitem" id="navLock"><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>Lock</button>
+    <button class="navitem" id="navProfile"><span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg></span>Profile</button>
+    <button class="navitem" id="navDash"><span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg></span>Dashboard</button>
+    <button class="navitem" id="navReport"><span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5"/><circle cx="12" cy="18" r="0.5" fill="#fff"/></svg></span>Report an issue</button>
+    <button class="navitem" id="navHelp"><span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.4 2.3c-.8.3-.9 1-.9 1.7"/><circle cx="12" cy="17" r="0.5" fill="#fff"/></svg></span>Help & support</button>
+    <button class="navitem" id="navLegal"><span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg></span>Legal info</button>
+    <button class="navitem" id="navOwner"><span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18h18"/><path d="M4 18l-1.5-9L7 12l5-7 5 7 4.5-3L20 18"/></svg></span>Owner controls</button>
+    <button class="navitem" id="navLock"><span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>Lock</button>
   </aside>
 </div>
 
@@ -577,9 +563,9 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 
 <!-- HOME -->
 <div class="wrap" id="homeScreen" hidden>
-  <div class="brand"><h1>OMNI</h1><div><button class="iconbtn" id="menuBtn" aria-label="Open menu" aria-haspopup="true">☰</button><span id="legacyHeaderBtns" style="display:none"><button class="iconbtn small" id="ownerBtn" aria-label="Owner controls">👑</button><button class="iconbtn small" id="dashBtn" aria-label="Open dashboard">📊</button><button class="iconbtn" id="lockBtn" aria-label="Lockout">Lock</button></span></div></div>
+  <div class="brand"><h1>OMNI</h1><div><button class="iconbtn" id="menuBtn" aria-label="Open menu" aria-haspopup="true">☰</button><span id="legacyHeaderBtns" style="display:none"><button class="iconbtn small" id="ownerBtn" aria-label="Owner controls"></button><button class="iconbtn small" id="dashBtn" aria-label="Open dashboard"></button><button class="iconbtn" id="lockBtn" aria-label="Lockout">Lock</button></span></div></div>
   <button id="presentShareBtn" class="present-share" aria-label="Share your card now">Share my card</button>
-  <div id="offlineBar" class="box" hidden style="border-color:#7a5a2b;text-align:center;padding:10px">📴 Offline — you can view and share saved cards.<br><span class="muted">Backing up and cloud stats need internet.</span></div>
+  <div id="offlineBar" class="box" hidden style="border-color:#7a5a2b;text-align:center;padding:10px">Offline — you can view and share saved cards.<br><span class="muted">Backing up and cloud stats need internet.</span></div>
   <div id="backupNudge" class="box" hidden style="border-color:#7a5a2b;background:linear-gradient(160deg,#1d1812,#14110c)">
     <button class="small gray" id="nudgeDismiss">Later</button>
   </div>
@@ -606,7 +592,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <div class="flipback" id="flipBack"></div>
     </div>
   </div>
-  <p class="muted" id="flipHint" style="text-align:center;font-size:13px;margin:6px 0 12px">👆 Tap the card to flip it</p>
+  <p class="muted" id="flipHint" style="text-align:center;font-size:13px;margin:6px 0 12px">Tap the card to flip it</p>
   </details>
   <details class="dashgroup" id="dgDesign">
     <summary><span>Design</span></summary>
@@ -624,7 +610,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 
   <div class="box">
     <h3 class="sec" style="margin-top:0">Card cover</h3>
-    <div id="coverShow" style="width:100%;height:90px;border-radius:14px;overflow:hidden;background:#1a1e26;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;border:1px dashed var(--line)">No cover image</div>
+    <div id="coverShow" style="width:100%;height:90px;border-radius:16px;overflow:hidden;background:#1a1e26;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;border:1px dashed var(--line)">No cover image</div>
     <input type="file" id="coverInput" accept="image/*" hidden>
     <button class="chg" id="coverBtn">Choose card cover</button>
     <button class="chg" id="coverReposBtn" hidden>Reposition cover</button>
@@ -671,14 +657,14 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <button id="vcfBtn" class="gray" style="width:100%">Save .vcf file</button>
       <button id="linkBtn" class="gray" style="width:100%">NFC / QR link</button>
       <button id="walletBtn" class="gray" style="width:100%"> Add to Apple Wallet</button>
-      <button id="nfcWriteBtn" class="gray" style="width:100%" hidden>📲 Write to NFC Tag</button>
+      <button id="nfcWriteBtn" class="gray" style="width:100%" hidden>Write to NFC Tag</button>
       <button id="qrDlBtn" class="gray" style="width:100%" hidden>Save QR image</button>
     </div>
     <p class="muted">Standard system sharing (.vcf / AirDrop) is always free and unlimited. Share limits only apply to tracked cloud NFC / QR taps.</p>
   </div>
   </details>
   <details class="dashgroup" id="dgDanger">
-    <summary><span style="color:#e08080">Danger zone</span></summary>
+    <summary><span style="color:#e08080">Delete account</span></summary>
   <div class="box" style="border-color:#4a2b2b">
     <h3 class="sec" style="margin-top:0;color:#e08080">Delete this card</h3>
     <button id="delBtn" class="danger" style="width:100%;background:none;border:1px solid #4a2b2b;box-shadow:none">Delete this card</button>
@@ -734,7 +720,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <button class="small gray" id="ownerUnlockBtn">Unlock</button>
     </div>
     <div id="ownerOpen" hidden>
-      <div style="margin-bottom:12px;padding:10px;border:1px solid var(--line);border-radius:12px">
+      <div style="margin-bottom:12px;padding:10px;border:1px solid var(--line);border-radius:16px">
         <b style="font-size:14px">Change owner password</b>
         <div id="chPwForm" hidden style="margin-top:8px">
           <input id="chPwCur" type="password" placeholder="Current password" style="width:100%;margin:4px 0" autocomplete="current-password">
@@ -748,14 +734,14 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
         </div>
         <button class="small gray" id="chPwBtn" style="width:100%;margin-top:8px">Change password</button>
       </div>
-      <div style="margin-bottom:12px;padding:12px;border:1px solid var(--line);border-radius:12px">
+      <div style="margin-bottom:12px;padding:12px;border:1px solid var(--line);border-radius:16px">
         <div style="font-size:14px;font-weight:700;margin-bottom:10px">Liquid Glass</div>
-        <div id="glassPill" style="background:#2c2c2e;border-radius:28px;padding:12px;display:flex;align-items:center;gap:10px;position:relative">
+        <div id="glassPill" style="background:#2c2c2e;border-radius:16px;padding:12px;display:flex;align-items:center;gap:10px;position:relative">
           <svg width="28" height="28" viewBox="0 0 36 36" fill="none" stroke="#8e8e93" stroke-width="2.5" opacity=".7" style="flex-shrink:0">
             <rect x="4" y="8" width="18" height="18" rx="5"/><rect x="14" y="12" width="18" height="18" rx="5"/>
           </svg>
           <div id="glassTrack" style="flex:1;position:relative;height:32px;cursor:pointer;touch-action:none">
-            <div style="position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:6px;border-radius:3px;background:#48484a"></div>
+            <div style="position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:6px;border-radius:8px;background:#48484a"></div>
             <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:4px;height:4px;border-radius:50%;background:#636366"></div>
             <div style="position:absolute;left:75%;top:50%;transform:translate(-50%,-50%);width:4px;height:4px;border-radius:50%;background:#636366"></div>
             <div id="glassThumb" style="position:absolute;top:50%;transform:translateY(-50%);width:48px;height:32px;border-radius:16px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.35);cursor:grab;left:0"></div>
@@ -768,7 +754,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
         <!-- Live preview: see glass change as you drag -->
         <div style="margin-top:12px;position:relative;border-radius:16px;overflow:hidden;
           background:linear-gradient(135deg,#1a2030,#2a1f3d,#1f2a3d);padding:20px;min-height:90px">
-          <div id="glassPreview" class="glass" style="border-radius:12px;padding:14px;text-align:center">
+          <div id="glassPreview" class="glass" style="border-radius:16px;padding:14px;text-align:center">
             <div style="font-weight:700;font-size:15px">Preview Card</div>
             <div class="muted" style="font-size:12px;margin-top:4px">Drag the slider — watch me change</div>
           </div>
@@ -788,9 +774,9 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <div class="togglerow"><span>Pro price ($/mo)</span><input id="setProPrice" type="number" min="0.99" max="999" step="0.01" style="width:90px" aria-label="Pro monthly price"></div>
       <div class="togglerow"><span>Premium price ($/mo)</span><input id="setPremPrice" type="number" min="0.99" max="999" step="0.01" style="width:90px" aria-label="Premium monthly price"></div>
       <div class="togglerow"><span>Tokens per invite</span><input id="setTokensPerInvite" type="number" min="1" max="10000" style="width:90px" aria-label="Tokens earned per invite"></div>
-      <div class="togglerow"><span>Aurora template </span><input id="setTplAurora" type="number" min="1" max="100000" style="width:90px" aria-label="Aurora template token price"></div>
-      <div class="togglerow"><span>Obsidian Gold </span><input id="setTplObsidian" type="number" min="1" max="100000" style="width:90px" aria-label="Obsidian template token price"></div>
-      <div class="togglerow"><span>Royale template </span><input id="setTplRoyale" type="number" min="1" max="100000" style="width:90px" aria-label="Royale template token price"></div>
+      <div class="togglerow"><span>Midnight template </span><input id="setTplAurora" type="number" min="1" max="100000" style="width:90px" aria-label="Midnight template token price"></div>
+      <div class="togglerow"><span>Gold Foil </span><input id="setTplObsidian" type="number" min="1" max="100000" style="width:90px" aria-label="Gold Foil template token price"></div>
+      <div class="togglerow"><span>Neon template </span><input id="setTplRoyale" type="number" min="1" max="100000" style="width:90px" aria-label="Neon template token price"></div>
       <button class="small" id="savePricingBtn" style="width:100%;margin:4px 0 12px">Save pricing</button>
       <p class="muted" id="pricingMsg" style="font-size:12px"></p>
       <h3 class="sec">Test plans</h3>
@@ -807,24 +793,24 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <p style="font-size:32px;font-weight:800;margin:8px 0" id="ownerUserCount">—</p>
       <p class="muted" style="font-size:12px" id="ownerUserSub">accounts created</p>
       <div style="display:flex;gap:8px;margin:12px 0">
-        <div style="flex:1;background:#141926;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center">
+        <div style="flex:1;background:#141926;border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center">
           <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Free</div>
           <div style="font-size:28px;font-weight:800;margin:4px 0" id="planFreeCount">—</div>
-          <div style="height:6px;background:#1e2536;border-radius:3px;overflow:hidden"><div id="planFreeBar" style="height:100%;background:#6ea8ff;width:0%;border-radius:3px;transition:width .5s"></div></div>
+          <div style="height:6px;background:#1e2536;border-radius:8px;overflow:hidden"><div id="planFreeBar" style="height:100%;background:#f5a623;width:0%;border-radius:8px;transition:width .5s"></div></div>
         </div>
-        <div style="flex:1;background:#141926;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center">
+        <div style="flex:1;background:#141926;border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center">
           <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Pro</div>
           <div style="font-size:28px;font-weight:800;margin:4px 0" id="planProCount">—</div>
-          <div style="height:6px;background:#1e2536;border-radius:3px;overflow:hidden"><div id="planProBar" style="height:100%;background:#a78bfa;width:0%;border-radius:3px;transition:width .5s"></div></div>
+          <div style="height:6px;background:#1e2536;border-radius:8px;overflow:hidden"><div id="planProBar" style="height:100%;background:#f5a623;width:0%;border-radius:8px;transition:width .5s"></div></div>
         </div>
-        <div style="flex:1;background:#141926;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center">
+        <div style="flex:1;background:#141926;border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center">
           <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Premium</div>
           <div style="font-size:28px;font-weight:800;margin:4px 0" id="planPremiumCount">—</div>
-          <div style="height:6px;background:#1e2536;border-radius:3px;overflow:hidden"><div id="planPremiumBar" style="height:100%;background:#f0b429;width:0%;border-radius:3px;transition:width .5s"></div></div>
+          <div style="height:6px;background:#1e2536;border-radius:8px;overflow:hidden"><div id="planPremiumBar" style="height:100%;background:#f0b429;width:0%;border-radius:8px;transition:width .5s"></div></div>
         </div>
       </div>
       <button class="small" id="refreshUserCount">Refresh</button>
-      <h3 class="sec" style="margin-top:16px;color:#e08080">Danger zone</h3>
+      <h3 class="sec" style="margin-top:16px;color:#e08080">Delete account</h3>
       <p class="muted" style="font-size:12px">Delete all accounts except the one tied to your invite code. Irreversible.</p>
       <input id="wipeKeepCode" placeholder="Your invite code (e.g. 3VWU7K39)" autocomplete="off" autocapitalize="characters" style="margin-bottom:8px" aria-label="Keep code">
       <button class="small" id="wipeAccountsBtn" style="background:#5a1f1f;border-color:#7a2a2a">Wipe all other accounts</button>
@@ -845,7 +831,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   <div class="brand"><h1>Dashboard</h1></div>
   <div class="muted" style="letter-spacing:.08em;font-size:11px">YOUR ACCOUNT</div>
     <details class="dashgroup" id="dgAccount">
-    <summary><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg></span><span>My account</span></summary>
+    <summary><span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg></span><span>My account</span></summary>
 <div class="box" id="planBox">
     <h3 class="sec" style="margin-top:0">Your plan</h3>
     <div class="statrow"><span>Plan</span><b id="planName">Free</b></div>
@@ -876,7 +862,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   </div>
   </details>
   <details class="dashgroup" id="dgSharing">
-    <summary><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4"/><path d="M5 12v8h14v-8"/><path d="M12 8v12"/><path d="M12 8s-4.5 0-5.5-2.5C5.7 3.7 8 3 9 4.5 10 6 12 8 12 8z"/><path d="M12 8s4.5 0 5.5-2.5C18.3 3.7 16 3 15 4.5 14 6 12 8 12 8z"/></svg></span><span>Invite friends</span></summary>
+    <summary><span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4"/><path d="M5 12v8h14v-8"/><path d="M12 8v12"/><path d="M12 8s-4.5 0-5.5-2.5C5.7 3.7 8 3 9 4.5 10 6 12 8 12 8z"/><path d="M12 8s4.5 0 5.5-2.5C18.3 3.7 16 3 15 4.5 14 6 12 8 12 8z"/></svg></span><span>Invite friends</span></summary>
 <div class="box" id="inviteBox" hidden>
     <h3 class="sec" style="margin-top:0">Invite friends</h3>
     <p class="muted">Share your invite link — you'll earn <b><span id="inviteTokenRate">100</span> tokens</b> per friend plus access to 7 cards. Tokens can buy premium card designs. Your friend earns a free Pro trial.</p>
@@ -894,7 +880,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   </details>
   
   <details class="dashgroup" id="dgRedeem">
-    <summary><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2.5 2.5 0 0 0 0 5v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2.5 2.5 0 0 0 0-5z"/><path d="M13 5v2"/><path d="M13 11v2"/><path d="M13 17v2"/></svg></span><span>Redeem referral code</span></summary>
+    <summary><span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2.5 2.5 0 0 0 0 5v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2.5 2.5 0 0 0 0-5z"/><path d="M13 5v2"/><path d="M13 11v2"/><path d="M13 17v2"/></svg></span><span>Redeem referral code</span></summary>
 <div class="box" id="redeemBox">
     <h3 class="sec" style="margin-top:0">Redeem referral code</h3>
     <p class="muted">New here? Enter a friend's invite code — you'll earn 7 cards plus 7 days of Pro trial.</p>
@@ -906,31 +892,34 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   </div>
   </details>
   <details class="dashgroup" id="dgSig">
-    <summary><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/><path d="M14 15h4"/><path d="M14 18h2"/></svg></span><span>Email signature <span class="advbadge">PRO</span></span></summary>
+    <summary><span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/><path d="M14 15h4"/><path d="M14 18h2"/></svg></span><span>Email signature <span class="advbadge">PRO</span></span></summary>
 <div class="box" id="sigBox">
     <h3 class="sec" style="margin-top:0">Email signature <span class="advbadge">PRO</span></h3>
-    <p class="muted">Generate a branded signature from your profile.</p>
-    <button class="small gray" id="sigGen" style="width:100%">Generate signature</button>
-    <div id="sigPreview" hidden style="margin-top:12px;padding:12px;background:#fff;border-radius:12px;color:#000;"></div>
+    <p class="muted">Turn your profile into an email signature.</p>
+    <button class="small gray" id="sigGen" style="width:100%">Make my signature</button>
+    <div id="sigPreview" hidden style="margin-top:12px;padding:12px;background:#fff;border-radius:16px;color:#000;"></div>
     <button class="small" id="sigCopy" hidden style="width:100%;margin-top:8px">Copy HTML</button>
   </div>
   </details>
-  <details class="dashgroup" id="dgShop">
-    <summary><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 1 0 9 9"/><circle cx="8.5" cy="10.5" r="1" fill="#fff"/><circle cx="12" cy="7.5" r="1" fill="#fff"/><circle cx="15.5" cy="10.5" r="1" fill="#fff"/></svg></span><span>Premium designs</span></summary>
-<div class="box">
-    <div class="statrow"><span>Your tokens</span><b id="shopTokens">0</b></div>
+  <div class="dashgroup" id="dgShop" style="padding:16px 18px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+      <span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 1 0 9 9"/><circle cx="8.5" cy="10.5" r="1" fill="#fff"/><circle cx="12" cy="7.5" r="1" fill="#fff"/><circle cx="15.5" cy="10.5" r="1" fill="#fff"/></svg></span>
+      <b style="font-size:17px">Premium designs</b>
+      <span class="muted" style="margin-left:auto;font-size:13px"><b id="shopTokens" style="color:#f5a623">0</b> tokens</span>
+    </div>
     <div id="shopList"></div>
   </div>
-  </details>
-  <details class="dashgroup" id="dgTokens">
-    <summary><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M9 9.5c0-1 1.3-1.8 3-1.8s3 .8 3 1.8-1.3 1.7-3 1.9-3 .9-3 1.9 1.3 1.8 3 1.8 3-.8 3-1.8"/></svg></span><span>Buy tokens</span></summary>
-<div class="box">
-    <p class="muted">Earn 100 tokens per friend who joins, or buy a pack.</p>
+  <div class="dashgroup" id="dgTokens" style="padding:16px 18px;border-color:rgba(245,166,35,.45);background:linear-gradient(160deg,#1a1410,#12100c)">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f5a623" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M9 9.5c0-1 1.3-1.8 3-1.8s3 .8 3 1.8-1.3 1.7-3 1.9-3 .9-3 1.9 1.3 1.8 3 1.8 3-.8 3-1.8"/></svg></span>
+      <b style="font-size:17px">Buy tokens</b>
+    </div>
+    <p class="muted" style="margin:0 0 8px">Friends who join earn you 100 tokens each. Need more now? Grab a pack below.</p>
     <div id="packList"></div>
   </div>
   </details>
 <details class="dashgroup" id="dgData">
-    <summary><span class="glassicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><span>Data controls</span></summary>
+    <summary><span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><span>Data controls</span></summary>
 <div class="box">
     <h3 class="sec" style="margin-top:0">Your data</h3>
     <div class="statrow"><span>Cloud Sync</span><b id="dataSyncStatus">—</b></div>
@@ -967,7 +956,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <h3 class="sec" style="margin-top:0">FAQ</h3>
     <details style="margin:8px 0"><summary style="font-size:14px">How do I share my card?</summary><p class="muted" style="font-size:13px">Tap "Share my card" on the home screen, or open a card and use the Share button. The other person gets your contact details instantly.</p></details>
     <details style="margin:8px 0"><summary style="font-size:14px">How do invites work?</summary><p class="muted" style="font-size:13px">Share your invite code from Dashboard → Invite friends. Your friend gets 7 days of Pro free, and you earn 100 tokens per friend.</p></details>
-    <details style="margin:8px 0"><summary style="font-size:14px">What are tokens for?</summary><p class="muted" style="font-size:13px">Tokens unlock premium card designs (Aurora, Obsidian Gold, Royale) under Dashboard → Invite friends → Premium designs.</p></details>
+    <details style="margin:8px 0"><summary style="font-size:14px">What are tokens for?</summary><p class="muted" style="font-size:13px">Tokens unlock premium card designs (Midnight, Gold Foil, Neon) under Dashboard → Invite friends → Premium designs.</p></details>
     <details style="margin:8px 0"><summary style="font-size:14px">Is my data private?</summary><p class="muted" style="font-size:13px">Yes. Everything is encrypted on your phone with your PIN before it's stored or synced. We can't read your data.</p></details>
     <div class="statrow" style="margin-top:8px"><span>App version</span><b id="helpAppVer">1.0</b></div>
   </div>
@@ -1296,7 +1285,7 @@ async function pinDone(){
   }catch(e){
     // Never blame the PIN for a crypto/storage failure — say what's actually wrong.
     if(!window.isSecureContext||!window.crypto||!window.crypto.subtle){
-      pinMsg("⚠️ Page isn't secure — OMNI needs HTTPS to encrypt. Open https://omni-tap.com");
+      pinMsg("Page isn't secure — OMNI needs HTTPS to encrypt. Open https://omni-tap.com");
       pinBuf="";renderDots();return;
     }
     const f=pinFailRecord();
@@ -1779,7 +1768,7 @@ async function claimInvite(code){
       }catch(e){}
       await saveAll();
       ping("invite_claimed");
-      setTimeout(()=>toast(trial?"🎉 7 days of Pro — on us!":"🎉 Welcome!"),1200);
+      setTimeout(()=>toast(trial?"7 days of Pro — on us!":"Welcome!"),1200);
       // Re-register with inviter attribution
       registerInviteCode(myInviteCode());
     }else if(j&&j.error==="code_invalid_account_deleted"){
@@ -1813,10 +1802,10 @@ async function collectPendingInvites(){
       if(!userPlan.sharedOnce){
         userPlan.sharedOnce=true;
         userPlan.tokens=(userPlan.tokens||0)+reward;
-        msg=`🎉 Your cards bumped to 7 +${reward} tokens — a friend joined!`;
+        msg=`Your cards bumped to 7 +${reward} tokens — a friend joined!`;
       }else{
         userPlan.tokens=(userPlan.tokens||0)+reward;
-        msg=`🎉 +${reward} tokens — a friend joined!`;
+        msg=`+${reward} tokens — a friend joined!`;
       }
       await saveAll();
       toast(msg);
@@ -1892,7 +1881,7 @@ function renderCreditBoxes(){
   const bb=$("buyBox");if(bb)bb.hidden=true;
   try{
     $("inviteLink").value=myInviteCode();
-    $("bonusBal").textContent=(userPlan.tokens||0)+" 🪙";
+    $("bonusBal").textContent=(userPlan.tokens||0)+" tokens";
     const ib=$("inviteBonusAmt");if(ib)ib.textContent=tokensPerInvite();
     const itr=$("inviteTokenRate");if(itr)itr.textContent=tokensPerInvite();
   }catch(e){}
@@ -2374,7 +2363,7 @@ function planCardHTML(tier){
     : tier==="pro"
     ? ["Unlimited shares","12 cards","Everything allowed","All premium templates","Email signature"]
     : ["Unlimited shares","Unlimited cards","Advanced analytics","Custom branding","Priority support"];
-  return `<div style="border:1px solid ${cur?"#0a84ff":"var(--line)"};border-radius:14px;padding:14px;background:${cur?"#0a84ff18":"transparent"}">
+  return `<div style="border:1px solid ${cur?"#0a84ff":"var(--line)"};border-radius:16px;padding:14px;background:${cur?"#0a84ff18":"transparent"}">
     <div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:17px">${d.name}</b><b style="font-size:17px">${priceStr}</b></div>
     <div style="font-size:13px;color:var(--muted);margin:8px 0">${feats.map(f=>"✓ "+f).join("<br>")}</div>
     ${cur?`<div style="color:#0a84ff;font-weight:700">Current plan</div>`
@@ -2475,9 +2464,9 @@ async function ownerGrantPlan(tier){
 }
 /* ---------- premium templates + token shop ---------- */
 const PREMIUM_TEMPLATES=[
-  {id:"aurora",name:"Aurora",desc:"Shifting gradient glow",color:"#8b5cf6",coverColor:"#1e1b4b"},
-  {id:"obsidian",name:"Obsidian Gold",desc:"Black + gold luxury",color:"#d4af37",coverColor:"#0a0a0a"},
-  {id:"royale",name:"Royale",desc:"Signature flagship design",color:"#0a84ff",coverColor:"#0d1b2a"}
+  {id:"aurora",name:"Midnight",desc:"Deep dark gradient",color:"#8b5cf6",coverColor:"#1e1b4b"},
+  {id:"obsidian",name:"Gold Foil",desc:"Black and gold luxury",color:"#d4af37",coverColor:"#0a0a0a"},
+  {id:"royale",name:"Neon",desc:"Bright signature glow",color:"#0a84ff",coverColor:"#0d1b2a"}
 ];
 function templateDef(id){const t=PREMIUM_TEMPLATES.find(x=>x.id===id);if(t)t.cost=templateCost(id);return t;}
 const TOKEN_PACKS=[
@@ -2490,18 +2479,21 @@ function renderTokenShop(){
   try{
     const tb=tokenBalance();
     $("shopTokens").textContent=tb===Infinity?"∞":tb;
-    $("shopList").innerHTML=PREMIUM_TEMPLATES.map(t0=>{
+    $("shopList").innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">`+PREMIUM_TEMPLATES.map(t0=>{
       const t=templateDef(t0.id);
       const owned=ownedTemplates().includes(t.id)||tb===Infinity;
-      return `<div style="border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0">
-        <div style="display:flex;justify-content:space-between;align-items:baseline"><b>${t.name}</b><b>🪙 ${t.cost}</b></div>
-        <div class="muted" style="font-size:12px">${t.desc}</div>
-        ${owned?`<div style="color:#4ade80;font-size:13px;margin-top:6px">Owned — applies to your selected card</div><button class="small" style="width:100%;margin-top:6px" onclick="applyTemplate('${t.id}')">Apply to selected card</button>`
-        :`<button class="small" style="width:100%;margin-top:6px" onclick="buyTemplate('${t.id}')">Buy for 🪙 ${t.cost}</button>`}
+      return `<div style="border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#10131b">
+        <div style="height:64px;background:linear-gradient(135deg,${t.color},${t.coverColor})"></div>
+        <div style="padding:10px">
+          <b style="font-size:14px">${t.name}</b>
+          <div class="muted" style="font-size:11px;margin-top:2px">${t.cost} tokens</div>
+          ${owned?`<div style="color:#4ade80;font-size:12px;margin-top:4px">Owned</div><button class="small" style="width:100%;margin-top:4px" onclick="applyTemplate('${t.id}')">Apply</button>`
+          :`<button class="small" style="width:100%;margin-top:6px" onclick="buyTemplate('${t.id}')">Get</button>`}
+        </div>
       </div>`;
-    }).join("");
+    }).join("")+`</div>`;
     $("packList").innerHTML=TOKEN_PACKS.map((p,i)=>
-      `<button class="small" style="width:100%;margin:4px 0" onclick="buyTokens(${i})">🪙 ${p.tokens.toLocaleString()} — $${p.price}</button>`
+      `<button class="small" style="width:100%;margin:4px 0" onclick="buyTokens(${i})">${p.tokens.toLocaleString()} tokens — $${p.price}</button>`
     ).join("");
   }catch(e){}
 }
@@ -2509,7 +2501,7 @@ async function buyTemplate(id){
   const t=templateDef(id);if(!t)return;
   const tb=tokenBalance();
   if(tb!==Infinity&&(userPlan.tokens||0)<t.cost){
-    showUpgrade("Not enough tokens",`"${t.name}" costs 🪙 ${t.cost}. Earn tokens by inviting friends, or get unlimited tokens with Pro.`);
+    showUpgrade("Not enough tokens",`"${t.name}" costs ${t.cost} tokens. Earn tokens by inviting friends, or get unlimited tokens with Pro.`);
     return;
   }
   const p=getP();
@@ -2786,13 +2778,13 @@ function renderCards(){
     panel.className="wdetail";
     panel.style.top=(FULL+12)+"px";
     let rows="";
-    lines(p.phones).forEach(v=>rows+=`<a class="wrow" href="tel:${esc(v.replace(/\s/g,""))}"><span class="wico">📞</span><span><b>Call</b><i>${esc(formatPhone(v))}</i></span><span class="wchev">›</span></a>`);
-    lines(p.emails).forEach(v=>rows+=`<a class="wrow" href="mailto:${esc(v)}"><span class="wico">✉️</span><span><b>Email</b><i>${esc(v)}</i></span><span class="wchev">›</span></a>`);
+    lines(p.phones).forEach(v=>rows+=`<a class="wrow" href="tel:${esc(v.replace(/\s/g,""))}"><span><b>Call</b><i>${esc(formatPhone(v))}</i></span><span class="wchev">›</span></a>`);
+    lines(p.emails).forEach(v=>rows+=`<a class="wrow" href="mailto:${esc(v)}"><span><b>Email</b><i>${esc(v)}</i></span><span class="wchev">›</span></a>`);
     let socialBtns="";
-    lines(p.urls).forEach(v=>{const u=/^https?:/i.test(v)?v:"https://"+v;const sb=socialButton(u);if(sb){socialBtns+=sb;}else{rows+=`<a class="wrow" href="${esc(u)}" target="_blank" rel="noopener"><span class="wico">🌐</span><span><b>Website</b><i>${esc(v)}</i></span><span class="wchev">›</span></a>`;}});
-    if(socialBtns)rows+=`<div class="wrow" style="flex-wrap:wrap;gap:4px"><span class="wico">🔗</span><span style="flex:1;min-width:200px"><b>Links</b><br>${socialBtns}</span></div>`;
-    if(p.address)rows+=`<a class="wrow" href="https://maps.google.com/?q=${encodeURIComponent(p.address)}" target="_blank" rel="noopener"><span class="wico">📍</span><span><b>Address</b><i>${esc(properCase(p.address))}</i></span><span class="wchev">›</span></a>`;
-    if(p.notes)rows+=`<div class="wrow"><span class="wico">📝</span><span><b>Notes</b><i>${esc(p.notes)}</i></span></div>`;
+    lines(p.urls).forEach(v=>{const u=/^https?:/i.test(v)?v:"https://"+v;const sb=socialButton(u);if(sb){socialBtns+=sb;}else{rows+=`<a class="wrow" href="${esc(u)}" target="_blank" rel="noopener"><span><b>Website</b><i>${esc(v)}</i></span><span class="wchev">›</span></a>`;}});
+    if(socialBtns)rows+=`<div class="wrow" style="flex-wrap:wrap;gap:4px"><span style="flex:1;min-width:200px"><b>Links</b><br>${socialBtns}</span></div>`;
+    if(p.address)rows+=`<a class="wrow" href="https://maps.google.com/?q=${encodeURIComponent(p.address)}" target="_blank" rel="noopener"><span><b>Address</b><i>${esc(properCase(p.address))}</i></span><span class="wchev">›</span></a>`;
+    if(p.notes)rows+=`<div class="wrow"><span><b>Notes</b><i>${esc(p.notes)}</i></span></div>`;
     panel.innerHTML=`<div class="wdetail-head"><b>Contact details</b><button class="wclose" aria-label="Back to cards">✕</button></div>`+
       (rows||`<p class="muted" style="padding:12px">No contact info yet.</p>`)+
       `<div class="wdetail-actions"><button class="wact" id="wShare">Share</button><button class="wact" id="wEdit">Edit</button></div>`;
@@ -2874,9 +2866,9 @@ function renderFlip(){
   fb.style.borderColor=p.coverColor||"";
   let back="";
   if(p.title)back+=`<div class="flabel">${esc(p.title)}</div>`;
-  lines(p.phones).forEach(v=>back+=`<a href="tel:${esc(v.replace(/\s/g,""))}">📞 ${esc(v)}</a>`);
-  lines(p.emails).forEach(v=>back+=`<a href="mailto:${esc(v)}">✉️ ${esc(v)}</a>`);
-  lines(p.urls).forEach(v=>{const u=/^https?:/i.test(v)?v:"https://"+v;back+=`<a href="${esc(u)}" target="_blank" rel="noopener">🌐 ${esc(v)}</a>`;});
+  lines(p.phones).forEach(v=>back+=`<a href="tel:${esc(v.replace(/\s/g,""))}">${esc(v)}</a>`);
+  lines(p.emails).forEach(v=>back+=`<a href="mailto:${esc(v)}">${esc(v)}</a>`);
+  lines(p.urls).forEach(v=>{const u=/^https?:/i.test(v)?v:"https://"+v;back+=`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(v)}</a>`;});
   fb.classList.remove("has-cover-back");
   fb.innerHTML=back||`<p class="muted" style="text-align:center;margin-top:60px">No contact info yet.<br>Add some below.</p>`;
 }
@@ -3112,7 +3104,7 @@ $("saveBtn2").onclick=async()=>{
   if(verified){
     fillDetail();haptic(10);toast("Saved on this device ✓");
   }else{
-    toast("⚠️ Save failed — storage is full. Try removing the card cover photo, then save again");
+    toast("Save failed — storage is full. Try removing the card cover photo, then save again");
   }
 };
 // Emergency shrink for when storage is critically full (last resort only)
@@ -3144,8 +3136,8 @@ async function showFirstBackupModal(){
   overlay.id = "firstBackupModal";
   overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;";
   overlay.innerHTML = `
-    <div style="background:#14161c;border:1px solid #262a33;border-radius:18px;padding:24px;max-width:400px;width:100%;text-align:center;">
-      <div style="font-size:40px;margin-bottom:12px;">💾</div>
+    <div style="background:#14161c;border:1px solid #262a33;border-radius:16px;padding:24px;max-width:400px;width:100%;text-align:center;">
+      <div style="margin-bottom:12px;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#f5a623" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg></div>
       <h2 style="margin:0 0 8px;color:#f5f6f8;font-size:20px;">Back up your cards</h2>
       <p style="color:#9aa1ad;font-size:14px;margin:0 0 16px;">Your cards are saved to the cloud. Download a backup file for extra safety.</p>
       <button id="fbDownload" style="width:100%;margin-bottom:8px;">Download backup (.json)</button>
@@ -3381,7 +3373,7 @@ async function vaultUpload(silent){
     if(j.ok){
       localStorage.setItem(SYNC_LAST_KEY, String(updatedAt));
       updateSyncUI();
-      if(!silent){ syncMsg("✓ Synced"); toast("☁️ Synced"); }
+      if(!silent){ syncMsg("✓ Synced"); toast("Synced"); }
       return true;
     }else if(j.conflict){
       if(!silent) syncMsg("Server has a newer copy — pulling it first", false);
@@ -3445,7 +3437,7 @@ async function vaultCheckRemote(){
       try{
         unpackVault(await vaultDecrypt(sessionPin));
         renderCards();
-        toast("☁️ Updated from cloud");
+        toast("Updated from cloud");
       }catch(e){ /* PIN mismatch — leave local as-is */ }
     }
   }catch(e){ /* offline — skip silently */ }
@@ -3464,7 +3456,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const ok = await vaultUpload();
     if(ok){
       syncMsg("");
-      alert("☁️ Cloud Sync enabled!\n\nYour Sync ID: " + id + "\n\nWrite this down — you\u2019ll need it to link another browser or device.");
+      alert("Cloud Sync enabled!\n\nYour Sync ID: " + id + "\n\nWrite this down — you\u2019ll need it to link another browser or device.");
     }else{
       localStorage.removeItem(SYNC_ID_KEY);
     }
@@ -3555,7 +3547,7 @@ document.addEventListener("DOMContentLoaded", () => {
       buildDots(); updateGo();
       $("forgotBtn").hidden = false;
       $("lockSyncBtn").hidden = true; $("lockSyncForm").hidden = true; // linked — no longer a fresh install
-      toast("☁️ Device linked — enter your PIN");
+      toast("Device linked — enter your PIN");
     }catch(e){
       if(msg){ msg.textContent = "Link failed — check connection"; msg.style.color = "#e08080"; }
     }
@@ -3578,7 +3570,7 @@ async function loadCardAnalytics(){
       const max = Math.max(1, ...j.days.map(d=>d.taps));
       const bars = j.days.map(d=>{
         const pct = Math.round(d.taps/max*100);
-        return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"><div style="width:100%;height:40px;display:flex;align-items:flex-end"><div style="width:100%;height:${pct}%;background:#0a84ff;border-radius:3px;min-height:${d.taps>0?3:0}px"></div></div><span style="font-size:9px;color:#9aa1ad">${d.day.slice(5)}</span></div>`;
+        return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"><div style="width:100%;height:40px;display:flex;align-items:flex-end"><div style="width:100%;height:${pct}%;background:#0a84ff;border-radius:8px;min-height:${d.taps>0?3:0}px"></div></div><span style="font-size:9px;color:#9aa1ad">${d.day.slice(5)}</span></div>`;
       }).join("");
       h += `<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><b>${esc(p.label||"Untitled")}</b><span class="muted">${j.total} taps</span></div><div style="display:flex;gap:3px">${bars}</div></div>`;
     }catch(e){}
@@ -3603,7 +3595,7 @@ async function loadLeads(){
   box.hidden = false;
   all.sort((a,b)=>new Date(b.at)-new Date(a.at));
   list.innerHTML = all.slice(0,50).map(l=>`
-    <div style="padding:10px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px">
+    <div style="padding:10px;border:1px solid var(--line);border-radius:16px;margin-bottom:8px">
       <div style="display:flex;justify-content:space-between"><b>${esc(l.name||"Unknown")}</b><span class="muted" style="font-size:11px">${esc(l.cardLabel)}</span></div>
       ${l.email?`<div style="font-size:13px;color:#9aa1ad">${esc(l.email)}</div>`:""}
       ${l.phone?`<div style="font-size:13px;color:#9aa1ad">${esc(l.phone)}</div>`:""}
@@ -3663,9 +3655,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
 ${nm?`<div style="font-weight:bold;font-size:16px;color:#111">${esc(nm)}</div>`:""}
 ${title?`<div style="color:#666">${esc(title)}</div>`:""}
 ${org?`<div style="color:#666">${esc(org)}</div>`:""}
-${ph?`<div style="margin-top:4px">📞 ${esc(ph)}</div>`:""}
-${em?`<div>✉️ <a href="mailto:${esc(em)}" style="color:#0a84ff">${esc(em)}</a></div>`:""}
-${urls?`<div>🌐 <a href="${esc(urls)}" style="color:#0a84ff">${esc(urls)}</a></div>`:""}
+${ph?`<div style="margin-top:4px">${esc(ph)}</div>`:""}
+${em?`<div><a href="mailto:${esc(em)}" style="color:#0a84ff">${esc(em)}</a></div>`:""}
+${urls?`<div><a href="${esc(urls)}" style="color:#0a84ff">${esc(urls)}</a></div>`:""}
 <div style="padding-top:8px;font-size:12px;color:#999">Sent with <a href="https://omni-tap.com" style="color:#0a84ff">OMNI</a></div>
 </td></tr>
 </table>`;
@@ -3722,7 +3714,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       // Push the re-encrypted vault to cloud
       const upOk=await vaultUpload(true);
       if(upOk){msg.textContent="✓ PIN changed and synced! Use the new PIN on all devices.";}
-      else{msg.textContent="⚠️ PIN changed locally, but cloud sync FAILED — tap Cloud Sync → Sync now, then link Chrome again.";msg.style.color="#e0a030";}
+      else{msg.textContent="PIN changed locally, but cloud sync FAILED — tap Cloud Sync → Sync now, then link Chrome again.";msg.style.color="#e0a030";}
       $("newPin1").value="";$("newPin2").value="";
       toast("✓ PIN changed");
     }catch(e){
@@ -3956,19 +3948,19 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNavMenu();});
 /* ---------- rich social link buttons ---------- */
 function socialButton(url){
   const u = url.toLowerCase();
-  const btn = (emoji, label, color) =>
-    `<a href="${esc(url.startsWith("http")?url:"https://"+url)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;margin:4px 4px 4px 0;border-radius:20px;background:${color};color:#fff;text-decoration:none;font-size:13px;font-weight:600">${emoji} ${label}</a>`;
-  if(u.includes("linkedin.com")) return btn("💼","LinkedIn","#0a66c2");
-  if(u.includes("instagram.com")) return btn("📸","Instagram","#e1306c");
-  if(u.includes("x.com")||u.includes("twitter.com")) return btn("🐦","X","#000");
-  if(u.includes("facebook.com")) return btn("👍","Facebook","#1877f2");
-  if(u.includes("youtube.com")) return btn("▶️","YouTube","#ff0000");
-  if(u.includes("tiktok.com")) return btn("🎵","TikTok","#000");
-  if(u.includes("venmo.com")) return btn("💸","Venmo","#008cff");
-  if(u.includes("paypal.")) return btn("💰","PayPal","#003087");
-  if(u.includes("calendly.com")||u.includes("cal.com")) return btn("📅","Book time","#006bff");
-  if(u.includes("wa.me")||u.includes("whatsapp")) return btn("💬","WhatsApp","#25d366");
-  if(u.includes("github.com")) return btn("🐙","GitHub","#333");
+  const btn = (label, color) =>
+    `<a href="${esc(url.startsWith("http")?url:"https://"+url)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;padding:8px 14px;margin:4px 4px 4px 0;border-radius:16px;background:${color};color:#fff;text-decoration:none;font-size:13px;font-weight:600">${label}</a>`;
+  if(u.includes("linkedin.com")) return btn("LinkedIn","#0a66c2");
+  if(u.includes("instagram.com")) return btn("Instagram","#e1306c");
+  if(u.includes("x.com")||u.includes("twitter.com")) return btn("X","#000");
+  if(u.includes("facebook.com")) return btn("Facebook","#1877f2");
+  if(u.includes("youtube.com")) return btn("YouTube","#ff0000");
+  if(u.includes("tiktok.com")) return btn("TikTok","#000");
+  if(u.includes("venmo.com")) return btn("Venmo","#008cff");
+  if(u.includes("paypal.")) return btn("PayPal","#003087");
+  if(u.includes("calendly.com")||u.includes("cal.com")) return btn("Book time","#006bff");
+  if(u.includes("wa.me")||u.includes("whatsapp")) return btn("WhatsApp","#25d366");
+  if(u.includes("github.com")) return btn("GitHub","#333");
   return null;
 }
 
@@ -4132,7 +4124,7 @@ $("linkBtn").onclick=async()=>{
   }else{
     // No NFC: jump straight to QR with a clear explanation
     nn.hidden=false;
-    nn.innerHTML=`📵 This device can't write NFC tags from the browser.<br>Your link is copied — use an NFC writer app, or have them scan the QR code below.`;
+    nn.innerHTML=`This device can't write NFC tags from the browser.<br>Your link is copied — use an NFC writer app, or have them scan the QR code below.`;
     if(copied)toast("Link copied — QR code ready below");
   }
   _lastNfcUrl = url;
@@ -4227,14 +4219,14 @@ function bizFieldHTML(d,k){
   if(k==="name")return `<div class="bc-name">${esc(v)}</div>`;
   if(k==="title")return `<div class="bc-title">${esc(v)}</div>`;
   if(k==="org")return `<div class="bc-org">${esc(v)}</div>`;
-  const ic=k==="phone"?"📞":k==="email"?"✉️":k==="url"?"🌐":"📍";
-  return `<div class="bc-line">${ic} ${esc(v)}</div>`;
+  const ic="";
+  return `<div class="bc-line">${esc(v)}</div>`;
 }
 function bizCardHTML(d,keys,tpl,qrMode){
   const fields=keys.map(k=>bizFieldHTML(d,k)).join("");
   let extra="";
-  if(qrMode==="qr")extra=`<div class="bc-backrow"><div class="bc-fields">${fields}</div><div class="bc-qrwrap"><div class="qrbox" data-qr></div><div class="bc-qrlabel">Scan for full profile</div></div></div><div class="bc-tap">📲 Tap phone here to save contact</div>`;
-  else if(qrMode==="preview")extra=`<div class="bc-backrow"><div class="bc-fields">${fields}</div><div class="bc-qrwrap"><div class="qrbox"><span style="font-size:10px;color:#666">QR</span></div><div class="bc-qrlabel">Scan for full profile</div></div></div><div class="bc-tap">📲 Tap phone here to save contact</div>`;
+  if(qrMode==="qr")extra=`<div class="bc-backrow"><div class="bc-fields">${fields}</div><div class="bc-qrwrap"><div class="qrbox" data-qr></div><div class="bc-qrlabel">Scan for full profile</div></div></div><div class="bc-tap">Tap phone here to save contact</div>`;
+  else if(qrMode==="preview")extra=`<div class="bc-backrow"><div class="bc-fields">${fields}</div><div class="bc-qrwrap"><div class="qrbox"><span style="font-size:10px;color:#666">QR</span></div><div class="bc-qrlabel">Scan for full profile</div></div></div><div class="bc-tap">Tap phone here to save contact</div>`;
   else extra=`<div class="bc-fields">${fields}</div>`;
   return `<div class="bcard tpl-${tpl}">${extra}</div>`;
 }
@@ -4276,10 +4268,10 @@ function showContact(d){
     <div class="rcvface rcvback">${backHTML}</div>
   </div>
 </div>
-<p class="rcvhint">👆 Tap the card to flip it</p>
-<a class="rcvbtn" href="${href}" download="OMNI.vcf">📇 Save to Contacts</a>
+<p class="rcvhint">Tap the card to flip it</p>
+<a class="rcvbtn" href="${href}" download="OMNI.vcf">Save to Contacts</a>
 <details class="rcvlead" open>
-<summary style="cursor:pointer;font-size:16px;font-weight:700;margin-bottom:8px;list-style:none">💬 Share your info back</summary>
+<summary style="cursor:pointer;font-size:16px;font-weight:700;margin-bottom:8px;list-style:none">Share your info back</summary>
 <p>Want to send your contact info back to ${esc(d.name||"them")}?</p>
 <input id="leadName" placeholder="Your name *" autocomplete="name">
 <input id="leadEmail" placeholder="Email *" type="email" autocomplete="email">
@@ -4355,7 +4347,7 @@ window.addEventListener("hashchange",renderRecipient);
 /* ================= encounter memory ================= */
 function encDateStr(ts){return new Date(ts).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});}
 function encTimeStr(ts){return new Date(ts).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});}
-function shareIcon(t){return t==="nfc"?"📲":t==="qr"?"🔳":t==="link"?"🔗":t==="vcf"?"📇":"🤝";}
+function shareIcon(t){return t==="nfc"?"NFC":t==="qr"?"QR":t==="link"?"Link":t==="vcf"?"Contact":"Share";}
 
 /* location only if the OS already granted it — never triggers a permission prompt */
 async function maybeLoc(){
@@ -4391,10 +4383,10 @@ function renderNudgesMemories(){
     return d.getFullYear()===t.getFullYear()&&d.getMonth()===t.getMonth()&&d.getDate()===t.getDate();
   };
   encounters.filter(e=>isSameMD(e.ts,1,0)).slice(0,3).forEach(e=>{
-    html+=`<div class="memcard"><h4>📸 A year ago today</h4><p>You met <b>${esc(e.contactName||"someone")}</b>${e.where?" at "+esc(e.where):""}.</p></div>`;
+    html+=`<div class="memcard"><h4>A year ago today</h4><p>You met <b>${esc(e.contactName||"someone")}</b>${e.where?" at "+esc(e.where):""}.</p></div>`;
   });
   encounters.filter(e=>isSameMD(e.ts,0,6)).slice(0,3).forEach(e=>{
-    html+=`<div class="memcard"><h4>📸 6 months ago today</h4><p>You met <b>${esc(e.contactName||"someone")}</b>${e.where?" at "+esc(e.where):""}.</p></div>`;
+    html+=`<div class="memcard"><h4>6 months ago today</h4><p>You met <b>${esc(e.contactName||"someone")}</b>${e.where?" at "+esc(e.where):""}.</p></div>`;
   });
   box.innerHTML=html;
   box.querySelectorAll("[data-nudge-done]").forEach(b=>b.onclick=async()=>{const e=encounters.find(x=>x.id===b.dataset.nudgeDone);if(e){e.followUpDone=true;await saveEncounters();renderNudgesMemories();toast("Follow-up done ✓");}});
@@ -4435,7 +4427,7 @@ window.addEventListener("online",()=>{
   try{
     if(!window.isSecureContext||!window.crypto||!window.crypto.subtle){
       $("lockScreen").hidden=false;
-      pinMsg("⚠️ This page isn't secure — OMNI needs HTTPS to encrypt your cards. Please open https://omni-tap.com instead.");
+      pinMsg("This page isn't secure — OMNI needs HTTPS to encrypt your cards. Please open https://omni-tap.com instead.");
       try{$("forgotBtn").hidden=true;$("lockSyncBtn").hidden=true;}catch(e){}
       return;
     }
