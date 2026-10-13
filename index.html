@@ -2202,7 +2202,7 @@ function genRecoveryKey(){
   for(let i=0;i<24;i++){s+=alpha[r[i]%alpha.length];if(i%4===3&&i<23)s+="-";}
   return s;
 }
-$("rkCopy").onclick=async()=>{
+const _rkCopy=$("rkCopy");if(_rkCopy)_rkCopy.onclick=async()=>{ // guarded: recovery-key UI removed; null-safe so boot can't die here
   try{await navigator.clipboard.writeText($("recoveryKeyDisplay").textContent);toast("Copied ✓");}catch(e){toast("Copy failed — write it down");}
 };
 
@@ -2774,7 +2774,7 @@ function renderCards(){
   }
 }
 function panelHeight(el){return el.offsetHeight||300;}
-$("nudgeBackup").onclick=()=>{$("backupBtn").click();};
+const _nudgeBackup=$("nudgeBackup");if(_nudgeBackup)_nudgeBackup.onclick=()=>{const _bb0=$("backupBtn");if(_bb0)_bb0.click();};
 $("nudgeDismiss").onclick=()=>{$("backupNudge").hidden=true;};
 $("emptyCreate").onclick=()=>$("fabPlus").click();
 $("searchBox").oninput=e=>{searchQ=e.target.value;renderCards();};
@@ -3832,8 +3832,8 @@ function openOwner(){
 $("ownerBack").onclick=()=>{$("ownerScreen").hidden=true;$("homeScreen").hidden=false;renderCards();};
 
 /* ---------- backup view ---------- */
-$("fileDownloadBtn").onclick=()=>{$("backupBtn").onclick();};
-$("fileImportBtn").onclick=()=>{$("importInput").click();};
+const _fileDl=$("fileDownloadBtn");if(_fileDl)_fileDl.onclick=()=>{const _bb1=$("backupBtn");if(_bb1&&_bb1.onclick)_bb1.onclick();};
+const _fileIm=$("fileImportBtn");if(_fileIm)_fileIm.onclick=()=>{const _ii=$("importInput");if(_ii)_ii.click();};
 
 /* ---------- owner password gate (reusable) ---------- */
 /* In-app owner password modal (replaces native prompt) */
@@ -3935,7 +3935,7 @@ function socialButton(url){
 }
 
 /* ---------- backup ---------- */
-$("backupBtn").onclick=()=>{
+const _backupBtn=$("backupBtn");if(_backupBtn)_backupBtn.onclick=()=>{ // guarded: Backup screen removed 2026-10-12; dead handler kept null-safe
   const vault=localStorage.getItem("omni_vault")||"";
   const vault_enc=localStorage.getItem("omni_vault_enc")||"";
   const data=JSON.stringify({v:3,exported:new Date().toISOString(),vault,vault_enc});
