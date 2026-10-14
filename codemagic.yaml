@@ -88,6 +88,28 @@ workflows:
           echo "=== Info.plist usage descriptions ==="
           /usr/libexec/PlistBuddy -c "Print :NFCReaderUsageDescription" "$PLIST"
           /usr/libexec/PlistBuddy -c "Print :NSFaceIDUsageDescription" "$PLIST"
+      - name: Create export options plist
+        script: |
+          cat > /tmp/export_options.plist << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store</string>
+            <key>teamID</key>
+            <string>7R43JAU47W</string>
+            <key>uploadBitcode</key>
+            <false/>
+            <key>uploadSymbols</key>
+            <true/>
+            <key>compileBitcode</key>
+            <false/>
+          </dict>
+          </plist>
+          EOF
+          echo "Export options plist created"
+
       - name: Build iOS app for App Store
         script: |
           # Find the actual .xcodeproj or .xcworkspace
@@ -100,10 +122,10 @@ workflows:
           PROJECT=$(find capacitor/ios -name "*.xcodeproj" 2>/dev/null | head -1)
           if [ -n "$WORKSPACE" ]; then
             echo "Using workspace: $WORKSPACE"
-            xcode-project build-ipa --workspace "$WORKSPACE" --scheme "$XCODE_SCHEME"
+            xcode-project build-ipa --workspace "$WORKSPACE" --scheme "$XCODE_SCHEME" --export-options-plist /tmp/export_options.plist
           elif [ -n "$PROJECT" ]; then
             echo "Using project: $PROJECT"
-            xcode-project build-ipa --project "$PROJECT" --scheme "$XCODE_SCHEME"
+            xcode-project build-ipa --project "$PROJECT" --scheme "$XCODE_SCHEME" --export-options-plist /tmp/export_options.plist
           else
             echo "ERROR: No .xcodeproj or .xcworkspace found!"
             exit 1
