@@ -79,6 +79,15 @@ workflows:
           ls -la ios/App/ 2>/dev/null || echo "NO ios/App DIRECTORY"
           echo "=== Syncing ==="
           npx cap sync ios
+          echo "=== Installing custom app icons ==="
+          ICON_SRC="icons/ios/AppIcon.appiconset"
+          ICON_DST="ios/App/App/Assets.xcassets/AppIcon.appiconset"
+          if [ -d "$ICON_SRC" ] && [ -d "$ICON_DST" ]; then
+            cp "$ICON_SRC"/Icon-*.png "$ICON_DST"/ && echo "Custom icons installed" || echo "Icon copy failed"
+            ls "$ICON_DST"/ | head -15
+          else
+            echo "Icon source or destination missing — using default Capacitor icons"
+          fi
       - name: Apply provisioning profiles to Xcode project
         script: |
           # First, ensure all downloaded profiles are in the standard location
