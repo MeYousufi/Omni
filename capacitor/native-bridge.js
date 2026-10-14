@@ -7,7 +7,7 @@
   if (!window.Capacitor || !Capacitor.isNativePlatform()) return;
   console.log('[OMNI Native] Bridge initializing...');
 
-  const { Nfc, Contacts, Haptics } = Capacitor.Plugins;
+  const { Nfc, Haptics } = Capacitor.Plugins;
   const Share = Capacitor.Plugins.Share; // may be undefined if plugin removed
 
   // ============ NATIVE DETECTION ============
@@ -44,10 +44,12 @@
   // Save a received card directly to phone contacts
   window.omniSaveContact = async function(card){
     try {
-      const permission = await Contacts.requestPermissions();
+      const ContactsPlugin = Capacitor.Plugins.Contacts;
+      if (!ContactsPlugin) return {ok: false, error: 'Contacts not available'};
+      const permission = await ContactsPlugin.requestPermissions();
       if (permission.contacts !== 'granted') return {ok: false, error: 'Permission denied'};
 
-      await Contacts.createContact({
+      await ContactsPlugin.createContact({
         contact: {
           name: { given: card.name?.split(' ')[0] || '', family: card.name?.split(' ').slice(1).join(' ') || '' },
           phones: card.phone ? [{ label: 'mobile', number: card.phone }] : [],

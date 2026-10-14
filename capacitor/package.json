@@ -1,9 +1,9 @@
 {
   "dependencies": {
-    "@capacitor/contacts": "^1.0.1",
     "@capacitor/core": "^8.5.3",
     "@capacitor/haptics": "^8.0.2",
-    "@capacitor/ios": "^8.5.3"
+    "@capacitor/ios": "^8.5.3",
+    "@capacitor-community/contacts": "^8.0.0"
   },
   "description": "OMNI \u2014 Tap to share digital contact card",
   "devDependencies": {
