@@ -61,7 +61,11 @@ workflows:
       - name: Set up CocoaPods
         script: |
           cd capacitor/ios/App
-          pod install
+          if [ -f "Podfile" ]; then
+            pod install
+          else
+            echo "No Podfile found, skipping pod install"
+          fi
       - name: Configure Info.plist usage descriptions
         script: |
           PLIST="capacitor/ios/App/App/Info.plist"
