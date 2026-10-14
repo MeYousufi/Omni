@@ -208,6 +208,29 @@ workflows:
           EOF
           echo "Export options plist created"
 
+      - name: Validate provisioning profiles
+        script: |
+          echo "=== Profile validation ==="
+          for f in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
+            [ -f "$f" ] || continue
+            echo "Profile: $f"
+            echo "  Permissions: $(ls -la "$f" | awk '{print $1}')"
+            echo "  Size: $(wc -c < "$f") bytes"
+            # Try to decode
+            DECODED=$(security cms -D -i "$f" 2>&1)
+            if [ $? -eq 0 ]; then
+              echo "  ✓ Decodes successfully"
+              echo "$DECODED" | plutil -extract Name raw -o - - 2>/dev/null | xargs -I{} echo "  Name: {}"
+              echo "$DECODED" | plutil -extract UUID raw -o - - 2>/dev/null | xargs -I{} echo "  UUID: {}"
+              echo "$DECODED" | plutil -extract TeamIdentifier.0 raw -o - - 2>/dev/null | xargs -I{} echo "  Team: {}"
+              EXPIRATION=$(echo "$DECODED" | plutil -extract ExpirationDate raw -o - - 2>/dev/null || echo "unknown")
+              echo "  Expires: $EXPIRATION"
+            else
+              echo "  ✗ FAILED TO DECODE: $DECODED"
+            fi
+          done
+          echo "=== Export options plist ==="
+          cat /tmp/export_options.plist
       - name: Build iOS app for App Store
         script: |
           # Find the actual .xcodeproj or .xcworkspace
