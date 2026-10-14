@@ -67,6 +67,11 @@ workflows:
           npx cap sync ios
       - name: Apply provisioning profiles to Xcode project
         script: |
+          # Debug: show what was fetched
+          echo "=== Provisioning profiles ==="
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || echo "no profiles dir"
+          echo "=== Certificates ==="
+          ls -la ~/Library/MobileDevice/Certificates/ 2>/dev/null || echo "no certs dir"
           # Find the .xcodeproj and apply profiles to it
           PROJECT=$(find capacitor/ios -name "*.xcodeproj" 2>/dev/null | head -1)
           echo "Applying profiles to: $PROJECT"
