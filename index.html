@@ -23,7 +23,7 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
   .grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
 }
 .brand{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.brand h1{margin:0;font-size:24px;letter-spacing:.14em;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#2dd4bf);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.brand h1{margin:0;font-size:24px;letter-spacing:.14em;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#f5a623);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .brand span{color:var(--muted);font-size:11px;letter-spacing:.08em}
 .iconbtn{background:#1c2130;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:8px 12px;font-size:14px;margin:0;min-height:44px;display:inline-flex;align-items:center}
 select,input,textarea{width:100%;margin:6px 0;padding:12px;border-radius:16px;border:1px solid var(--line);background:#0e1118;color:var(--text);font:inherit}
@@ -32,9 +32,9 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 input[type=color]{height:48px;padding:6px}
 textarea{min-height:56px}
 .box{background:linear-gradient(160deg,#141824,#0f1219);border:1px solid var(--line);border-radius:16px;padding:14px;margin:14px 0;box-shadow:0 8px 28px rgba(0,0,0,.35)}
-button{border:0;border-radius:16px;padding:12px 14px;background:var(--accent);color:#1a1206;font-weight:700;margin:6px 6px 0 0;font:inherit;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+button{border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:12px 14px;background:linear-gradient(135deg,rgba(45,212,191,.45),rgba(20,184,166,.30));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#fff;font-weight:700;margin:6px 6px 0 0;font:inherit;box-shadow:0 8px 24px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.25);text-shadow:0 1px 2px rgba(0,0,0,.3)}
 button:active{transform:scale(.97)}
-button.gray{background:#232838;box-shadow:none;border:1px solid var(--line)}
+button.gray{background:linear-gradient(135deg,rgba(120,130,150,.35),rgba(80,90,110,.25));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.14);box-shadow:0 8px 24px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.15);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.3)}
 button.danger{background:linear-gradient(135deg,#7a2b2e,#5a2326);box-shadow:none}
 button.small{padding:8px 12px;font-size:13px;min-height:44px}
 label.chk{display:flex;gap:12px;align-items:center;padding:11px 4px;border-bottom:1px solid var(--line);border-radius:8px}
@@ -51,10 +51,10 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 #lockBg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,6,10,.5),rgba(5,6,10,.82))}
 #lockScreen>*:not(#lockBg){position:relative;z-index:1}
 #welcomeScreen[hidden]{display:none}
-#lockScreen h1{font-size:46px;letter-spacing:.2em;margin:0 0 8px;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#2dd4bf);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow))}
+#lockScreen h1{font-size:46px;letter-spacing:.2em;margin:0 0 8px;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#f5a623);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow))}
 #lockScreen h1.logo-anim{background:none;-webkit-text-fill-color:initial;filter:none}
-#lockScreen h1.logo-anim .logo-o{display:inline-block;background:linear-gradient(120deg,#6ea8ff,#2dd4bf);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow));animation:oSpin 2s ease-in-out}
-#lockScreen h1.logo-anim .logo-rest{display:inline-block;background:linear-gradient(120deg,#6ea8ff,#2dd4bf);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow));animation:mniSlide .8s ease-out 2s both}
+#lockScreen h1.logo-anim .logo-o{display:inline-block;background:linear-gradient(120deg,#6ea8ff,#f5a623);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow));animation:oSpin 2s ease-in-out}
+#lockScreen h1.logo-anim .logo-rest{display:inline-block;background:linear-gradient(120deg,#6ea8ff,#f5a623);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow));animation:mniSlide .8s ease-out 2s both}
 @keyframes oSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes mniSlide{from{transform:translateX(60px);opacity:0}to{transform:translateX(0);opacity:1}}
 .dots{display:flex;gap:14px;margin:22px 0}
@@ -97,7 +97,7 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
   background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(245,166,35,.06),transparent 70%),
              radial-gradient(ellipse 60% 40% at 50% 100%,rgba(245,166,35,.04),transparent 70%);}
 #lockScreen h1{font-size:54px;margin:0 0 20px;letter-spacing:.18em;
-  background:linear-gradient(120deg,#6ea8ff,#2dd4bf);
+  background:linear-gradient(120deg,#6ea8ff,#f5a623);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
   animation:fadeUp .7s cubic-bezier(.22,1,.36,1) both;
   filter:drop-shadow(0 0 24px rgba(245,166,35,.25));}
@@ -175,7 +175,7 @@ a.wrow:active{background:rgba(255,255,255,.05)}
 .wact{flex:1;padding:13px;border:0;border-radius:16px;font-size:15px;font-weight:700;cursor:pointer;background:#f5a623;color:#fff}
 .wact:last-child{background:#232a3a}
 .empty{color:var(--muted);text-align:center;margin:60px 0}
-.fab{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));right:24px;width:64px;height:64px;border-radius:50%;font-size:32px;line-height:1;background:var(--accent);color:#1a1206;margin:0;padding:0;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.fab{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));right:24px;width:64px;height:64px;border-radius:50%;font-size:32px;line-height:1;background:linear-gradient(135deg,rgba(45,212,191,.50),rgba(20,184,166,.35));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.20);color:#fff;margin:0;padding:0;box-shadow:0 8px 24px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.25);text-shadow:0 1px 2px rgba(0,0,0,.3)}
 /* present mode: one-tap share from home screen */
 .present-share{width:100%;padding:16px;font-size:18px;font-weight:700;margin:10px 0 2px;border-radius:16px;min-height:56px;box-shadow:0 6px 22px rgba(245,166,35,.4)}
 #presentQr{display:flex;justify-content:center;margin:14px 0}
@@ -303,7 +303,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 .tpl-minimal .bc-title{color:#8e8e99;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
 /* receiver flip */
 .rcv{max-width:480px;margin:0 auto;padding:22px 16px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#090a0d;color:#f5f6f8;min-height:100vh}
-.rcvbrand{letter-spacing:.14em;background:linear-gradient(120deg,#6ea8ff,#2dd4bf);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin:0 0 14px;font-size:26px}
+.rcvbrand{letter-spacing:.14em;background:linear-gradient(120deg,#6ea8ff,#f5a623);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin:0 0 14px;font-size:26px}
 .rcvflip{perspective:1200px;cursor:pointer}
 .rcvinner{position:relative;width:100%;aspect-ratio:3.5/2;transition:transform .6s;transform-style:preserve-3d}
 .rcvflip.flipped .rcvinner{transform:rotateY(180deg)}
@@ -388,7 +388,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 <!-- WELCOME (first run) -->
 <div id="welcomeScreen" hidden>
   <div class="wrap" style="min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
-    <h1 style="font-size:52px;letter-spacing:.2em;margin:0 0 8px;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#2dd4bf);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow))">OMNI</h1>
+    <h1 style="font-size:52px;letter-spacing:.2em;margin:0 0 8px;font-weight:800;background:linear-gradient(120deg,#6ea8ff,#f5a623);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 18px var(--glow))">OMNI</h1>
     <div class="muted" style="margin-bottom:28px;font-size:16px">Your card, in their phone, in one tap.</div>
     <p class="muted" style="font-size:15px;margin:0 0 24px;max-width:300px">They get your details instantly — no app, no paper, no typing.</p>
     <button id="welcomeGo" style="margin-top:4px;padding:16px 48px;font-size:17px;border-radius:16px">Create my first card →</button>
@@ -2491,7 +2491,7 @@ async function ownerGrantPlan(tier){
 }
 /* ---------- premium templates + token shop ---------- */
 const PREMIUM_TEMPLATES=[
-  {id:"aurora",name:"Midnight",desc:"Deep dark gradient",color:"#2dd4bf",coverColor:"#0d2b28",price:0.99,iap:"com.omnitap.design.midnight"},
+  {id:"aurora",name:"Midnight",desc:"Deep dark gradient",color:"#f5a623",coverColor:"#0d2b28",price:0.99,iap:"com.omnitap.design.midnight"},
   {id:"obsidian",name:"Gold Foil",desc:"Black and gold luxury",color:"#d4af37",coverColor:"#0a0a0a",price:1.99,iap:"com.omnitap.design.goldfoil"},
   {id:"royale",name:"Neon",desc:"Bright signature glow",color:"#0a84ff",coverColor:"#0d1b2a",price:2.99,iap:"com.omnitap.design.neon"}
 ];
