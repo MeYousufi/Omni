@@ -172,6 +172,20 @@ workflows:
             fi
           fi
           echo "Final profile name for export: '$PROFILE_NAME'"
+          # Get the profile UUID as well
+          PROFILE_UUID=""
+          for PROFILE_PATH in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
+            [ -f "$PROFILE_PATH" ] || continue
+            UUID=$(security cms -D -i "$PROFILE_PATH" 2>/dev/null | plutil -extract UUID raw -o - - 2>/dev/null || echo "")
+            NAME=$(security cms -D -i "$PROFILE_PATH" 2>/dev/null | plutil -extract Name raw -o - - 2>/dev/null || echo "")
+            if [ "$NAME" = "$PROFILE_NAME" ]; then
+              PROFILE_UUID="$UUID"
+              echo "Profile UUID: $PROFILE_UUID"
+              break
+            fi
+          done
+          # Fix permissions on profiles (xcodebuild needs to read them)
+          chmod 644 ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision 2>/dev/null || true
           cat > /tmp/export_options.plist << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
