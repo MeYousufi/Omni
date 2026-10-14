@@ -8,6 +8,8 @@ workflows:
         distribution_type: app_store
         bundle_ids:
           - com.omnitap.app
+      groups:
+        - APP_STORE
       vars:
         XCODE_WORKSPACE: "capacitor/ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
