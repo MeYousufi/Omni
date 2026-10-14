@@ -88,6 +88,13 @@ workflows:
           else
             echo "Icon source or destination missing — using default Capacitor icons"
           fi
+          echo "=== Setting build number to Codemagic build $BUILD_NUMBER ==="
+          INFO_PLIST="ios/App/App/Info.plist"
+          if [ -f "$INFO_PLIST" ]; then
+            /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$INFO_PLIST" && echo "Build number set to $BUILD_NUMBER" || echo "Failed to set build number"
+          else
+            echo "Info.plist not found at $INFO_PLIST"
+          fi
       - name: Apply provisioning profiles to Xcode project
         script: |
           # First, ensure all downloaded profiles are in the standard location
@@ -280,8 +287,7 @@ workflows:
           echo "Uploading: $IPA_PATH"
           app-store-connect publish \
             --path "$IPA_PATH" \
-            --testflight \
-            || echo "PUBLISH FAILED with exit code $?"
+            --testflight
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
