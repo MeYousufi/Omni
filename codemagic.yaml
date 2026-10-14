@@ -65,6 +65,14 @@ workflows:
           ls -la ios/App/ 2>/dev/null || echo "NO ios/App DIRECTORY"
           echo "=== Syncing ==="
           npx cap sync ios
+      - name: Add certificates to keychain
+        script: |
+          keychain add-certificates
+
+      - name: Apply provisioning profiles to Xcode project
+        script: |
+          xcode-project use-profiles
+
       - name: Set up CocoaPods
         script: |
           cd capacitor/ios/App
@@ -118,7 +126,7 @@ workflows:
           echo "=== ios/App contents ==="
           ls -la capacitor/ios/App/ 2>/dev/null || echo "no ios/App dir"
           # Try workspace first (excluding the internal project.xcworkspace), then project
-          WORKSPACE=$(find capacitor/ios -name "*.xcworkspace" -not -path "*/\.xcodeproj/*" 2>/dev/null | head -1)
+          WORKSPACE=$(find capacitor/ios -name "*.xcworkspace" 2>/dev/null | grep -v "xcodeproj" | head -1)
           PROJECT=$(find capacitor/ios -name "*.xcodeproj" 2>/dev/null | head -1)
           if [ -n "$WORKSPACE" ]; then
             echo "Using workspace: $WORKSPACE"
