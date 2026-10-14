@@ -999,6 +999,26 @@ const STATS_URL="https://omni-stats.mny2199wellness.workers.dev";
 // Owner auth is password-based now; token stored in memory after login.
 let OWNER_TOKEN="";
 try{OWNER_TOKEN=sessionStorage.getItem("omni_owner_token")||"";}catch(e){}
+/* Owner API fetch with automatic session-expiry recovery.
+ * On 403 (expired/invalid owner token): clears the stale token, prompts
+ * for the owner password once, and retries a single time with the fresh token.
+ * url and opts may each be a value or a function returning the value —
+ * use functions when they embed OWNER_TOKEN so the retry picks up the new one. */
+async function ownerFetch(url,opts){
+  const buildUrl=()=>typeof url==="function"?url():url;
+  const buildOpts=()=>typeof opts==="function"?opts():opts;
+  let r=await fetch(buildUrl(),buildOpts());
+  if(r&&r.status===403){
+    OWNER_TOKEN="";
+    try{sessionStorage.removeItem("omni_owner_token");}catch(e){}
+    try{localStorage.removeItem("omni_owner_unlocked");}catch(e){}
+    toast("Owner session expired — please log in again");
+    if(await ownerAuth()){
+      r=await fetch(buildUrl(),buildOpts());
+    }
+  }
+  return r;
+}
 const esc=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 
 /* ---------- cloud analytics ---------- */
@@ -1939,7 +1959,7 @@ async function setFlag(name,on,el){
 }
 async function setFlags(vals){
   try{
-    const r=await fetch(STATS_URL+"/api/flags",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({owner_token:OWNER_TOKEN,flags:vals})});
+    const r=await ownerFetch(STATS_URL+"/api/flags",()=>({method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({owner_token:OWNER_TOKEN,flags:vals})}));
     const j=await r.json();
     if(j&&j.ok){
       FLAGS=Object.assign({},FLAGS,j.flags);
@@ -1964,7 +1984,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     if(nw.length<8){msg.textContent="New password must be 8+ characters";msg.style.color="#e08080";return;}
     msg.textContent="Changing…";msg.style.color="";
     try{
-      const r=await fetch(STATS_URL+"/api/owner/change",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({owner_token:OWNER_TOKEN,current_password:cur,new_password:nw})});
+      const r=await ownerFetch(STATS_URL+"/api/owner/change",()=>({method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({owner_token:OWNER_TOKEN,current_password:cur,new_password:nw})}));
       const j=await r.json();
       if(j.ok&&j.token){
         OWNER_TOKEN=j.token;
@@ -2037,8 +2057,8 @@ const _snb=$("saveNumbersBtn");if(_snb)_snb.onclick=()=>{toast("Removed — plan
     FLAGS.glassLevel=v; applyGlassLevel();
     // Try server save, but don't block on auth issues
     try{
-      const r=await fetch(STATS_URL+"/api/flags",{method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({owner_token:OWNER_TOKEN,flags:{glassLevel:v}})});
+      const r=await ownerFetch(STATS_URL+"/api/flags",()=>({method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({owner_token:OWNER_TOKEN,flags:{glassLevel:v}})}));
       const j=await r.json().catch(()=>({}));
       if(j&&j.ok){
         FLAGS=Object.assign({},FLAGS,j.flags);
@@ -2073,8 +2093,8 @@ const _snb=$("saveNumbersBtn");if(_snb)_snb.onclick=()=>{toast("Removed — plan
 $("tgFaceId").onchange=async e=>{
   const on=e.target.checked;
   try{
-    const r=await fetch(STATS_URL+"/api/flags",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({owner_token:OWNER_TOKEN,flags:{faceIdUnlock:on}})});
+    const r=await ownerFetch(STATS_URL+"/api/flags",()=>({method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({owner_token:OWNER_TOKEN,flags:{faceIdUnlock:on}})}));
     const j=await r.json();
     if(j&&j.ok){FLAGS=Object.assign({},FLAGS,j.flags);toast(on?"Face ID unlock ON":"Face ID unlock OFF");}
     else{e.target.checked=!on;toast("Failed to save");}
@@ -2115,7 +2135,7 @@ $("lockPhotoInput").onchange=e=>{
 async function loadUserCount(){
   try{
     if(!OWNER_TOKEN)return;
-    const r=await fetch(STATS_URL+"/api/users/stats?owner_token="+encodeURIComponent(OWNER_TOKEN),{cache:"no-store"});
+    const r=await ownerFetch(()=>STATS_URL+"/api/users/stats?owner_token="+encodeURIComponent(OWNER_TOKEN),{cache:"no-store"});
     if(!r.ok)return;
     const j=await r.json();
     const el=$("ownerUserCount");
@@ -2146,8 +2166,8 @@ $("wipeAccountsBtn").onclick=async()=>{
   if(!confirm("Last chance — type OK to confirm."))return;
   msg.textContent="Wiping…";msg.style.color="#9aa1ad";
   try{
-    const r=await fetch(STATS_URL+"/api/admin/wipe-accounts",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({owner_token:OWNER_TOKEN,keepCode:code,confirm:"WIPE-ALL-OTHERS"})});
+    const r=await ownerFetch(STATS_URL+"/api/admin/wipe-accounts",()=>({method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({owner_token:OWNER_TOKEN,keepCode:code,confirm:"WIPE-ALL-OTHERS"})}));
     const j=await r.json();
     if(j&&j.ok){
       msg.textContent="Done. Kept "+j.keptCode+" ("+j.keptUid.slice(0,8)+"…), deleted "+j.deletedCount+" accounts.";
@@ -2166,7 +2186,7 @@ $("grantBtn").onclick=async()=>{
   if(!amt){m.textContent="Enter an amount.";return;}
   m.textContent="Working…";
   try{
-    const r=await fetch(STATS_URL+"/api/grant",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({owner_token:OWNER_TOKEN,code,amount:amt})});
+    const r=await ownerFetch(STATS_URL+"/api/grant",()=>({method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({owner_token:OWNER_TOKEN,code,amount:amt})}));
     const j=await r.json();
     m.textContent=(j&&j.ok)?`Granted ${amt} shares to ${code} ✓ — they'll arrive on next app open`:`Error: ${(j&&j.error)||"unknown"}`;
     if(j&&j.ok)$("grantCode").value="";
@@ -3565,7 +3585,7 @@ async function loadCardAnalytics(){
   let h = "";
   for(const p of profiles){
     try{
-      const r = await fetch(STATS_URL + "/api/taps?card_id=" + encodeURIComponent(p.id) + "&owner_token=" + encodeURIComponent(OWNER_TOKEN));
+      const r = await ownerFetch(()=>STATS_URL + "/api/taps?card_id=" + encodeURIComponent(p.id) + "&owner_token=" + encodeURIComponent(OWNER_TOKEN));
       if(!r.ok) continue;
       const j = await r.json();
       const max = Math.max(1, ...j.days.map(d=>d.taps));
@@ -3586,7 +3606,7 @@ async function loadLeads(){
   let all = [];
   for(const p of profiles){
     try{
-      const r = await fetch(STATS_URL + "/api/leads?card_id=" + encodeURIComponent(p.id) + "&owner_token=" + encodeURIComponent(OWNER_TOKEN));
+      const r = await ownerFetch(()=>STATS_URL + "/api/leads?card_id=" + encodeURIComponent(p.id) + "&owner_token=" + encodeURIComponent(OWNER_TOKEN));
       if(!r.ok) continue;
       const j = await r.json();
       all = all.concat((j.leads||[]).map(l=>({...l, cardLabel: p.label||"Untitled"})));
@@ -3615,7 +3635,7 @@ async function loadWebhook(){
   if(!box || !OWNER_TOKEN){ if(box) box.hidden = true; return; }
   box.hidden = false;
   try{
-    const r = await fetch(STATS_URL + "/api/webhook?owner_token=" + encodeURIComponent(OWNER_TOKEN));
+    const r = await ownerFetch(()=>STATS_URL + "/api/webhook?owner_token=" + encodeURIComponent(OWNER_TOKEN));
     const j = await r.json();
     if(j.url) $("webhookUrl").value = j.url;
   }catch(e){}
@@ -3629,7 +3649,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
     const m = $("webhookMsg");
     m.textContent = "Saving…";
     try{
-      const r = await fetch(STATS_URL + "/api/webhook", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({owner_token:OWNER_TOKEN,url})});
+      const r = await ownerFetch(STATS_URL + "/api/webhook", ()=>({method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({owner_token:OWNER_TOKEN,url})}));
       const j = await r.json();
       m.textContent = j.ok ? (url ? "✓ Webhook saved" : "✓ Webhook removed") : ("Error: "+(j.error||"unknown"));
     }catch(e){ m.textContent = "Couldn't reach server."; }
