@@ -7,7 +7,8 @@
   if (!window.Capacitor || !Capacitor.isNativePlatform()) return;
   console.log('[OMNI Native] Bridge initializing...');
 
-  const { Nfc, Contacts, Share, Haptics } = Capacitor.Plugins;
+  const { Nfc, Contacts, Haptics } = Capacitor.Plugins;
+  const Share = Capacitor.Plugins.Share; // may be undefined if plugin removed
 
   // ============ NATIVE DETECTION ============
   window.OMNI_NATIVE = {
@@ -65,8 +66,16 @@
   // ============ SHARE SHEET ============
   window.omniNativeShare = async function(title, text, url){
     try {
-      await Share.share({ title, text, url, dialogTitle: 'Share your OMNI card' });
-      return {ok: true};
+      if (typeof Share !== 'undefined' && Share.share) {
+        await Share.share({ title, text, url, dialogTitle: 'Share your OMNI card' });
+        return {ok: true};
+      }
+      // Fallback to Web Share API
+      if (navigator.share) {
+        await navigator.share({ title, text, url });
+        return {ok: true};
+      }
+      return {ok: false, error: 'Share not available'};
     } catch(e) {
       return {ok: false, error: e.message};
     }
@@ -100,11 +109,11 @@
 
   // ============ IN-APP PURCHASE ============
   const IAP_PRODUCTS = {
-    pro: Capacitor.getPlatform() === 'ios' ? 'com.omnitap.pro.monthly' : 'com.omnitap.pro.monthly',
-    premium: Capacitor.getPlatform() === 'ios' ? 'com.omnitap.premium.monthly' : 'com.omnitap.premium.monthly',
-    tokens_1700: 'com.omnitap.tokens.1700',
-    tokens_3500: 'com.omnitap.tokens.3500',
-    tokens_9000: 'com.omnitap.tokens.9000',
+    pro: 'com.omnitap.pro.monthly',
+    premium: 'com.omnitap.premium.monthly',
+    design_midnight: 'com.omnitap.design.midnight',
+    design_goldfoil: 'com.omnitap.design.goldfoil',
+    design_neon: 'com.omnitap.design.neon',
   };
   window.OMNI_IAP_PRODUCTS = IAP_PRODUCTS;
 
@@ -147,13 +156,11 @@
     }
   };
 
-  // Purchase token pack (consumable)
-  window.omniPurchaseTokens = async function(packIndex){
+  // Purchase a premium design (non-consumable, one-time)
+  window.omniPurchaseDesign = async function(productId){
     try {
       const { InAppPurchase } = Capacitor.Plugins;
-      const keys = ['tokens_1700', 'tokens_3500', 'tokens_9000'];
-      const productId = IAP_PRODUCTS[keys[packIndex]];
-      if (!productId) throw new Error('Invalid pack');
+      if (!productId || !Object.values(IAP_PRODUCTS).includes(productId)) throw new Error('Invalid product');
 
       const result = await InAppPurchase.purchase({ productId });
 
@@ -166,14 +173,14 @@
           productId,
           receipt: result.receipt,
           transactionId: result.transactionId,
-          syncId, tokens: [1700, 3500, 9000][packIndex],
+          syncId, design: true,
         }),
       });
       const verify = await verifyResp.json();
       if (!verify.ok) throw new Error(verify.error || 'Receipt verification failed');
 
       await InAppPurchase.finishTransaction({ productId });
-      return {ok: true, tokens: [1700, 3500, 9000][packIndex]};
+      return {ok: true, productId};
     } catch(e) {
       return {ok: false, error: e.message};
     }

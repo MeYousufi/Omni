@@ -1,1 +1,13 @@
-{"android":{"allowMixedContent":false},"appId":"com.omnitap.app","appName":"OMNI","ios":{"contentInset":"automatic","preferredContentMode":"mobile"},"plugins":{"SplashScreen":{"backgroundColor":"#07080c","launchShowDuration":2000}},"webDir":"www"}
+{
+  "android": {
+    "allowMixedContent": false
+  },
+  "appId": "com.omnitap.app",
+  "appName": "OMNI",
+  "ios": {
+    "contentInset": "automatic",
+    "preferredContentMode": "mobile"
+  },
+  "plugins": {},
+  "webDir": "www"
+}
