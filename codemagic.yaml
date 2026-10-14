@@ -83,9 +83,18 @@ workflows:
           /usr/libexec/PlistBuddy -c "Print :NSFaceIDUsageDescription" "$PLIST"
       - name: Build iOS app for App Store
         script: |
-          xcode-project build-ipa \
-            --workspace "$XCODE_WORKSPACE" \
-            --scheme "$XCODE_SCHEME"
+          # Use .xcworkspace if it exists (CocoaPods), otherwise .xcodeproj
+          if [ -d "$XCODE_WORKSPACE" ]; then
+            xcode-project build-ipa \
+              --workspace "$XCODE_WORKSPACE" \
+              --scheme "$XCODE_SCHEME"
+          else
+            XCODE_PROJECT="capacitor/ios/App/App.xcodeproj"
+            echo "No workspace found, using project: $XCODE_PROJECT"
+            xcode-project build-ipa \
+              --project "$XCODE_PROJECT" \
+              --scheme "$XCODE_SCHEME"
+          fi
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
