@@ -53,6 +53,19 @@ workflows:
           echo "=== Checking what was downloaded ==="
           ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || echo "NO PROFILES DOWNLOADED"
           find ~/Library -name "*.mobileprovision" 2>/dev/null | head -5 || echo "no mobileprovision files found"
+          echo "=== Installing certificates to keychain ==="
+          # Find and import the .p12 certificate
+          P12_FILE=$(find ~/Library -name "*.p12" 2>/dev/null | head -1)
+          if [ -n "$P12_FILE" ]; then
+            echo "Found certificate: $P12_FILE"
+            # Import to login keychain (no password on the p12 from app-store-connect)
+            security import "$P12_FILE" -k ~/Library/Keychains/login.keychain-db -T /usr/bin/codesign 2>&1 || echo "import attempted"
+            # Also try without password prompt
+            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" ~/Library/Keychains/login.keychain-db 2>&1 || true
+          else
+            echo "No .p12 file found"
+            find ~/Library -name "*.p12" 2>/dev/null || echo "no p12 files anywhere"
+          fi
       - name: Add iOS platform and sync
         script: |
           cd capacitor
@@ -103,7 +116,20 @@ workflows:
           /usr/libexec/PlistBuddy -c "Print :NSFaceIDUsageDescription" "$PLIST"
       - name: Create export options plist
         script: |
-          cat > /tmp/export_options.plist << 'EOF'
+          # Find the provisioning profile for our bundle ID
+          PROFILE_PATH=$(find ~/Library -name "*.mobileprovision" 2>/dev/null | head -1)
+          PROFILE_NAME=""
+          if [ -n "$PROFILE_PATH" ]; then
+            # Extract profile name from the mobileprovision file
+            PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< $(security cms -D -i "$PROFILE_PATH" 2>/dev/null) 2>/dev/null || echo "")
+            echo "Found profile: $PROFILE_NAME at $PROFILE_PATH"
+          fi
+          # Also copy profile to standard location for xcodebuild
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles/
+          if [ -n "$PROFILE_PATH" ]; then
+            cp "$PROFILE_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || true
+          fi
+          cat > /tmp/export_options.plist << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -118,6 +144,11 @@ workflows:
             <true/>
             <key>compileBitcode</key>
             <false/>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>$BUNDLE_ID</key>
+              <string>$PROFILE_NAME</string>
+            </dict>
           </dict>
           </plist>
           EOF
