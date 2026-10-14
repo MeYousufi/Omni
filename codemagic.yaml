@@ -144,13 +144,34 @@ workflows:
             fi
           done
           ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
-          # Get profile name for export options
-          PROFILE_PATH=$(find ~/Library/MobileDevice/Provisioning\ Profiles/ -name "*.mobileprovision" 2>/dev/null | head -1)
+          # Get profile name for export options - try multiple methods
+          echo "=== All profiles in standard location ==="
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
           PROFILE_NAME=""
-          if [ -n "$PROFILE_PATH" ]; then
-            PROFILE_NAME=$(security cms -D -i "$PROFILE_PATH" 2>/dev/null | /usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin 2>/dev/null || echo "")
-            echo "Profile name for export: $PROFILE_NAME"
+          for PROFILE_PATH in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
+            [ -f "$PROFILE_PATH" ] || continue
+            echo "Checking: $PROFILE_PATH"
+            # Try to get the app ID from the profile to match our bundle ID
+            APP_ID=$(security cms -D -i "$PROFILE_PATH" 2>/dev/null | plutil -extract Entitlements.application-identifier raw -o - - 2>/dev/null || echo "")
+            echo "  App ID: $APP_ID"
+            NAME=$(security cms -D -i "$PROFILE_PATH" 2>/dev/null | plutil -extract Name raw -o - - 2>/dev/null || echo "")
+            echo "  Name: $NAME"
+            # Check if this profile is for our bundle ID
+            if [[ "$APP_ID" == *"$BUNDLE_ID"* ]]; then
+              PROFILE_NAME="$NAME"
+              echo "  ✓ MATCHED our bundle ID!"
+              break
+            fi
+          done
+          if [ -z "$PROFILE_NAME" ]; then
+            # Fallback: use first profile's name
+            FIRST_PROFILE=$(ls ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision 2>/dev/null | head -1)
+            if [ -n "$FIRST_PROFILE" ]; then
+              PROFILE_NAME=$(security cms -D -i "$FIRST_PROFILE" 2>/dev/null | plutil -extract Name raw -o - - 2>/dev/null || echo "")
+              echo "Fallback profile name: $PROFILE_NAME"
+            fi
           fi
+          echo "Final profile name for export: '$PROFILE_NAME'"
           cat > /tmp/export_options.plist << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -181,11 +202,13 @@ workflows:
           # Find the actual .xcodeproj or .xcworkspace
           echo "=== Looking for iOS project ==="
           find capacitor/ios -name "*.xcodeproj" -o -name "*.xcworkspace" 2>/dev/null | head -10
-          echo "=== ios/App contents ==="
-          ls -la capacitor/ios/App/ 2>/dev/null || echo "no ios/App dir"
-          # Try workspace first (excluding the internal project.xcworkspace), then project
           WORKSPACE=$(find capacitor/ios -name "*.xcworkspace" 2>/dev/null | grep -v "xcodeproj" | head -1)
           PROJECT=$(find capacitor/ios -name "*.xcodeproj" 2>/dev/null | head -1)
+          # Get the provisioning profile UUID for manual signing
+          PROFILE_UUID=$(ls ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision 2>/dev/null | head -1 | xargs -I{} sh -c 'security cms -D -i "{}" 2>/dev/null | plutil -extract UUID raw -o - - 2>/dev/null' || echo "")
+          echo "Profile UUID: $PROFILE_UUID"
+          echo "=== Export options plist ==="
+          cat /tmp/export_options.plist
           if [ -n "$WORKSPACE" ]; then
             echo "Using workspace: $WORKSPACE"
             xcode-project build-ipa --workspace "$WORKSPACE" --scheme "$XCODE_SCHEME" --export-options-plist /tmp/export_options.plist
