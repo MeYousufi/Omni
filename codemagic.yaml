@@ -51,7 +51,7 @@ workflows:
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
             --create \
-            --certificate-key /tmp/cert_private_key.pem || echo "FETCH FAILED with exit code $?"
+            --certificate-key "$(cat /tmp/cert_private_key.pem)" || echo "FETCH FAILED with exit code $?"
           echo "=== Checking what was downloaded ==="
           ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || echo "NO PROFILES DOWNLOADED"
           find ~/Library -name "*.mobileprovision" 2>/dev/null | head -5 || echo "no mobileprovision files found"
