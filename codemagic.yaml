@@ -55,8 +55,15 @@ workflows:
       - name: Add iOS platform and sync
         script: |
           cd capacitor
-          # Add iOS platform on first build; safe to re-run
-          npx cap add ios || echo "iOS platform already added"
+          echo "=== Capacitor version ==="
+          npx cap --version
+          echo "=== Adding iOS platform ==="
+          npx cap add ios
+          echo "=== cap add exit code: $?" 
+          echo "=== ios directory contents ==="
+          ls -la ios/ 2>/dev/null || echo "NO ios DIRECTORY"
+          ls -la ios/App/ 2>/dev/null || echo "NO ios/App DIRECTORY"
+          echo "=== Syncing ==="
           npx cap sync ios
       - name: Set up CocoaPods
         script: |
@@ -88,8 +95,8 @@ workflows:
           find capacitor/ios -name "*.xcodeproj" -o -name "*.xcworkspace" 2>/dev/null | head -10
           echo "=== ios/App contents ==="
           ls -la capacitor/ios/App/ 2>/dev/null || echo "no ios/App dir"
-          # Try workspace first, then project
-          WORKSPACE=$(find capacitor/ios -name "*.xcworkspace" 2>/dev/null | head -1)
+          # Try workspace first (excluding the internal project.xcworkspace), then project
+          WORKSPACE=$(find capacitor/ios -name "*.xcworkspace" -not -path "*/\.xcodeproj/*" 2>/dev/null | head -1)
           PROJECT=$(find capacitor/ios -name "*.xcodeproj" 2>/dev/null | head -1)
           if [ -n "$WORKSPACE" ]; then
             echo "Using workspace: $WORKSPACE"
