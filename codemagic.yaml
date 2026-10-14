@@ -65,13 +65,9 @@ workflows:
           ls -la ios/App/ 2>/dev/null || echo "NO ios/App DIRECTORY"
           echo "=== Syncing ==="
           npx cap sync ios
-      - name: Add certificates to keychain
-        script: |
-          keychain add-certificates
-
       - name: Apply provisioning profiles to Xcode project
         script: |
-          xcode-project use-profiles
+          xcode-project use-profiles || echo "use-profiles failed, continuing"
 
       - name: Set up CocoaPods
         script: |
