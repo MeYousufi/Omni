@@ -42,9 +42,16 @@ workflows:
           keychain initialize
       - name: Fetch signing files
         script: |
+          # Write API private key to file (avoids shell escaping issues)
+          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > /tmp/api_key.p8
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
-            --create
+            --create \
+            --api-key /tmp/api_key.p8 \
+            --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
+            --issuer-id "$APP_STORE_CONNECT_ISSUER_ID" \
+            --certificate-key "$CERTIFICATE_PRIVATE_KEY"
+          rm -f /tmp/api_key.p8
       - name: Add iOS platform and sync
         script: |
           cd capacitor
