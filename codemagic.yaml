@@ -67,7 +67,10 @@ workflows:
           npx cap sync ios
       - name: Apply provisioning profiles to Xcode project
         script: |
-          xcode-project use-profiles || echo "use-profiles failed, continuing"
+          # Find the .xcodeproj and apply profiles to it
+          PROJECT=$(find capacitor/ios -name "*.xcodeproj" 2>/dev/null | head -1)
+          echo "Applying profiles to: $PROJECT"
+          xcode-project use-profiles --project "$PROJECT" || echo "use-profiles failed, continuing"
 
       - name: Set up CocoaPods
         script: |
