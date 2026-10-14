@@ -80,9 +80,9 @@ workflows:
           echo "=== Syncing ==="
           npx cap sync ios
           echo "=== Installing custom app icons ==="
-          ICON_SRC="icons/ios/AppIcon.appiconset"
+          ICON_SRC="."
           ICON_DST="ios/App/App/Assets.xcassets/AppIcon.appiconset"
-          if [ -d "$ICON_SRC" ] && [ -d "$ICON_DST" ]; then
+          if [ -d "$ICON_DST" ]; then
             cp "$ICON_SRC"/Icon-*.png "$ICON_DST"/ && echo "Custom icons installed" || echo "Icon copy failed"
             ls "$ICON_DST"/ | head -15
           else
