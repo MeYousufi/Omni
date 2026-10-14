@@ -43,12 +43,15 @@ workflows:
       - name: Fetch signing files
         script: |
           echo "=== Fetching signing files for $BUNDLE_ID ==="
+          # Generate a fresh RSA private key for the certificate (PEM format)
+          openssl genrsa -out /tmp/cert_private_key.pem 2048
+          echo "Generated private key"
           # app-store-connect reads APP_STORE_CONNECT_ISSUER_ID,
           # APP_STORE_CONNECT_KEY_IDENTIFIER, APP_STORE_CONNECT_PRIVATE_KEY from env
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
             --create \
-            --certificate-key "$CERTIFICATE_PRIVATE_KEY" || echo "FETCH FAILED with exit code $?"
+            --certificate-key /tmp/cert_private_key.pem || echo "FETCH FAILED with exit code $?"
           echo "=== Checking what was downloaded ==="
           ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || echo "NO PROFILES DOWNLOADED"
           find ~/Library -name "*.mobileprovision" 2>/dev/null | head -5 || echo "no mobileprovision files found"
