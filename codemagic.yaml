@@ -50,8 +50,7 @@ workflows:
             --create \
             --api-key /tmp/api_key.p8 \
             --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
-            --issuer-id "$APP_STORE_CONNECT_ISSUER_ID" \
-            --certificate-key "$CERTIFICATE_PRIVATE_KEY" || echo "FETCH FAILED with exit code $?"
+            --issuer-id "$APP_STORE_CONNECT_ISSUER_ID" || echo "FETCH FAILED with exit code $?"
           rm -f /tmp/api_key.p8
           echo "=== Checking what was downloaded ==="
           ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || echo "NO PROFILES DOWNLOADED"
