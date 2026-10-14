@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@capacitor/app": "^8.1.2",
     "@capacitor/contacts": "^1.0.1",
     "@capacitor/core": "^8.5.3",
     "@capacitor/haptics": "^8.0.2",
