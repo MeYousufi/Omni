@@ -12,10 +12,6 @@ workflows:
         XCODE_WORKSPACE: "capacitor/ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
         BUNDLE_ID: "com.omnitap.app"
-        APP_STORE_CONNECT_ISSUER_ID: Encrypted(...)
-        APP_STORE_CONNECT_KEY_IDENTIFIER: Encrypted(...)
-        APP_STORE_CONNECT_PRIVATE_KEY: Encrypted(...)
-        CERTIFICATE_PRIVATE_KEY: Encrypted(...)
       node: 20
       xcode: 16.2
       cocoapods: default
