@@ -4,10 +4,6 @@ workflows:
     instance_type: mac_mini_m2
     max_build_duration: 60
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_ids:
-          - com.omnitap.app
       groups:
         - APP_STORE
       vars:
