@@ -116,18 +116,26 @@ workflows:
           /usr/libexec/PlistBuddy -c "Print :NSFaceIDUsageDescription" "$PLIST"
       - name: Create export options plist
         script: |
-          # Find the provisioning profile for our bundle ID
-          PROFILE_PATH=$(find ~/Library -name "*.mobileprovision" 2>/dev/null | head -1)
+          # Find all provisioning profiles and install them to standard location
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles/
+          find ~/Library -name "*.mobileprovision" 2>/dev/null | while read PROFILE_PATH; do
+            echo "Installing profile: $PROFILE_PATH"
+            # Copy with UUID as filename (xcodebuild expects this)
+            UUID=$(security cms -D -i "$PROFILE_PATH" 2>/dev/null | /usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin 2>/dev/null || echo "")
+            if [ -n "$UUID" ]; then
+              cp "$PROFILE_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/$UUID.mobileprovision
+              echo "Installed as $UUID.mobileprovision"
+            else
+              cp "$PROFILE_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || true
+            fi
+          done
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
+          # Get profile name for export options
+          PROFILE_PATH=$(find ~/Library/MobileDevice/Provisioning\ Profiles/ -name "*.mobileprovision" 2>/dev/null | head -1)
           PROFILE_NAME=""
           if [ -n "$PROFILE_PATH" ]; then
-            # Extract profile name from the mobileprovision file
-            PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< $(security cms -D -i "$PROFILE_PATH" 2>/dev/null) 2>/dev/null || echo "")
-            echo "Found profile: $PROFILE_NAME at $PROFILE_PATH"
-          fi
-          # Also copy profile to standard location for xcodebuild
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles/
-          if [ -n "$PROFILE_PATH" ]; then
-            cp "$PROFILE_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || true
+            PROFILE_NAME=$(security cms -D -i "$PROFILE_PATH" 2>/dev/null | /usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin 2>/dev/null || echo "")
+            echo "Profile name for export: $PROFILE_NAME"
           fi
           cat > /tmp/export_options.plist << EOF
           <?xml version="1.0" encoding="UTF-8"?>
