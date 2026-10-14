@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@capacitor-community/barcode-scanner": "^4.0.0",
     "@capacitor-community/biometric-auth": "^6.0.0",
     "@capacitor-community/in-app-purchase": "^6.0.0",
     "@capacitor-community/nfc": "^6.0.0",
