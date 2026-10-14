@@ -10,7 +10,7 @@ workflows:
         XCODE_WORKSPACE: "capacitor/ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
         BUNDLE_ID: "com.omnitap.app"
-      node: 20
+      node: 22
       xcode: 16.2
       cocoapods: default
     scripts:
