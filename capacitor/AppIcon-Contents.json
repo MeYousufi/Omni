@@ -1,74 +1,204 @@
 {
   "images": [
     {
-      "idiom": "ios-marketing",
-      "filename": "Icon-1024.png",
-      "scale": "1x",
-      "size": "1024x1024"
+      "size": "1024x1024",
+      "idiom": "universal",
+      "filename": "Icon-1024.png"
     },
     {
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ],
+      "size": "1024x1024",
+      "idiom": "universal",
+      "filename": "Icon-1024-dark.png"
+    },
+    {
+      "size": "180x180",
       "idiom": "iphone",
       "filename": "Icon-180.png",
-      "scale": "3x",
-      "size": "60x60"
+      "scale": "3x"
     },
     {
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ],
+      "size": "180x180",
+      "idiom": "iphone",
+      "filename": "Icon-180-dark.png",
+      "scale": "3x"
+    },
+    {
+      "size": "167x167",
       "idiom": "ipad",
       "filename": "Icon-167.png",
-      "scale": "2x",
-      "size": "83.5x83.5"
+      "scale": "2x"
     },
     {
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ],
+      "size": "167x167",
+      "idiom": "ipad",
+      "filename": "Icon-167-dark.png",
+      "scale": "2x"
+    },
+    {
+      "size": "152x152",
       "idiom": "ipad",
       "filename": "Icon-152.png",
-      "scale": "2x",
-      "size": "76x76"
+      "scale": "2x"
     },
     {
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ],
+      "size": "152x152",
+      "idiom": "ipad",
+      "filename": "Icon-152-dark.png",
+      "scale": "2x"
+    },
+    {
+      "size": "120x120",
       "idiom": "iphone",
       "filename": "Icon-120.png",
-      "scale": "2x",
-      "size": "60x60"
+      "scale": "3x"
     },
     {
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ],
+      "size": "120x120",
+      "idiom": "iphone",
+      "filename": "Icon-120-dark.png",
+      "scale": "3x"
+    },
+    {
+      "size": "87x87",
       "idiom": "iphone",
       "filename": "Icon-87.png",
-      "scale": "3x",
-      "size": "29x29"
+      "scale": "3x"
     },
     {
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ],
+      "size": "87x87",
+      "idiom": "iphone",
+      "filename": "Icon-87-dark.png",
+      "scale": "3x"
+    },
+    {
+      "size": "80x80",
       "idiom": "iphone",
       "filename": "Icon-80.png",
-      "scale": "2x",
-      "size": "40x40"
+      "scale": "2x"
     },
     {
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ],
+      "size": "80x80",
+      "idiom": "iphone",
+      "filename": "Icon-80-dark.png",
+      "scale": "2x"
+    },
+    {
+      "size": "60x60",
       "idiom": "iphone",
       "filename": "Icon-60.png",
-      "scale": "3x",
-      "size": "20x20"
+      "scale": "3x"
     },
     {
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ],
+      "size": "60x60",
+      "idiom": "iphone",
+      "filename": "Icon-60-dark.png",
+      "scale": "3x"
+    },
+    {
+      "size": "58x58",
       "idiom": "iphone",
       "filename": "Icon-58.png",
-      "scale": "2x",
-      "size": "29x29"
+      "scale": "2x"
     },
     {
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ],
+      "size": "58x58",
+      "idiom": "iphone",
+      "filename": "Icon-58-dark.png",
+      "scale": "2x"
+    },
+    {
+      "size": "40x40",
       "idiom": "iphone",
       "filename": "Icon-40.png",
-      "scale": "2x",
-      "size": "20x20"
+      "scale": "2x"
     },
     {
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ],
+      "size": "40x40",
+      "idiom": "iphone",
+      "filename": "Icon-40-dark.png",
+      "scale": "2x"
+    },
+    {
+      "size": "29x29",
       "idiom": "iphone",
       "filename": "Icon-29.png",
-      "scale": "1x",
-      "size": "29x29"
+      "scale": "2x"
+    },
+    {
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ],
+      "size": "29x29",
+      "idiom": "iphone",
+      "filename": "Icon-29-dark.png",
+      "scale": "2x"
     }
   ],
   "info": {
-    "author": "xcode",
-    "version": 1
+    "version": 1,
+    "author": "xcode"
   }
 }
