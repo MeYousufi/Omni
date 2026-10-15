@@ -2281,6 +2281,20 @@ function toast(msg){
   clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2200);
 }
 
+/* ---------- global error catcher (safety net) ---------- */
+window.addEventListener("error",e=>{
+  try{
+    console.warn("Caught:",e.message);
+    toast("Something went wrong — try again");
+  }catch(_){}
+});
+window.addEventListener("unhandledrejection",e=>{
+  try{
+    console.warn("Unhandled rejection:",e.reason);
+    toast("Something went wrong — try again");
+  }catch(_){}
+});
+
 /* ---------- connectivity monitor ---------- */
 (function(){
   let banner=null;
