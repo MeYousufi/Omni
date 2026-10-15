@@ -460,45 +460,43 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
 </div>
 
 <!-- FORGOT PIN MODAL — 3-step safety flow -->
-<div id="resetModal" class="modal" hidden role="dialog" aria-label="Reset app confirmation">
+<div id="resetModal" class="modal" hidden role="dialog" aria-label="Reset PIN">
   <div class="box">
     <h3 class="sec" style="margin-top:0">Forgot your PIN?</h3>
 
-    <!-- STEP 1: what's at stake -->
+    <!-- STEP 1: verify account password -->
     <div id="resetStep1">
-      <p>Resetting <b style="color:#e08080">permanently deletes</b> from this device:</p>
-      <ul>
-        <li>All your cards (stored in your encrypted vault)</li>
-        <li>Profile photos</li>
-        <li>Backups stored on this device</li>
-      </ul>
-      <p class="muted" style="font-size:13px">Your data is encrypted with your PIN. <b>Without the PIN there is no way to recover it</b> — not even we can unlock it. This cannot be undone.</p>
+      <p>Enter your <b>account password</b> to reset your PIN.</p>
+      <p class="muted" style="font-size:13px">Your cards are encrypted with your old PIN and can't be recovered — they'll be wiped. Your account stays intact.</p>
+      <input id="resetPassword" type="password" placeholder="Account password" autocomplete="current-password" aria-label="Account password" style="margin:12px 0">
+      <p class="muted" id="resetPassMsg" style="font-size:13px;color:#e08080"></p>
       <div class="rowbtns">
-        <button id="resetStep1Next" class="danger">I understand — continue</button>
+        <button id="resetStep1Next">Verify &amp; Reset PIN</button>
         <button id="resetStep1Cancel" class="gray">Cancel</button>
       </div>
+      <p style="text-align:center;margin-top:12px"><a href="#" id="forgotPassLink" class="muted" style="font-size:13px">Forgot your password?</a></p>
     </div>
 
-    <!-- STEP 2: backup check -->
+    <!-- STEP 2: forgot password - enter email -->
     <div id="resetStep2" hidden>
-      <p><b>Before you wipe everything, check for a backup:</b></p>
-      <div id="resetBackupStatus" class="muted" style="font-size:13px;margin:8px 0"></div>
-      <button id="resetRestore" style="width:100%">I have a backup file — restore it instead</button>
-      <p class="muted" style="margin-top:12px;font-size:13px">No backup available? Only continue if you accept losing everything.</p>
+      <p>Enter your account email. We'll send a reset code.</p>
+      <input id="resetEmail" type="email" placeholder="Email address" autocomplete="email" aria-label="Email address" style="margin:12px 0">
+      <p class="muted" id="resetEmailMsg" style="font-size:13px;color:#e08080"></p>
       <div class="rowbtns">
-        <button id="resetStep2Next" class="danger">No backup — continue to wipe</button>
-        <button id="resetStep2Cancel" class="gray">Cancel</button>
+        <button id="resetStep2Next">Send code</button>
+        <button id="resetStep2Cancel" class="gray">Back</button>
       </div>
     </div>
 
-    <!-- STEP 3: type RESET to confirm -->
+    <!-- STEP 3: enter code + new password -->
     <div id="resetStep3" hidden>
-      <p style="color:#e08080"><b>Final step — this wipes everything.</b></p>
-      <p class="muted" style="font-size:13px">To confirm, type <b>RESET</b> below:</p>
-      <input id="resetType" placeholder="Type RESET" autocomplete="off" autocapitalize="characters" aria-label="Type RESET to confirm wipe">
+      <p>Enter the code we sent to your email, then choose a new password.</p>
+      <input id="resetCode" placeholder="6-digit code" inputmode="numeric" autocomplete="one-time-code" aria-label="Reset code" style="margin:12px 0">
+      <input id="resetNewPass" type="password" placeholder="New password" autocomplete="new-password" aria-label="New password" style="margin-bottom:12px">
+      <p class="muted" id="resetCodeMsg" style="font-size:13px;color:#e08080"></p>
       <div class="rowbtns">
-        <button id="resetConfirm" class="danger" disabled>Wipe everything</button>
-        <button id="resetStep3Cancel" class="gray">Cancel</button>
+        <button id="resetStep3Next">Set new password</button>
+        <button id="resetStep3Cancel" class="gray">Back</button>
       </div>
     </div>
 
@@ -1220,17 +1218,6 @@ async function pinDone(){
         }
         onboarding=false;pendingProfile=null;pendingAuth=null;
         $("lockScreen").hidden=true;
-        // Generate and show recovery key
-        try{
-          const rk=genRecoveryKey();
-          $("recoveryKeyDisplay").textContent=rk;
-          // Store encrypted with PIN so it can be shown again in Settings
-          const rkSalt=crypto.getRandomValues(new Uint8Array(16));
-          const rkIv=crypto.getRandomValues(new Uint8Array(12));
-          const rkKey=await deriveKey(pin,rkSalt,310000);
-          const rkCt=await crypto.subtle.encrypt({name:"AES-GCM",iv:rkIv},rkKey,te.encode(rk));
-          localStorage.setItem("omni_recovery","310k."+b64(rkSalt)+"."+b64(rkIv)+"."+b64(rkCt));
-        }catch(e){}
         return;
       }
       unlock();return;
@@ -1521,109 +1508,77 @@ function resetShowStep(n){
   $("resetStep1").hidden=n!==1;
   $("resetStep2").hidden=n!==2;
   $("resetStep3").hidden=n!==3;
-  if(n===2)resetCheckBackup();
-  if(n===3){$("resetType").value="";$("resetConfirm").disabled=true;}
-}
-function resetCheckBackup(){
-  const el=$("resetBackupStatus");
-  let html="";
-  try{
-    const sid=localStorage.getItem("omni_sync_id");
-    const syncLast=parseInt(localStorage.getItem("omni_sync_last")||"0",10);
-    const lastB=parseInt(localStorage.getItem("omni_last_backup")||"0",10);
-    if(sid){
-      html+="<p>Cloud Sync was set up on this device"+(syncLast?" (last synced "+new Date(syncLast).toLocaleDateString()+")":"")+". A cloud backup may exist — but it's encrypted with the same forgotten PIN, so it can't be unlocked without it.</p>";
-    }
-    if(lastB>0){
-      html+="<p>A backup file was created on "+new Date(lastB).toLocaleDateString()+". If you still have that file, use the restore button below instead of wiping.</p>";
-    }
-    if(!sid&&!lastB){
-      html="<p>We couldn't find any backup for this device. If you wipe now, your cards will be <b>permanently lost</b>.</p>";
-    }
-  }catch(e){
-    html="<p>We couldn't verify backup status.</p>";
-  }
-  el.innerHTML=html;
 }
 $("forgotBtn").onclick=()=>{
   resetShowStep(1);
+  $("resetPassword").value="";$("resetPassMsg").textContent="";
   $("resetModal").hidden=false;
 };
-$("resetStep1Next").onclick=()=>resetShowStep(2);
 $("resetStep1Cancel").onclick=()=>{$("resetModal").hidden=true;};
-$("resetStep2Next").onclick=()=>resetShowStep(3);
-$("resetStep2Cancel").onclick=()=>{$("resetModal").hidden=true;};
-$("resetStep3Cancel").onclick=()=>{$("resetModal").hidden=true;};
-$("resetType").oninput=e=>{$("resetConfirm").disabled=e.target.value.trim().toUpperCase()!=="RESET";};
-$("resetRestore").onclick=()=>{
-  $("resetModal").hidden=true;
-  // trigger backup import without unlocking
-  const inp=document.createElement("input");inp.type="file";inp.accept=".json";
-  inp.onchange=()=>{
-    const f=inp.files[0];if(!f)return;
-    const r=new FileReader();
-    r.onload=()=>{
-      try{
-        const d=JSON.parse(r.result);
-        if(d.v===3&&d.vault){
-          localStorage.setItem("omni_vault",d.vault);
-          if(d.vault_enc)localStorage.setItem("omni_vault_enc",d.vault_enc);
-          localStorage.setItem("omni_last_backup",Date.now().toString());
-          alert("Encrypted backup installed. Enter your PIN to unlock.");location.reload();return;
-        }
-        if(!d.profiles||!Array.isArray(d.profiles))throw 0;
-        if(confirm("Restore "+d.profiles.length+" cards from backup? This replaces what's on this device.")){
-          profiles=d.profiles;
-          // seed user profile from first card if it has a picture
-          if(profiles.length&&profiles[0].pic){userProfile.pic=profiles[0].pic;userProfile.picPos=profiles[0].picPos||"50% 50%";if(profiles[0].name)userProfile.name=profiles[0].name;}
-          sessionPin=null;
-          localStorage.removeItem("omni_vault");localStorage.removeItem("omni_vault_enc");localStorage.removeItem("omni_profiles");localStorage.removeItem("omni_pin");
-          // do NOT call doLock() — it would wipe the restored profiles from memory.
-          // Go straight to PIN setup, keeping profiles in memory for encryption.
-          alert("Backup loaded. Set a new PIN to encrypt and save these cards.");
-          pinTmp=null;pinBuf="";buildDots();
-          pinMsg("Set a "+(localStorage.getItem("omni_pinlen")||"6")+"-digit PIN");
-          $("forgotBtn").hidden=true;
-          $("lockSyncBtn").hidden=false; // no vault on disk yet — cloud restore stays available
-          $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("profileScreen").hidden=true;$("ownerScreen").hidden=true;$("welcomeScreen").hidden=true;$("lockScreen").hidden=false;
-          try{applyLockBg();}catch(e){}
-          updateGo();
-        }
-      }catch(e){alert("Couldn't read that backup file.");}
-    };
-    r.readAsText(f);
-  };
-  inp.click();
+// Step 1: verify account password, then reset PIN
+$("resetStep1Next").onclick=async()=>{
+  const pw=$("resetPassword").value;
+  if(!pw){$("resetPassMsg").textContent="Enter your account password.";return;}
+  $("resetPassMsg").textContent="Verifying...";
+  try{
+    // Get the account email from the session or stored registration
+    const reg=localStorage.getItem("omni_user_registered");
+    const email=reg?reg.split("|")[0]:null;
+    if(!email){$("resetPassMsg").textContent="No account found on this device.";return;}
+    const r=await fetch(STATS_URL+"/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({email,password:pw})});
+    const d=await r.json();
+    if(!d.ok){$("resetPassMsg").textContent="Wrong password — try again.";return;}
+    // Password correct: wipe vault, go to PIN setup
+    $("resetModal").hidden=true;
+    await fetch(STATS_URL+"/api/auth/vault/delete",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({token:d.token})}).catch(()=>{});
+    localStorage.removeItem("omni_vault");localStorage.removeItem("omni_vault_enc");
+    localStorage.removeItem("omni_recovery");
+    pinTmp=null;pinBuf="";buildDots();
+    vaultIsNew=true;
+    pinMsg("Set a new "+(localStorage.getItem("omni_pinlen")||"6")+"-digit PIN");
+    $("forgotBtn").hidden=true;
+  }catch(e){$("resetPassMsg").textContent="Couldn't verify — check your connection.";}
 };
-$("resetConfirm").onclick=async()=>{
-  // CLOUD-ONLY RESET: wipe server vault, logout, then offer fresh PIN setup.
-  const sess=getSession();
-  if(sess&&sess.token){
-    try{
-      await fetch(STATS_URL+"/api/auth/vault/delete",{
-        method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({token:sess.token,vkey:"main"})
-      });
-      await fetch(STATS_URL+"/api/auth/vault/delete",{
-        method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({token:sess.token,vkey:"omni_vault_enc"})
-      });
-    }catch(e){}
-  }
-  clearSession();
-  localStorage.removeItem("omni_vault");localStorage.removeItem("omni_vault_bak");localStorage.removeItem("omni_profiles");localStorage.removeItem("omni_pin");
-  localStorage.removeItem("omni_pinlen");localStorage.removeItem("omni_pinfail");localStorage.removeItem("omni_last_backup");
-  localStorage.removeItem("omni_sync_id");localStorage.removeItem("omni_sync_last");localStorage.removeItem("omni_first_backup_done");
-  localStorage.removeItem("omni_recovery");
-  userPlan={tier:"free",trialEndsAt:0,tokens:0,sharedOnce:false,templates:[]};
-  profiles=[];sessionPin=null;pinTmp=null;pinBuf="";
-  $("resetModal").hidden=true;buildDots();
-  // CLOUD-ONLY: need an account before PIN setup (vault saves to server).
-  // Show account creation screen.
-  $("lockScreen").hidden=true;
-  $("quickScreen").hidden=false;
-  toast("Reset complete. Create your account to start fresh.");
+// Forgot password link -> step 2
+$("forgotPassLink").onclick=e=>{e.preventDefault();resetShowStep(2);$("resetEmail").value="";$("resetEmailMsg").textContent="";};
+$("resetStep2Cancel").onclick=()=>resetShowStep(1);
+// Step 2: send reset code to email
+$("resetStep2Next").onclick=async()=>{
+  const email=$("resetEmail").value.trim();
+  if(!email||!email.includes("@")){$("resetEmailMsg").textContent="Enter a valid email.";return;}
+  $("resetEmailMsg").textContent="Sending...";
+  try{
+    const r=await fetch(STATS_URL+"/api/auth/forgot-password",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({email})});
+    const d=await r.json();
+    if(!d.ok){$("resetEmailMsg").textContent=d.error||"Couldn't send code.";return;}
+    resetShowStep(3);
+    $("resetCode").value="";$("resetNewPass").value="";$("resetCodeMsg").textContent="";
+    window._pwResetEmail=email;
+  }catch(e){$("resetEmailMsg").textContent="Couldn't send — check your connection.";}
 };
+$("resetStep3Cancel").onclick=()=>resetShowStep(2);
+// Step 3: verify code + set new password
+$("resetStep3Next").onclick=async()=>{
+  const code=$("resetCode").value.trim();
+  const np=$("resetNewPass").value;
+  if(code.length!==6){$("resetCodeMsg").textContent="Enter the 6-digit code.";return;}
+  if(np.length<6){$("resetCodeMsg").textContent="Password must be at least 6 characters.";return;}
+  $("resetCodeMsg").textContent="Verifying...";
+  try{
+    const r=await fetch(STATS_URL+"/api/auth/reset-password",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({email:window._pwResetEmail,code,newPassword:np})});
+    const d=await r.json();
+    if(!d.ok){$("resetCodeMsg").textContent=d.error||"Wrong code — try again.";return;}
+    $("resetModal").hidden=true;
+    alert("Password updated. You can now reset your PIN with the new password.");
+    resetShowStep(1);
+    $("resetModal").hidden=false;
+  }catch(e){$("resetCodeMsg").textContent="Couldn't verify — check your connection.";}
+};
+/* Old reset handlers removed — new flow uses resetStep1Next/2Next/3Next above. */
 
 /* ---------- stats ---------- */
 function stat(k){
@@ -2326,6 +2281,34 @@ function toast(msg){
   clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2200);
 }
 
+/* ---------- connectivity monitor ---------- */
+(function(){
+  let banner=null;
+  function showBanner(online){
+    if(online){
+      if(banner){banner.remove();banner=null;}
+      toast("Back online");
+      return;
+    }
+    if(banner)return;
+    banner=document.createElement("div");
+    banner.id="offlineBanner";
+    banner.setAttribute("role","alert");
+    banner.style.cssText="position:fixed;top:0;left:0;right:0;z-index:9999;background:#7a2a2a;color:#fff;text-align:center;padding:10px 16px;font-size:14px;font-weight:600;";
+    banner.textContent="No internet connection — changes won't save until you're back online.";
+    document.body.appendChild(banner);
+  }
+  window.addEventListener("online",()=>showBanner(true));
+  window.addEventListener("offline",()=>showBanner(false));
+  // Check on boot too (in case we loaded while offline)
+  if(typeof navigator!=="undefined"&&navigator.onLine===false){
+    // delay slightly so DOM is ready
+    setTimeout(()=>showBanner(false),500);
+  }
+  // Expose for save functions to check before attempting server calls
+  window.isOnline=()=>typeof navigator==="undefined"||navigator.onLine!==false;
+})();
+
 /* ---------- profiles ---------- */
 let profiles=[];
 let curId=null, searchQ="";
@@ -2606,6 +2589,8 @@ let _saving=false;
 let lastSaveStep="";
 async function saveAll(){
   if(!sessionPin){lastSaveStep="no-pin";return false;}
+  // Don't attempt server save while offline — data stays in memory, user sees the banner
+  if(window.isOnline&&!window.isOnline()){lastSaveStep="offline";return false;}
   // Queue: wait for any in-progress save instead of failing
   let waits=0;
   while(_saving&&waits<50){await new Promise(r=>setTimeout(r,100));waits++;}
