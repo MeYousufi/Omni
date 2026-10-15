@@ -4331,13 +4331,24 @@ $("walletBtn").onclick=async()=>{
     }
     const blob=await r.blob();
     if(!blob||blob.size<100){toast("Pass came back empty — try again");return;}
-    const url=URL.createObjectURL(new Blob([blob],{type:"application/vnd.apple.pkpass"}));
-    // Use an anchor click — iOS offers to open .pkpass in Wallet
+    const pkpassBlob=new Blob([blob],{type:"application/vnd.apple.pkpass"});
+    const file=new File([pkpassBlob],"omni-card.pkpass",{type:"application/vnd.apple.pkpass"});
+    // Use native share sheet — iOS recognizes .pkpass and offers Wallet
+    try{
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        await navigator.share({files:[file],title:"OMNI Card"});
+        toast("Pass shared — open it in Wallet");
+        return;
+      }
+    }catch(e){
+      if(e&&e.name==="AbortError")return; // user cancelled share sheet
+    }
+    // Fallback: download the file
+    const url=URL.createObjectURL(pkpassBlob);
     const a=document.createElement("a");
     a.href=url;a.download="omni-card.pkpass";
-    a.setAttribute("type","application/vnd.apple.pkpass");
     document.body.appendChild(a);a.click();a.remove();
-    toast("Pass created — open it in Wallet");
+    toast("Pass downloaded — tap it to add to Wallet");
     setTimeout(()=>URL.revokeObjectURL(url),60000);
   }catch(e){toast("Couldn't create pass — check your connection");}
 };
