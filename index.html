@@ -4335,23 +4335,11 @@ $("walletBtn").onclick=async()=>{
     const blob=await r.blob();
     if(!blob||blob.size<100){toast("Pass came back empty — try again");return;}
     const pkpassBlob=new Blob([blob],{type:"application/vnd.apple.pkpass"});
-    const file=new File([pkpassBlob],"omni-card.pkpass",{type:"application/vnd.apple.pkpass"});
-    // Use native share sheet — iOS recognizes .pkpass and offers Wallet
-    try{
-      if(navigator.canShare&&navigator.canShare({files:[file]})){
-        await navigator.share({files:[file],title:"OMNI Card"});
-        toast("Pass shared — open it in Wallet");
-        return;
-      }
-    }catch(e){
-      if(e&&e.name==="AbortError")return; // user cancelled share sheet
-    }
-    // Fallback: download the file
     const url=URL.createObjectURL(pkpassBlob);
-    const a=document.createElement("a");
-    a.href=url;a.download="omni-card.pkpass";
-    document.body.appendChild(a);a.click();a.remove();
-    toast("Pass downloaded — tap it to add to Wallet");
+    // Navigate directly — iOS opens .pkpass URLs in Wallet automatically
+    // This works better than share sheet in the Capacitor WebView
+    toast("Opening Wallet…");
+    window.location.href=url;
     setTimeout(()=>URL.revokeObjectURL(url),60000);
   }catch(e){toast("Couldn't create pass — check your connection");}
 };
@@ -4577,18 +4565,31 @@ $("presentClose").onclick=closePresentShare;
 $("presentModal").addEventListener("click",e=>{if(e.target===$("presentModal"))closePresentShare();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("presentModal").hidden)closePresentShare();});
 $("presentShareSys").onclick=async()=>{
-  if(_presentSelectedIds.length>1){
-    // Multi-card system share
-    if(!consumeShare())return;
-    const vc=multiVcard(_presentSelectedIds);
-    const file=new File([vc],"OMNI-cards.vcf",{type:"text/vcard"});
-    try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"OMNI"});return;}}catch(e){}
-    try{if(navigator.share){await navigator.share({title:"OMNI",text:vc});return;}}catch(e){}
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(new Blob([vc],{type:"text/vcard"}));
-    a.download="OMNI-cards.vcf";document.body.appendChild(a);a.click();
-    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},800);
-  }else{$("shareBtn").onclick();}
+  try{
+    if(_presentSelectedIds.length>1){
+      // Multi-card system share
+      if(!consumeShare())return;
+      const vc=multiVcard(_presentSelectedIds);
+      if(!vc||!vc.trim()){toast("No card data to share");return;}
+      const file=new File([vc],"OMNI-cards.vcf",{type:"text/vcard"});
+      try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"OMNI"});return;}}catch(e){
+        if(e&&e.name==="AbortError")return;
+        console.warn("File share failed:",e);
+      }
+      try{if(navigator.share){await navigator.share({title:"OMNI",text:vc});return;}}catch(e){
+        if(e&&e.name==="AbortError")return;
+        console.warn("Text share failed:",e);
+      }
+      const a=document.createElement("a");
+      a.href=URL.createObjectURL(new Blob([vc],{type:"text/vcard"}));
+      a.download="OMNI-cards.vcf";document.body.appendChild(a);a.click();
+      setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},800);
+      toast("Cards downloaded ✓");
+    }else{$("shareBtn").onclick();}
+  }catch(e){
+    console.error("Multi-card share failed:",e);
+    toast("Share failed: "+(e.message||"unknown error"));
+  }
 };
 $("presentVcf").onclick=()=>{
   if(_presentSelectedIds.length>1){
