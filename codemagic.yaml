@@ -79,9 +79,6 @@ workflows:
           ls -la ios/App/ 2>/dev/null || echo "NO ios/App DIRECTORY"
           echo "=== Syncing ==="
           npx cap sync ios
-          echo "=== Setting iOS deployment target to 18.0 (required for dark mode app icons) ==="
-          echo "=== MUST run AFTER cap sync (sync regenerates the project) ==="
-          python3 -c "import re; p='ios/App/App.xcodeproj/project.pbxproj'; c=open(p).read(); n=re.sub(r'IPHONEOS_DEPLOYMENT_TARGET = [0-9.]+;', 'IPHONEOS_DEPLOYMENT_TARGET = 18.0;', c); open(p,'w').write(n); print('Deployment target updated:', n.count('IPHONEOS_DEPLOYMENT_TARGET = 18.0;'), 'occurrences')"
           echo "=== Installing custom app icons ==="
           ICON_SRC="."
           ICON_DST="ios/App/App/Assets.xcassets/AppIcon.appiconset"
