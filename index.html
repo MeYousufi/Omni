@@ -1496,8 +1496,8 @@ $("quickSave").onclick=async()=>{
   $("quickSave").disabled=false;
 };
 async function doLock(){
-  // save any pending changes before wiping memory — but ALWAYS wipe even if save fails
-  try{await saveAll();}catch(e){console.warn("Lock-time save failed:",e);}
+  // save in background — but lock IMMEDIATELY, don't wait for save
+  saveAll().catch(e=>console.warn("Lock-time save failed:",e));
   pinBuf="";pinTmp=null;sessionPin=null;profiles=[];encounters=[];userProfile={pic:null,picPos:"50% 50%",name:"",phone:"",email:"",cover:"",coverPos:"50% 50%"};curId=null;buildDots();updateGo();
   // After lock, always verify mode (vault exists on server)
   vaultIsNew=false;
