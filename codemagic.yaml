@@ -79,20 +79,8 @@ workflows:
           ls -la ios/App/ 2>/dev/null || echo "NO ios/App DIRECTORY"
           echo "=== Syncing ==="
           npx cap sync ios
-          echo "=== Installing custom app icons ==="
-          ICON_SRC="."
-          ICON_DST="ios/App/App/Assets.xcassets/AppIcon.appiconset"
-          if [ -d "$ICON_DST" ]; then
-            cp "$ICON_SRC"/Icon-*.png "$ICON_DST"/ && echo "Custom icons installed" || echo "Icon copy failed"
-            # Install our Contents.json so Xcode references the new Icon-*.png filenames
-            # (Capacitor's default Contents.json points to AppIcon-*.png names)
-            if [ -f "$ICON_SRC/AppIcon-Contents.json" ]; then
-              cp "$ICON_SRC/AppIcon-Contents.json" "$ICON_DST/Contents.json" && echo "Contents.json installed" || echo "Contents.json copy failed"
-            fi
-            ls "$ICON_DST"/ | head -15
-          else
-            echo "Icon source or destination missing — using default Capacitor icons"
-          fi
+          echo "=== Skipping custom icons (testing if they cause build failure) ==="
+          echo "Using default Capacitor icons for this build"
           echo "=== Setting build number to Codemagic build $BUILD_NUMBER ==="
           INFO_PLIST="ios/App/App/Info.plist"
           if [ -f "$INFO_PLIST" ]; then
