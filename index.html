@@ -1504,7 +1504,8 @@ async function doLock(){
   pinMsg("Enter your PIN");
   $("forgotBtn").hidden=false;
   // cloud restore is for fresh installs — hide it when this device already has cards
-  $("lockSyncBtn").hidden=has;$("lockSyncForm").hidden=true;
+  try{$("lockSyncBtn").hidden=true;}catch(e){}
+  try{$("lockSyncForm").hidden=true;}catch(e){}
   const locked=pinLockedLeft();
   if(locked>0)pinMsg("Too many tries — wait "+locked+"s");
   $("homeScreen").hidden=true;$("detailScreen").hidden=true;$("dashScreen").hidden=true;$("profileScreen").hidden=true;$("ownerScreen").hidden=true;$("welcomeScreen").hidden=true;$("lockScreen").hidden=false;applyLockBg();replayLogo();
