@@ -160,7 +160,7 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 .wcard .wtext{position:absolute;left:18px;right:90px;bottom:16px;z-index:2}
 .wcard .wlabel{font-size:21px;font-weight:800;letter-spacing:.2px;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wcard .wname{font-size:13px;font-weight:500;color:rgba(255,255,255,.85);text-shadow:0 1px 6px rgba(0,0,0,.6);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wcard .wbrand{position:absolute;bottom:18px;right:18px;z-index:2;font-size:12px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,.92);text-shadow:0 1px 6px rgba(0,0,0,.55)}
+.wcard .wbrand{position:absolute;bottom:18px;right:18px;z-index:2;font-size:21px;font-weight:800;letter-spacing:.2px;color:rgba(255,255,255,.92);text-shadow:0 2px 10px rgba(0,0,0,.65)}
 .wcard.active{box-shadow:0 12px 34px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.22)}
 /* wallet detail panel (below selected card) */
 .wdetail{position:absolute;left:0;right:0;background:#141824;border:1px solid var(--line);border-radius:16px;overflow:hidden;animation:slideup .25s ease}
@@ -3107,7 +3107,34 @@ function renderFlip(){
   lines(p.emails).forEach(v=>back+=`<a href="mailto:${esc(v)}">${esc(v)}</a>`);
   lines(p.urls).forEach(v=>{const u=/^https?:/i.test(v)?v:"https://"+v;back+=`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(v)}</a>`;});
   fb.classList.remove("has-cover-back");
-  fb.innerHTML=back||`<p class="muted" style="text-align:center;margin-top:60px">No contact info yet.<br>Add some below.</p>`;
+  // Add QR code that links to the card's share URL
+  const qrSection=`<div style="margin-top:16px;text-align:center;padding:12px;background:rgba(255,255,255,.95);border-radius:12px;display:inline-block">
+    <div id="flipQr" style="display:flex;justify-content:center"></div>
+    <div style="font-size:11px;color:#666;margin-top:6px;font-weight:600">Scan for full profile</div>
+  </div>`;
+  fb.innerHTML=(back||`<p class="muted" style="text-align:center;margin-top:20px">No contact info yet.<br>Add some below.</p>`)+qrSection;
+  // Generate QR code asynchronously
+  setTimeout(async()=>{
+    try{
+      const qrEl=document.getElementById("flipQr");
+      if(!qrEl||typeof QRCode==="undefined")return;
+      // Generate share URL for this card
+      let url="";
+      try{
+        const key=crypto.getRandomValues(new Uint8Array(32));
+        const iv=crypto.getRandomValues(new Uint8Array(12));
+        const ck=await crypto.subtle.importKey("raw",key,"AES-GCM",false,["encrypt"]);
+        const payload={name:p.name,org:p.org,title:p.title,phones:lines(p.phones),emails:lines(p.emails),urls:lines(p.urls),address:p.address};
+        const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},ck,te.encode(JSON.stringify(payload)));
+        const r=await fetch(STATS_URL+"/api/card",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({d:b64(iv)+"."+b64(ct)})});
+        if(r.ok){const j=await r.json();if(j.id)url=PUBLIC_URL+"#s="+j.id+"&k="+b64(key).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}
+      }catch(e){}
+      if(url){
+        qrEl.innerHTML="";
+        new QRCode(qrEl,{text:url,width:100,height:100,correctLevel:QRCode.CorrectLevel.M});
+      }
+    }catch(e){console.warn("Flip QR failed:",e);}
+  },100);
 }
 function fillDetail(){
   const p=getP();if(!p)return;
