@@ -72,10 +72,38 @@ async function hashPassword(password, salt){
 
 async function verifyPassword(password, salt, expectedHash){
   const h = await hashPassword(password, salt);
-  if (h.length !== expectedHash.length) return false;
+  return timingSafeEqual(h, expectedHash);
+}
+
+// Constant-time string comparison (prevents timing attacks on codes/tokens)
+function timingSafeEqual(a, b){
+  if (typeof a !== "string" || typeof b !== "string") return false;
+  if (a.length !== b.length) return false;
   let diff = 0;
-  for (let i = 0; i < h.length; i++) diff |= h.charCodeAt(i) ^ expectedHash.charCodeAt(i);
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return diff === 0;
+}
+
+// Send a password-reset email via Resend (fire-and-forget; never throws)
+// Requires RESEND_API_KEY in worker env. RESET_EMAIL_FROM optional (default noreply@omni-tap.com).
+async function sendResetEmail(env, toEmail, code){
+  try{
+    const apiKey = env.RESEND_API_KEY;
+    if (!apiKey) return; // not configured — caller returns generic ok
+    const from = env.RESET_EMAIL_FROM || "noreply@omni-tap.com";
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: "OMNI <" + from + ">",
+        to: [toEmail],
+        subject: "Your OMNI password reset code",
+        text: "Your OMNI password reset code is: " + code +
+          "\n\nThis code expires in 15 minutes and can only be used once." +
+          "\nIf you didn't request this, just ignore this email — your password stays the same.",
+      }),
+    });
+  }catch(e){ /* fire-and-forget: never break the reset flow on email failure */ }
 }
 
 // Owner auth: password-based token. The password hash lives in KV;
@@ -434,6 +462,8 @@ export default {
       }
 
       // Authenticated vault save: ties encrypted vault to user account (cloud-only storage)
+      // v2 format: {v:2, blob (VK-encrypted), wkey_pin, wkey_pwd} — all opaque to server.
+      // v1 format: {blob (PIN-encrypted)} — migrated client-side on next unlock.
       if (p === "/api/auth/vault/save" && req.method === "POST") {
         let b = {};
         try { b = await req.json(); } catch (e) {}
@@ -441,7 +471,12 @@ export default {
         const blob = String(b.blob || "");
         const updatedAt = parseInt(b.updated_at, 10) || Date.now();
         const vkey = String(b.vkey || "main").slice(0, 32);
+        const v = parseInt(b.v, 10) === 2 ? 2 : 1;
+        const wkey_pin = typeof b.wkey_pin === "string" ? b.wkey_pin.slice(0, 2000) : null;
+        const wkey_pwd = typeof b.wkey_pwd === "string" ? b.wkey_pwd.slice(0, 2000) : null;
         if (!token || !blob || blob.length > 500000)
+          return json({ error: "bad request" }, 400);
+        if ((wkey_pin && wkey_pin.length > 2000) || (wkey_pwd && wkey_pwd.length > 2000))
           return json({ error: "bad request" }, 400);
         const sess = await kv.get("auth:session:" + token, "json");
         if (!sess || sess.expires < Date.now())
@@ -450,7 +485,10 @@ export default {
         const existing = await kv.get(key, "json");
         if (existing && existing.updated_at > updatedAt)
           return json({ ok: false, conflict: true, server_updated_at: existing.updated_at }, 409);
-        await kv.put(key, JSON.stringify({ blob, updated_at: updatedAt }));
+        const rec = { blob, updated_at: updatedAt, v };
+        if (wkey_pin) rec.wkey_pin = wkey_pin;
+        if (wkey_pwd) rec.wkey_pwd = wkey_pwd;
+        await kv.put(key, JSON.stringify(rec));
         return json({ ok: true, updated_at: updatedAt });
       }
 
@@ -468,6 +506,7 @@ export default {
         return json({ ok: true });
       }
       // Authenticated vault load: download vault by session (cloud-only storage)
+      // Returns v2 wrapped fields (wkey_pin, wkey_pwd) when present — all opaque to server.
       if (p === "/api/auth/vault/load" && req.method === "GET") {
         const token = String(url.searchParams.get("token") || "").slice(0, 64);
         const vkey = String(url.searchParams.get("vkey") || "main").slice(0, 32);
@@ -477,7 +516,76 @@ export default {
           return json({ error: "invalid_session" }, 401);
         const v = await kv.get("auth:vault:" + sess.uid + ":" + vkey, "json");
         if (!v) return json({ error: "not found" }, 404);
-        return json({ ok: true, blob: v.blob, updated_at: v.updated_at });
+        const out = { ok: true, blob: v.blob, updated_at: v.updated_at, v: v.v || 1 };
+        if (v.wkey_pin) out.wkey_pin = v.wkey_pin;
+        if (v.wkey_pwd) out.wkey_pwd = v.wkey_pwd;
+        return json(out);
+      }
+
+      /* ---------------- password recovery (2026-10-15) ----------------
+       * Forgot password: 6-digit code emailed to the account address.
+       * - Codes are SHA256-hashed before KV storage, 15-min TTL, single-use.
+       * - Rate limit: 5 codes per email per hour.
+       * - Generic {ok:true} on forgot-password to avoid user enumeration.
+       * - Requires RESEND_API_KEY in worker env to actually send email.
+       * ------------------------------------------------------------------------ */
+      // Step 1: request a reset code
+      if (p === "/api/auth/forgot-password" && req.method === "POST") {
+        let b = {};
+        try { b = await req.json(); } catch (e) {}
+        const email = String(b.email || "").toLowerCase().trim();
+        // Always return ok:true — never reveal whether the email has an account.
+        if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return json({ ok: true });
+        const eh = await sha256hex("auth:" + email);
+        const userRec = await kv.get("auth:user:" + eh, "json");
+        if (!userRec) return json({ ok: true });
+        // Rate limit: 5 codes per email per hour (silent — still returns ok:true)
+        const rlKey = "auth:pwreset:rl:" + eh;
+        let rl = await kv.get(rlKey, "json");
+        const now = Date.now();
+        if (!rl || now > rl.reset) rl = { count: 0, reset: now + 3600000 };
+        if (rl.count >= 5) return json({ ok: true });
+        rl.count++;
+        await kv.put(rlKey, JSON.stringify(rl), { expirationTtl: 3600 });
+        // Cryptographically random 6-digit code
+        const rb = crypto.getRandomValues(new Uint8Array(4));
+        const code = String((new DataView(rb.buffer).getUint32(0) % 900000) + 100000);
+        const codeHash = await sha256hex("pwreset:" + eh + ":" + code);
+        await kv.put("auth:pwreset:" + eh, JSON.stringify({ h: codeHash }), { expirationTtl: 900 });
+        // Fire-and-forget email (never blocks, never leaks failure to client)
+        sendResetEmail(env, email, code).catch(() => {});
+        return json({ ok: true });
+      }
+
+      // Step 2: verify code + set new password
+      if (p === "/api/auth/reset-password" && req.method === "POST") {
+        let b = {};
+        try { b = await req.json(); } catch (e) {}
+        const email = String(b.email || "").toLowerCase().trim();
+        const code = String(b.code || "").replace(/\\D/g, "").slice(0, 6);
+        const newPassword = String(b.newPassword || "");
+        if (newPassword.length < 6)
+          return json({ ok: false, error: "password_min_6" }, 400);
+        if (code.length !== 6)
+          return json({ ok: false, error: "invalid_code" }, 400);
+        const eh = await sha256hex("auth:" + email);
+        const stored = await kv.get("auth:pwreset:" + eh, "json");
+        // Generic error — don't reveal whether a code was ever issued
+        if (!stored || !stored.h)
+          return json({ ok: false, error: "invalid_code" }, 400);
+        const codeHash = await sha256hex("pwreset:" + eh + ":" + code);
+        if (!timingSafeEqual(codeHash, stored.h))
+          return json({ ok: false, error: "invalid_code" }, 400);
+        const userRec = await kv.get("auth:user:" + eh, "json");
+        if (!userRec)
+          return json({ ok: false, error: "invalid_code" }, 400);
+        // Code valid: update password, then single-use invalidate the code
+        const salt = genId(32);
+        userRec.pwd_hash = await hashPassword(newPassword, salt);
+        userRec.salt = salt;
+        await kv.put("auth:user:" + eh, JSON.stringify(userRec));
+        await kv.delete("auth:pwreset:" + eh);
+        return json({ ok: true });
       }
 
       /* ---------------- invites ---------------- */
@@ -689,7 +797,7 @@ export default {
 
       /* ---------------- owner authentication ----------------
        * Password-based owner login. First use creates the password
-       * (one-time setup); afterwards login returns a 24h token.
+       * (one-time setup); afterwards login returns a 30-day token.
        * The token guards /api/flags (POST), /api/grant, /api/stats.
        * -------------------------------------------------------- */
       if (p === "/api/owner/setup" && req.method === "POST") {
@@ -703,7 +811,7 @@ export default {
         await kv.put("owner:hash", await sha256hex("omni-owner:" + pw));
         const token = genId(32);
         const curGen = (await kv.get("owner:gen")) || "0";
-        await kv.put("owner:token:" + token, curGen, { expirationTtl: 86400 });
+        await kv.put("owner:token:" + token, curGen, { expirationTtl: 2592000 });
         return json({ ok: true, token });
       }
 
@@ -718,7 +826,7 @@ export default {
           return json({ ok: false });
         const token = genId(32);
         const curGen = (await kv.get("owner:gen")) || "0";
-        await kv.put("owner:token:" + token, curGen, { expirationTtl: 86400 });
+        await kv.put("owner:token:" + token, curGen, { expirationTtl: 2592000 });
         return json({ ok: true, token });
       }
 
@@ -865,7 +973,7 @@ export default {
         await kv.put("owner:gen", String(gen));
         // 5. Issue a fresh token for this session
         const token = genId(32);
-        await kv.put("owner:token:" + token, String(gen), { expirationTtl: 86400 });
+        await kv.put("owner:token:" + token, String(gen), { expirationTtl: 2592000 });
         return json({ ok: true, token });
       }
 
