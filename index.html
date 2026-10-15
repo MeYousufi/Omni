@@ -4335,11 +4335,27 @@ $("walletBtn").onclick=async()=>{
     const blob=await r.blob();
     if(!blob||blob.size<100){toast("Pass came back empty — try again");return;}
     const pkpassBlob=new Blob([blob],{type:"application/vnd.apple.pkpass"});
+    const isNativeApp=window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform();
+    if(isNativeApp){
+      // Native app: use share sheet — user taps the pass to add to Wallet
+      const file=new File([pkpassBlob],"omni-card.pkpass",{type:"application/vnd.apple.pkpass"});
+      try{
+        if(navigator.canShare&&navigator.canShare({files:[file]})){
+          await navigator.share({files:[file],title:"OMNI Card"});
+          toast("Tap the pass to add to Wallet");
+          return;
+        }
+      }catch(e){
+        if(e&&e.name==="AbortError")return;
+      }
+    }
+    // Web/Safari: download the file — iOS opens .pkpass downloads in Wallet
     const url=URL.createObjectURL(pkpassBlob);
-    // Navigate directly — iOS opens .pkpass URLs in Wallet automatically
-    // This works better than share sheet in the Capacitor WebView
-    toast("Opening Wallet…");
-    window.location.href=url;
+    const a=document.createElement("a");
+    a.href=url;a.download="omni-card.pkpass";
+    a.setAttribute("type","application/vnd.apple.pkpass");
+    document.body.appendChild(a);a.click();a.remove();
+    toast("Pass downloaded — tap it to add to Wallet");
     setTimeout(()=>URL.revokeObjectURL(url),60000);
   }catch(e){toast("Couldn't create pass — check your connection");}
 };
@@ -4473,25 +4489,38 @@ async function openPresentShareFor(ids){
   const multi=ids.length>1;
   // For single card: use existing flow with field checkboxes
   if(!multi){
-    curId=ids[0];
-    buildShare();
-    const p=getP();
-    const has=$("shareBox")&&!$("shareBox").hidden;
-    $("presentCardName").textContent="\u201c"+(p?(p.label||p.name||"card"):"card")+"\u201d";
-    $("presentEmpty").hidden=has;
-    $("presentQr").innerHTML="";
-    ["presentShareSys","presentVcf","presentCopyLink"].forEach(id=>{$(id).style.display=has?"":"none";});
-    $("presentNfc").hidden=true;
-    if(has){
-      try{await $("linkBtn").onclick();}catch(e){}
-      if(!$("limitModal").hidden){closePresentShare();return;}
-      const qrHtml=$("qr").innerHTML;
-      if(qrHtml){
-        $("presentQr").innerHTML=qrHtml;
-        if("NDEFReader" in window)$("presentNfc").hidden=false;
+    try{
+      curId=ids[0];
+      if(typeof buildShare==="function")buildShare();
+      const p=(typeof getP==="function")?getP():null;
+      const shareBox=$("shareBox");
+      const has=shareBox&&!shareBox.hidden;
+      $("presentCardName").textContent="\u201c"+(p?(p.label||p.name||"card"):"card")+"\u201d";
+      $("presentEmpty").hidden=has;
+      $("presentQr").innerHTML="";
+      ["presentShareSys","presentVcf","presentCopyLink"].forEach(id=>{const el=$(id);if(el)el.style.display=has?"":"none";});
+      const nfcEl=$("presentNfc");if(nfcEl)nfcEl.hidden=true;
+      if(has){
+        try{const lb=$("linkBtn");if(lb&&lb.onclick)await lb.onclick();}catch(e){console.warn("linkBtn failed:",e);}
+        const lm=$("limitModal");if(lm&&!lm.hidden){closePresentShare();return;}
+        const qrEl=$("qr");
+        const qrHtml=qrEl?qrEl.innerHTML:"";
+        const pqr=$("presentQr");
+        if(qrHtml){
+          pqr.innerHTML=qrHtml;
+          if("NDEFReader" in window&&nfcEl)nfcEl.hidden=false;
+        }else{
+          pqr.innerHTML='<p class="muted" style="text-align:center">Couldn\'t generate the QR code.</p>';
+        }
       }else{
-        $("presentQr").innerHTML='<p class="muted" style="text-align:center">Couldn\'t generate the QR code.</p>';
+        // shareBox not available — fall back to direct share
+        const p2=(typeof getP==="function")?getP():profiles.find(x=>x.id===ids[0]);
+        if(p2){curId=p2.id;}
+        $("presentEmpty").hidden=false;
       }
+    }catch(e){
+      console.error("Single-card present failed:",e);
+      toast("Share failed: "+(e.message||"unknown error"));
     }
   }else{
     // Multi-card: generate combined share
