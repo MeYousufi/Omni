@@ -158,7 +158,6 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 .wcard .wlabel{font-size:21px;font-weight:800;letter-spacing:.2px;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wcard .wname{font-size:13px;font-weight:500;color:rgba(255,255,255,.85);text-shadow:0 1px 6px rgba(0,0,0,.6);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wcard .wbrand{position:absolute;bottom:18px;right:18px;z-index:2;font-size:12px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,.92);text-shadow:0 1px 6px rgba(0,0,0,.55)}
-.wcard .wring{position:absolute;top:12px;right:16px;z-index:2;width:30px;height:30px;border-radius:50%;border:3px solid rgba(255,255,255,.85);box-shadow:0 0 10px rgba(0,0,0,.4)}
 .wcard.active{box-shadow:0 12px 34px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.22)}
 /* wallet detail panel (below selected card) */
 .wdetail{position:absolute;left:0;right:0;background:#141824;border:1px solid var(--line);border-radius:16px;overflow:hidden;animation:slideup .25s ease}
@@ -656,7 +655,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <div id="moreShare" hidden style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
       <button id="vcfBtn" class="gray" style="width:100%">Save .vcf file</button>
       <button id="linkBtn" class="gray" style="width:100%">NFC / QR link</button>
-      <button id="walletBtn" class="gray" style="width:100%"> Add to Apple Wallet</button>
+      <button id="walletBtn" class="gray" style="width:100%">Add to Apple Wallet</button>
       <button id="nfcWriteBtn" class="gray" style="width:100%" hidden>Write to NFC Tag</button>
       <button id="qrDlBtn" class="gray" style="width:100%" hidden>Save QR image</button>
     </div>
@@ -2774,7 +2773,7 @@ function renderCards(){
       else{const c=p.color||"#2dd4bf";d.style.background=`linear-gradient(135deg,${c},#141824 130%)`;}
       const avatarHtml = p.photo ? `<div style="position:absolute;top:14px;left:16px;width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,.3);z-index:2"><img src="${esc(p.photo)}" style="width:100%;height:100%;object-fit:cover"></div>`
         : (p.name ? `<div style="position:absolute;top:14px;left:16px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;border:2px solid rgba(255,255,255,.3);z-index:2">${esc(initials(p.name))}</div>` : '');
-      d.innerHTML=`<div class="wdim" aria-hidden="true"></div><div class="wbrand">OMNI</div>${avatarHtml}<div class="wring" aria-hidden="true"></div>`+
+      d.innerHTML=`<div class="wdim" aria-hidden="true"></div><div class="wbrand">OMNI</div>${avatarHtml}`+
         `${(()=>{const tc=contrastText(p.color||"#2dd4bf");return `<div class="wtext"><div class="wlabel" style="color:${tc}">${esc(p.label||"Untitled")}</div><div class="wname" style="color:${tc}">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div></div>`;})()}`;
       d.onclick=()=>{activeWallet=i;renderCards();haptic(10);};
       d.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();d.click();}};
@@ -2791,7 +2790,7 @@ function renderCards(){
     else{const c=p.color||"#2dd4bf";top.style.background=`linear-gradient(135deg,${c},#141824 130%)`;}
     const topAvatar = p.photo ? `<div style="position:absolute;top:14px;left:16px;width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,.3);z-index:2"><img src="${esc(p.photo)}" style="width:100%;height:100%;object-fit:cover"></div>`
       : (p.name ? `<div style="position:absolute;top:14px;left:16px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;border:2px solid rgba(255,255,255,.3);z-index:2">${esc(initials(p.name))}</div>` : '');
-    top.innerHTML=`<div class="wdim" aria-hidden="true"></div><div class="wbrand">OMNI</div>${topAvatar}<div class="wring" aria-hidden="true"></div>`+
+    top.innerHTML=`<div class="wdim" aria-hidden="true"></div><div class="wbrand">OMNI</div>${topAvatar}`+
       `${(()=>{const tc=contrastText(p.color||"#2dd4bf");return `<div class="wtext"><div class="wlabel" style="color:${tc}">${esc(p.label||"Untitled")}</div><div class="wname" style="color:${tc}">${esc(p.name||"")}${p.org?" · "+esc(p.org):""}</div></div>`;})()}`;
     top.onclick=()=>openDetail(p.id);
     g.appendChild(top);
