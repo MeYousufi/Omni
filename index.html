@@ -4279,8 +4279,34 @@ $("moreShareBtn").onclick=()=>{
   $("moreShareBtn").innerHTML=open?"More ways to share ▴":"More ways to share ▾";
 };
 $("vcfBtn").onclick=()=>{if(!consumeShare())return;stat("vcf");downloadVcf();};
-$("walletBtn").onclick=()=>{
-  toast("Apple Wallet passes coming soon — needs Apple Developer Pass certificate");
+$("walletBtn").onclick=async()=>{
+  try{
+    const sess=getSession();
+    if(!sess||!sess.token){toast("Log in first, then add to Wallet");return;}
+    let card;
+    try{card=chosen();}catch(e){toast("Couldn't read card data");return;}
+    const p=getP(); if(p&&p.id) card.id=p.id;
+    toast("Creating Wallet pass…");
+    const r=await fetch(STATS_URL+"/api/wallet/pass",{method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({token:sess.token,card})});
+    if(!r.ok){
+      const j=await r.json().catch(()=>null);
+      toast(j&&j.error==="wallet not configured"?"Wallet not set up yet":"Couldn't create pass — try again");
+      return;
+    }
+    const blob=await r.blob();
+    const url=URL.createObjectURL(blob);
+    if(/iPhone|iPad|iPod/i.test(navigator.userAgent)){
+      // iOS opens the .pkpass in Wallet automatically
+      location.href=url;
+    }else{
+      const a=document.createElement("a");
+      a.href=url;a.download="omni-card.pkpass";
+      document.body.appendChild(a);a.click();a.remove();
+    }
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
+  }catch(e){toast("Couldn't create pass — check your connection");}
 };
 $("shareBtn").onclick=async()=>{if(!consumeShare())return;haptic(10);
   stat("share");

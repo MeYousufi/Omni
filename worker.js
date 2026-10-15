@@ -15,6 +15,12 @@
  *                              toggle returns 503 until this is set.
  *   PUBLIC_URL        string   Optional. Defaults to https://omni-tap.com/
  *                              Used for Stripe success/cancel return URLs.
+ *   PASS_KEY_PEM      secret   REQUIRED for Apple Wallet. The Pass Type ID
+ *                              private key PEM (-----BEGIN PRIVATE KEY-----).
+ *   PASS_CERT_PEM     secret   REQUIRED for Apple Wallet. The Pass Type ID
+ *                              certificate PEM (-----BEGIN CERTIFICATE-----).
+ *   WWDR_CERT_PEM     secret   REQUIRED for Apple Wallet. Apple WWDR G4
+ *                              intermediate cert PEM (AppleWWDRCAG4).
  *
  * HOW TO DEPLOY:
  *   1. Copy this file's contents into the Cloudflare dashboard:
@@ -156,6 +162,394 @@ async function getFlags(env) {
   return { ...DEFAULT_FLAGS };
 }
 
+/* ============================================================
+ * APPLE WALLET .pkpass — signing library + placeholder images
+ * (inlined from wallet/pkpass-lib.js and wallet/pass-images.js)
+ * Secrets required: PASS_KEY_PEM, PASS_CERT_PEM, WWDR_CERT_PEM
+ * ============================================================ */
+/* ============================================================
+ * OMNI Apple Wallet .pkpass library (Cloudflare Worker compatible)
+ *
+ * Self-contained: no imports, no npm. Uses only WebCrypto
+ * (crypto.subtle), TextEncoder, and atob — all available in
+ * Cloudflare Workers and modern browsers/Node.
+ *
+ * Produces a fully valid PKCS#7/CMS SignedData (detached)
+ * signature over manifest.json, as required by Apple Wallet.
+ *
+ * ESM: import { buildPkpass, createPKCS7 } from './pkpass-lib.js'
+ * For worker.js (single-file deploy): inline this file's body with
+ * the leading `export ` keywords stripped.
+ * ============================================================ */
+
+// ---------- byte helpers ----------
+function pkConcat(...arrays) {
+  let total = 0;
+  for (const a of arrays) total += a.length;
+  const out = new Uint8Array(total);
+  let off = 0;
+  for (const a of arrays) { out.set(a, off); off += a.length; }
+  return out;
+}
+
+function pkDerLen(len) {
+  if (len < 128) return new Uint8Array([len]);
+  const bytes = [];
+  let l = len;
+  while (l > 0) { bytes.unshift(l & 0xff); l >>>= 8; }
+  return new Uint8Array([0x80 | bytes.length, ...bytes]);
+}
+
+function pkTLV(tag, value) {
+  const v = value instanceof Uint8Array ? value : new TextEncoder().encode(value);
+  const len = pkDerLen(v.length);
+  const out = new Uint8Array(1 + len.length + v.length);
+  out[0] = tag;
+  out.set(len, 1);
+  out.set(v, 1 + len.length);
+  return out;
+}
+
+const pkSeq = (...items) => pkTLV(0x30, pkConcat(...items));
+const pkSet = (...items) => pkTLV(0x31, pkConcat(...items));
+const pkInt = (n) => pkTLV(0x02, new Uint8Array([n])); // small positive ints only
+const pkNull = () => new Uint8Array([0x05, 0x00]);
+const pkOctet = (b) => pkTLV(0x04, b);
+
+function pkOid(oidStr) {
+  const parts = oidStr.split('.').map(Number);
+  const bytes = [parts[0] * 40 + parts[1]];
+  for (let i = 2; i < parts.length; i++) {
+    let v = parts[i];
+    const stack = [v & 0x7f];
+    v >>>= 7;
+    while (v > 0) { stack.unshift((v & 0x7f) | 0x80); v >>>= 7; }
+    bytes.push(...stack);
+  }
+  return pkTLV(0x06, new Uint8Array(bytes));
+}
+
+function pkUTCTime(date) {
+  const p = (n) => String(n).padStart(2, '0');
+  const s = p(date.getUTCFullYear() % 100) + p(date.getUTCMonth() + 1) +
+            p(date.getUTCDate()) + p(date.getUTCHours()) +
+            p(date.getUTCMinutes()) + p(date.getUTCSeconds()) + 'Z';
+  return pkTLV(0x17, s);
+}
+
+function pkPemToDer(pem, label) {
+  const b64 = pem
+    .replace('-----BEGIN ' + label + '-----', '')
+    .replace('-----END ' + label + '-----', '')
+    .replace(/\s/g, '');
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+function pkHex(bytes) {
+  return [...bytes].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function pkSha1(subtle, data) {
+  const buf = typeof data === 'string' ? new TextEncoder().encode(data) : data;
+  return new Uint8Array(await subtle.digest('SHA-1', buf));
+}
+async function pkSha256(subtle, data) {
+  const buf = typeof data === 'string' ? new TextEncoder().encode(data) : data;
+  return new Uint8Array(await subtle.digest('SHA-256', buf));
+}
+
+// ---------- minimal DER reader (for X.509 cert parsing) ----------
+function pkReadTLV(buf, off) {
+  const tag = buf[off];
+  let len = buf[off + 1];
+  let hlen = 2;
+  if (len & 0x80) {
+    const n = len & 0x7f;
+    len = 0;
+    for (let i = 0; i < n; i++) len = (len << 8) | buf[off + 2 + i];
+    hlen = 2 + n;
+  }
+  return { tag, len, headerLen: hlen, start: off + hlen, totalLen: hlen + len };
+}
+
+function pkChildren(buf, tlv) {
+  // tlv: parsed TLV of a constructed type; returns array of child TLVs
+  const kids = [];
+  let off = tlv.start;
+  const end = tlv.start + tlv.len;
+  while (off < end) {
+    const c = pkReadTLV(buf, off);
+    kids.push(c);
+    off += c.totalLen;
+  }
+  return kids;
+}
+
+/* Extract the raw DER (tag+length+value) of the issuer Name and the
+ * serialNumber INTEGER from a DER-encoded X.509 certificate. */
+function pkCertIssuerAndSerial(certDer) {
+  const outer = pkReadTLV(certDer, 0);
+  if (outer.tag !== 0x30) throw new Error('not a DER certificate');
+  const tbs = pkChildren(certDer, outer)[0];
+  const f = pkChildren(certDer, tbs);
+  // f[0] = [0] version, f[1] = serialNumber, f[2] = signature, f[3] = issuer
+  const serial = f[1];
+  const issuer = f[3];
+  if (serial.tag !== 0x02) throw new Error('unexpected cert layout (serial)');
+  if (issuer.tag !== 0x30) throw new Error('unexpected cert layout (issuer)');
+  return {
+    issuerDer: certDer.slice(issuer.start - issuer.headerLen, issuer.start + issuer.len),
+    serialDer: certDer.slice(serial.start - serial.headerLen, serial.start + serial.len),
+  };
+}
+
+// ---------- PKCS#7 / CMS SignedData (detached) ----------
+const OID_DATA = '1.2.840.113549.1.7.1';
+const OID_SIGNED_DATA = '1.2.840.113549.1.7.2';
+const OID_SHA256 = '2.16.840.1.101.3.4.2.1';
+const OID_RSA_SHA256 = '1.2.840.113549.1.1.11';
+const OID_ATTR_CONTENT_TYPE = '1.2.840.113549.1.9.3';
+const OID_ATTR_SIGNING_TIME = '1.2.840.113549.1.9.5';
+const OID_ATTR_MESSAGE_DIGEST = '1.2.840.113549.1.9.4';
+
+function pkLexLess(a, b) {
+  const n = Math.min(a.length, b.length);
+  for (let i = 0; i < n; i++) {
+    if (a[i] !== b[i]) return a[i] < b[i];
+  }
+  return a.length < b.length;
+}
+
+/* Build the DER-encoded PKCS#7 SignedData for `content` (the raw
+ * manifest.json bytes). Returns a Uint8Array of the DER signature. */
+async function createPKCS7(content, secrets, subtle) {
+  subtle = subtle || globalThis.crypto.subtle;
+  const keyDer = pkPemToDer(secrets.keyPem, 'PRIVATE KEY');
+  const certDer = pkPemToDer(secrets.certPem, 'CERTIFICATE');
+  const wwdrDer = pkPemToDer(secrets.wwdrPem, 'CERTIFICATE');
+
+  const key = await subtle.importKey(
+    'pkcs8', keyDer,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false, ['sign']
+  );
+
+  const { issuerDer, serialDer } = pkCertIssuerAndSerial(certDer);
+
+  const digestAlgo = pkSeq(pkOid(OID_SHA256), pkNull());
+  const sigAlgo = pkSeq(pkOid(OID_RSA_SHA256), pkNull());
+
+  // Signed attributes (DER SET OF — must be sorted by encoding)
+  const messageDigest = await pkSha256(subtle, content);
+  const attrContentType = pkSeq(pkOid(OID_ATTR_CONTENT_TYPE), pkSet(pkOid(OID_DATA)));
+  const attrSigningTime = pkSeq(pkOid(OID_ATTR_SIGNING_TIME), pkSet(pkUTCTime(new Date())));
+  const attrMessageDigest = pkSeq(pkOid(OID_ATTR_MESSAGE_DIGEST), pkSet(pkOctet(messageDigest)));
+  const attrs = [attrContentType, attrSigningTime, attrMessageDigest]
+    .sort(pkLexLess); // DER SET OF ordering
+  const attrsContent = pkConcat(...attrs);
+  const signedAttrsField = pkConcat(new Uint8Array([0xa0]), pkDerLen(attrsContent.length), attrsContent);
+  // The data actually signed: same bytes re-tagged as SET OF
+  const dataToSign = pkConcat(new Uint8Array([0x31]), pkDerLen(attrsContent.length), attrsContent);
+  const sig = new Uint8Array(await subtle.sign('RSASSA-PKCS1-v1_5', key, dataToSign));
+
+  const signerInfo = pkSeq(
+    pkInt(1),
+    pkSeq(issuerDer, serialDer), // issuerAndSerialNumber
+    digestAlgo,
+    signedAttrsField,            // [0] IMPLICIT
+    sigAlgo,
+    pkOctet(sig)
+  );
+
+  const certsField = pkConcat(
+    new Uint8Array([0xa0]),
+    pkDerLen(certDer.length + wwdrDer.length),
+    certDer, wwdrDer
+  );
+
+  const signedData = pkSeq(
+    pkInt(1),
+    pkSet(digestAlgo),
+    pkSeq(pkOid(OID_DATA)),      // encapContentInfo (detached: no eContent)
+    certsField,                  // [0] IMPLICIT certificates
+    pkSet(signerInfo)
+  );
+
+  return pkSeq(
+    pkOid(OID_SIGNED_DATA),
+    pkConcat(new Uint8Array([0xa0]), pkDerLen(signedData.length), signedData)
+  );
+}
+
+// ---------- minimal ZIP writer (stored entries) ----------
+function pkCrc32(bytes) {
+  let crc = 0xffffffff;
+  for (let i = 0; i < bytes.length; i++) {
+    crc ^= bytes[i];
+    for (let j = 0; j < 8; j++) crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function createZip(files) {
+  const enc = new TextEncoder();
+  const chunks = [];
+  const central = [];
+  let offset = 0;
+  for (const [name, data] of Object.entries(files)) {
+    const nb = enc.encode(name);
+    const db = data instanceof Uint8Array ? data : enc.encode(String(data));
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true);
+    lh.setUint16(4, 20, true);
+    lh.setUint16(6, 0x0800, true);
+    lh.setUint16(8, 0, true);
+    lh.setUint32(14, pkCrc32(db), true);
+    lh.setUint32(18, db.length, true);
+    lh.setUint32(22, db.length, true);
+    lh.setUint16(26, nb.length, true);
+    chunks.push(new Uint8Array(lh.buffer), nb, db);
+    central.push({ nb, size: db.length, crc: pkCrc32(db), offset });
+    offset += 30 + nb.length + db.length;
+  }
+  const cdStart = offset;
+  const cdChunks = [];
+  for (const f of central) {
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true);
+    ch.setUint16(4, 20, true);
+    ch.setUint16(6, 20, true);
+    ch.setUint16(8, 0x0800, true);
+    ch.setUint32(16, f.crc, true);
+    ch.setUint32(20, f.size, true);
+    ch.setUint32(24, f.size, true);
+    ch.setUint16(28, f.nb.length, true);
+    ch.setUint32(42, f.offset, true);
+    cdChunks.push(new Uint8Array(ch.buffer), f.nb);
+    offset += 46 + f.nb.length;
+  }
+  const eocd = new DataView(new ArrayBuffer(22));
+  eocd.setUint32(0, 0x06054b50, true);
+  eocd.setUint16(8, central.length, true);
+  eocd.setUint16(10, central.length, true);
+  eocd.setUint32(12, offset - cdStart, true);
+  eocd.setUint32(16, cdStart, true);
+  return pkConcat(...chunks, ...cdChunks, new Uint8Array(eocd.buffer));
+}
+
+// ---------- pass.json builder ----------
+const PASS_TYPE_ID = 'pass.com.omnitap.card';
+const TEAM_ID = '7R43JAU47W';
+
+function str(v, n) {
+  return String(v == null ? '' : v).slice(0, n || 120);
+}
+
+/* card: { id, name, title, org, phones[], emails[], address, notes, urls[] }
+ * images: { "icon.png": Uint8Array, "logo.png": ..., ... } (filenames incl. @2x/@3x) */
+function buildPassJson(card) {
+  const phone = (card.phones && card.phones[0]) || '';
+  const passJson = {
+    formatVersion: 1,
+    passTypeIdentifier: PASS_TYPE_ID,
+    serialNumber: str(card.id || ('omni-' + Date.now()), 64),
+    teamIdentifier: TEAM_ID,
+    organizationName: 'OMNI',
+    description: str((card.name || 'Contact') + ' — OMNI Card', 200),
+    logoText: 'OMNI',
+    foregroundColor: 'rgb(255, 255, 255)',
+    backgroundColor: 'rgb(27, 28, 49)',
+    labelColor: 'rgb(45, 212, 191)',
+    generic: {
+      primaryFields: [
+        { key: 'name', label: 'NAME', value: str(card.name) },
+      ],
+      secondaryFields: [
+        { key: 'title', label: 'TITLE', value: str(card.title) },
+        { key: 'org', label: 'ORG', value: str(card.org) },
+      ],
+      auxiliaryFields: [
+        { key: 'phone', label: 'PHONE', value: str(phone, 40) },
+        { key: 'email', label: 'EMAIL', value: str((card.emails && card.emails[0]) || '') },
+      ],
+      backFields: [
+        { key: 'address', label: 'ADDRESS', value: str(card.address, 300) },
+        { key: 'website', label: 'WEBSITE', value: str((card.urls && card.urls[0]) || '') },
+        { key: 'notes', label: 'NOTES', value: str(card.notes, 500) },
+      ],
+    },
+  };
+  if (phone) {
+    passJson.barcodes = [{
+      format: 'PKBarcodeFormatQR',
+      message: 'tel:' + phone.replace(/\D/g, ''),
+      messageEncoding: 'iso-8859-1',
+    }];
+  }
+  return passJson;
+}
+
+/* Full pipeline: pass.json -> manifest.json -> signature -> .pkpass zip.
+ * secrets: { keyPem, certPem, wwdrPem } (PEM strings)
+ * images: { filename: Uint8Array } e.g. icon.png, icon@2x.png, logo.png...
+ * subtle: WebCrypto subtle (defaults to globalThis.crypto.subtle) */
+async function buildPkpass(card, images, secrets, subtle) {
+  subtle = subtle || globalThis.crypto.subtle;
+  if (!secrets.keyPem || !secrets.certPem || !secrets.wwdrPem)
+    throw new Error('missing wallet signing secrets');
+
+  const files = {};
+  files['pass.json'] = new TextEncoder().encode(JSON.stringify(buildPassJson(card)));
+  for (const [name, data] of Object.entries(images || {})) files[name] = data;
+
+  const manifest = {};
+  for (const [name, data] of Object.entries(files))
+    manifest[name] = pkHex(await pkSha1(subtle, data));
+  const manifestBytes = new TextEncoder().encode(JSON.stringify(manifest));
+  files['manifest.json'] = manifestBytes;
+
+  files['signature'] = await createPKCS7(manifestBytes, secrets, subtle);
+  return createZip(files);
+}
+
+/* Placeholder pass images (base64). Replace with final art. */
+const PKPASS_IMAGES_B64 = {
+  "icon.png": "iVBORw0KGgoAAAANSUhEUgAAAB0AAAAdCAYAAABWk2cPAAAA0UlEQVR4nOWWzQ3CMAyFHasTcIUl2IJ5OgjzsEWXaK9dAU6RIquO3xNyhKhPrZ28T46dnyLGrrf72/q+tW1dSvuv2cAjXfUCmWAdAbTgMgrYmsZD/gQ6sRMur+ehf3/MsAaVqQeMYtagRrKCNqsobo1aXk+s+tFsw+WtQkjNUHgXytSJmQs1EtOZyNjzHA6/C2UaChnbhTINxMwNM2U2PrqnqRPJE2X3M3WJR+JoOaju7Yky9T/Rc8U+hLNtW5ei9WMUUKRZ3mxwq69eIAsoIvIBHA5aCna8jlkAAAAASUVORK5CYII=",
+  "icon@2x.png": "iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAYAAADhu0ooAAABcUlEQVR4nO2awRHCIBBFgbECr9qEXViPhViPXaSJ5GoLemImQ1iC5C+yC+8YEPbNhpWQWJPJ5Xr75PatyTJPNqdfslOrchQpaUc1SJM0Jh1zVFSipIeKfSMqWdITc3B7HaQSujiqQQNrJxde0IZ3I6uuNroRtZpv2zXdZHSIauNUa6Lz60m2ve8P9vlZi1FKjoJLmkW0RDAELQxfowhJ5DgeaEZL12GN9QsTpYL9JVDEGBQQ0ViAR4JDj2cMYI1yBBX7/dE1Cy9GqDXVVNVFV0bO+aAZRWcBOV43e91i0fA24tq6heOW3r4jo9oYotoYotooFkWV/T1Qf2MjoyWgs4oc75BojdM71HzdnBkdFuV4SOZ4mB9nRiV0cQroQa6tph+8Wz0zGu9e0Kh+m9YSY6+rDZf7vatklnmy/WT03wHUwhmT/7m2RLybCy9oYu3kqAbphC6bNapBNuYQLUaSZanYyaorUTYVc7ZMq3vi3IR8AccGsm7vB5cNAAAAAElFTkSuQmCC",
+  "icon@3x.png": "iVBORw0KGgoAAAANSUhEUgAAAFcAAABXCAYAAABxyNlsAAACUUlEQVR4nO2dwXXCMBBEZb9UkGvSRLpIPSkk9aQLmoArLSQn54FtiZWl2Vnj+VdsJH2GlQT285AaeHv/+G05fw9czqdh67nVJx5BaI5a0eaDjyx1jlXyaDlIYu+x+ih+ApL6mFKKs8mVWBslT6tyJbaOnK+FXIndxpo304QmtnEnV6ltY+5vzL0gtnHrUWUByJiSUtubyaeSC0RygQwqCTiUXCCSC0RygUguEMkF8sLuQInXn2/TcdfPL3BPthFuKWYVmiOS6DByW6XOiSCZLre31DlMydQJDS3Wq40clOSyBuydYne5tWIfCen9fj1xlYteWkVburnJtQy816A92yoRZofWc7ARlmEpOSW3lCS0CGbb8OQyB/eoDfSqJUxZeEagctmptbSFTC8luYwJh9EmTC5z21kLqq/uyWUuk7zb1oQGBCJ3TyVhAtFn1+RG2Dl59kFlAYjkApFcIJILRHKBSC4QyQXiKjfC5sKzDxC5ETYLtSD6rLIAxF0uszR4tw2Tu6fSgOorpSww0stoEyqX+c+rtS3kN0wTGhC4XHZ6mf9Ah7lWrPdAvdtbI0xZ6JniCDvBlHQJKRRd/AxEl+0Dod7N4yWZtVukTmjsS0jR0O9Dm9BNfg7o9lQnoi2tagktd++E2aE9I5ILRHKBSC6QseU5CCLP5XwalFwgkgtkTKntESliyeRTyQXyL1fp7cOtxzH3gqhn7k9lAchCrtK7jTVvq8mV4DpyvrJlQYJtlDyZBOo33yWW8JkmNKX4HqsPPYOyAtgzKNc4guiWb+0fhTb9CNzcm/0AAAAASUVORK5CYII=",
+  "logo.png": "iVBORw0KGgoAAAANSUhEUgAAAKAAAAAyCAYAAADbYdBlAAAB5klEQVR4nO3dy22EMBRAUYNSQbaZFJFUkXpSSOpJFaGIgW1aSFYgPv49+4HNcM92AI3kK2MQMzRG2cvt7U/7mKjH0HeN5vFUDkZ016QRY/IBiA5zqTGKdyI8+EhDbCUbEx9CpI1EB0h8iCVpJThdEh5yhE7J3hmQ+JAr1JAzQOKDFl9LoosQQJs1QGY/aHM1tQmQ+LAXW1ttaANA07ox1oAoagqQ2Q9Hmbf2FLPD8/eX87Pfj0+Fr4Sr8gboC2+9DSEiRWuM/fQbE1/O9ri2sTnrRUhqTEQIqU2AuRERISSa+elXMx6NNWF//1H4JjjC7fU9ab9q7wMS37mkjtcUoPapM+d4xHdOKeNW3QxIfOcmHb/qAsS1ECCKIkAURYAoqroAU+8noQ7S8ZsC1H6YIOd4RHhOKePWav/bkRYiPJeU8Rr6rmmMWT4No3FDmkezEGPou2azBsyNh/gg0Rqz/fuE1IiID7HG5pxXwdKYiA8pvI/kj1HxmxDsZXHq5ZdxOMJ8yVfdjWhcyyLAWu8J4nGsG9vMgESIvdjasp6CiRDaXE2xBkRRzgCZBaHF15J3BiRC5Ao1FB0Y9wghETt5Ra8BmQ0RS9KK6CKECBEibYSXFULFYS8rtCHGayr6ulYXYnxs2suwf188tMZzJGbYAAAAAElFTkSuQmCC",
+  "logo@2x.png": "iVBORw0KGgoAAAANSUhEUgAAAUAAAABkCAYAAAD32uk+AAAD/0lEQVR4nO3dzXHUMBiAYW+GCrgCRUAV1EMh1EMVpAiSKy3AIbOZzcY/si3pk63nOe+sdfE7n2yv9zIcyKfPX/9FrwGY9/z0eIleQ6pmFyp2cB6tRrGZRQke9KOVIIYvQvigX9EhDDm46AH3ImJY9YDCByypGcIqBxI+YK0aIXwofQDxA7ao0Y5ihRU+IJdS02CRCVD8gJxKNSV7AMUPKKFEW7KNlcIH1JJrS5xlAhQ/oKZczdkdQPEDIuRoz64Aih8QaW+DNgdQ/IAW7GnRpgCKH9CSrU1aHUDxA1q0pU2rAih+QMvWNqr4b4EBWpUcQNMfcARrWpUUQPEDjiS1WYsBFD/giFLa5Rog0K3ZAJr+gCNbathkAMUPOIO5ltkCA90aDaDpDziTqaaZAIFuvQug6Q84o7G2fShxoI+/fi5+5u/3HyUODZAsWwBTojf1eTEEIrz5Y5Et29+14ZsjhEBpt3+otHkCzBm+++8UQqCG15sga6a/EvGr+f1Av25bt/oxmFpxEkGgtFUBrB0lEQRKSg5gVIxEECjlYRiWr/9FRyj6+MC5XJu3OAG2Ep9W1gGcR5FfgpzZ05/f0UuAU/n85VvYsS/DML0FbnHqinpGUPigrNohfH56vHgbTALxg/IizrPLkaa/q5pToPhBXTUnQRPgDPGD+mqedwI4QfwgTq3zbzSALW9/h6H99QHHYAIcYfqDeDXOQwEEuiWAQLcEEOiWAALdEkCgWwIIdEsAR0S+nQJ4UeM8HA1g6//K1vr6gGMwAU4wBUKcWuffw+2fBPOWCEJ9tc672fcBtrrNrL0uEYR6ap9vtsAJRBDKizjPZl+JPwxtvXmlhanUixIgr6gB4/np8eJPkVYyDcJ5PAzDSwmnPtDC1DUM7awDOL5r85KuAUbHJ/r4wDkl3wSJipD4AaWsugtcO0biB5T0GsDUB6JrRUn8gBJuW7fpOcDScRI/oIZ3U9/cM4Fjcj4nKHxASfc73d3PAV6jtSeEwgdEyPYg9G3EUmIoekC00Rsfa7fBAK0bu9HrZQhAt0YD6B2BwJlMNc0ECHRrMoCmQOAM5lo2OwGKIHBkSw2zBQa6tRhAUyBwRCntSpoARRA4ktRmJW+BRRA4gjWtcg0Q6NaqAJoCgZatbdTqCVAEgRZtadOmLbAIAi3Z2qTN1wBFEGjBnhbtugkigkCkvQ3afRdYBIEIOdqT5TEYEQRqytWc7OHyNmmglNzDVvYHoU2DQAkl2lLklyAiCORUqinFQ2VLDGxVepgq/ltg0yCwRY12VI2TaRBYUnNoCpnOhBC4F7FbDN+eiiH0K/oSWXgAr4QQ+hEdvqsmFjFGEOE8WgnevSYXNUUUoX2txm7Mf3DCaMcUFofcAAAAAElFTkSuQmCC",
+  "logo@3x.png": "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",
+};
+function pkLoadPassImages() {
+  const out = {};
+  for (const [name, b64] of Object.entries(PKPASS_IMAGES_B64)) {
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    out[name] = bytes;
+  }
+  return out;
+}
+
+function pkSanitizeCard(c) {
+  const s = (v, n) => String(v == null ? '' : v).slice(0, n);
+  const arr = (v, n) => Array.isArray(v) ? v.slice(0, 4).map(x => s(x, n)) : [];
+  return {
+    id: s(c.id, 64),
+    name: s(c.name, 120),
+    title: s(c.title, 120),
+    org: s(c.org, 120),
+    phones: arr(c.phones, 40),
+    emails: arr(c.emails, 120),
+    address: s(c.address, 300),
+    notes: s(c.notes, 500),
+    urls: arr(c.urls, 200),
+  };
+}
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
@@ -1209,6 +1603,44 @@ export default {
         return json({ok:true});
       }
 
+
+      /* ============ APPLE WALLET PASS (.pkpass) ============
+       * POST /api/wallet/pass  { token, card }
+       * Authenticated: verifies the session token, then builds a signed
+       * .pkpass for the caller's own card data (decrypted client-side;
+       * the server never sees the vault key). Returns the .pkpass file.
+       * Requires secrets: PASS_KEY_PEM, PASS_CERT_PEM, WWDR_CERT_PEM.
+       * ======================================================= */
+      if (p === "/api/wallet/pass" && req.method === "POST") {
+        let b = {};
+        try { b = await req.json(); } catch (e) {}
+        const token = String(b.token || "").slice(0, 64);
+        const cardIn = (b.card && typeof b.card === "object") ? b.card : null;
+        if (!token || !cardIn) return json({ error: "bad request" }, 400);
+        const sess = await kv.get("auth:session:" + token, "json");
+        if (!sess || sess.expires < Date.now())
+          return json({ error: "unauthorized" }, 401);
+        if (!env.PASS_KEY_PEM || !env.PASS_CERT_PEM || !env.WWDR_CERT_PEM)
+          return json({ error: "wallet not configured" }, 503);
+        try {
+          const card = pkSanitizeCard(cardIn);
+          const images = pkLoadPassImages();
+          const pkpass = await buildPkpass(card, images, {
+            keyPem: env.PASS_KEY_PEM,
+            certPem: env.PASS_CERT_PEM,
+            wwdrPem: env.WWDR_CERT_PEM,
+          });
+          return new Response(pkpass, {
+            headers: {
+              "Content-Type": "application/vnd.apple.pkpass",
+              "Content-Disposition": 'attachment; filename="omni-card.pkpass"',
+              ...CORS,
+            },
+          });
+        } catch (e) {
+          return json({ error: "pass generation failed" }, 500);
+        }
+      }
       return json({ error: "not found" }, 404);
     } catch (e) {
       return json({ error: "server error" }, 500);
