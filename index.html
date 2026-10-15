@@ -4313,25 +4313,32 @@ $("walletBtn").onclick=async()=>{
     try{card=chosen();}catch(e){toast("Couldn't read card data");return;}
     const p=getP(); if(p&&p.id) card.id=p.id;
     toast("Creating Wallet pass…");
-    const r=await fetch(STATS_URL+"/api/wallet/pass",{method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({token:sess.token,card})});
+    const ctrl=new AbortController();
+    const tmo=setTimeout(()=>ctrl.abort(),30000);
+    let r;
+    try{
+      r=await fetch(STATS_URL+"/api/wallet/pass",{method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({token:sess.token,card}),signal:ctrl.signal});
+    }finally{clearTimeout(tmo);}
     if(!r.ok){
       const j=await r.json().catch(()=>null);
-      toast(j&&j.error==="wallet not configured"?"Wallet not set up yet":"Couldn't create pass — try again");
+      const msg=j&&j.error==="wallet not configured"?"Wallet not set up yet":
+        j&&j.error==="unauthorized"?"Session expired — log in again":
+        "Couldn't create pass ("+(j&&j.error||r.status)+") — try again";
+      toast(msg);
       return;
     }
     const blob=await r.blob();
-    const url=URL.createObjectURL(blob);
-    if(/iPhone|iPad|iPod/i.test(navigator.userAgent)){
-      // iOS opens the .pkpass in Wallet automatically
-      location.href=url;
-    }else{
-      const a=document.createElement("a");
-      a.href=url;a.download="omni-card.pkpass";
-      document.body.appendChild(a);a.click();a.remove();
-    }
-    setTimeout(()=>URL.revokeObjectURL(url),30000);
+    if(!blob||blob.size<100){toast("Pass came back empty — try again");return;}
+    const url=URL.createObjectURL(new Blob([blob],{type:"application/vnd.apple.pkpass"}));
+    // Use an anchor click — iOS offers to open .pkpass in Wallet
+    const a=document.createElement("a");
+    a.href=url;a.download="omni-card.pkpass";
+    a.setAttribute("type","application/vnd.apple.pkpass");
+    document.body.appendChild(a);a.click();a.remove();
+    toast("Pass created — open it in Wallet");
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
   }catch(e){toast("Couldn't create pass — check your connection");}
 };
 $("shareBtn").onclick=async()=>{if(!consumeShare())return;haptic(10);
