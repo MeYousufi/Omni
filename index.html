@@ -2387,14 +2387,32 @@ $("dataExportBtn").onclick=async()=>{
     toast("Backup exported ✓");
   }catch(e){toast("Export failed — try again");}
 };
-$("issueSendBtn").onclick=()=>{
+$("issueSendBtn").onclick=async()=>{
   const txt=$("issueText").value.trim();
   if(!txt){toast("Describe the issue first");return;}
-  const ver=$("helpAppVer").textContent||"1.0";
-  const body=encodeURIComponent(txt+"\n\n---\nApp v"+ver+" | "+navigator.userAgent);
-  location.href="mailto:hello@omni-tap.com?subject="+encodeURIComponent("OMNI Issue Report")+"&body="+body;
-  $("issueText").value="";
-  toast("Opening email…");
+  const btn=$("issueSendBtn");
+  btn.disabled=true;btn.textContent="Sending…";
+  try{
+    const sess=getSession();
+    if(!sess||!sess.token){toast("Log in first to send a report");btn.disabled=false;btn.textContent="Send report";return;}
+    const ver=($("helpAppVer")&&$("helpAppVer").textContent)||"1.0";
+    const r=await fetch(STATS_URL+"/api/report",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({token:sess.token,text:txt,appVer:ver,userAgent:navigator.userAgent})
+    });
+    if(r.ok){
+      $("issueText").value="";
+      $("reportModal").hidden=true;
+      toast("Report sent — thank you!");
+    }else{
+      const j=await r.json().catch(()=>null);
+      toast(j&&j.error==="unauthorized"?"Session expired — log in again":"Couldn't send — try again");
+    }
+  }catch(e){
+    toast("Couldn't send — check your connection");
+  }
+  btn.disabled=false;btn.textContent="Send report";
 };
 
 // Recovery key: shown at signup, stored encrypted with PIN
