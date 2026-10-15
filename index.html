@@ -808,7 +808,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
         </div>
       </div>
       <button class="small" id="refreshUserCount">Refresh</button>
-      <h3 class="sec" style="margin-top:16px;color:#e08080">Delete account</h3>
+      <h3 class="sec" style="margin-top:16px;color:#e08080">Delete other accounts</h3>
       <p class="muted" style="font-size:12px">Delete all accounts except the one tied to your invite code. Irreversible.</p>
       <input id="wipeKeepCode" placeholder="Your invite code (e.g. 3VWU7K39)" autocomplete="off" autocapitalize="characters" style="margin-bottom:8px" aria-label="Keep code">
       <button class="small" id="wipeAccountsBtn" style="background:#5a1f1f;border-color:#7a2a2a">Wipe all other accounts</button>
@@ -816,6 +816,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <h3 class="sec">Grant bonus shares</h3>
       <p class="muted">Enter the user's invite code (they'll find it in Dashboard → Invite friends).</p>
       <input id="grantCode" placeholder="Invite code (e.g. X7K2P9QA)" autocomplete="off" autocapitalize="characters" aria-label="User invite code">
+      <label for="grantAmt" class="muted" style="font-size:12px;display:block;margin:8px 0 4px">Share amount</label>
       <input id="grantAmt" type="number" min="1" max="10000" value="100" aria-label="Share amount">
       <button class="small" id="grantBtn">Grant shares</button>
       <p class="muted" id="grantMsg"></p>
