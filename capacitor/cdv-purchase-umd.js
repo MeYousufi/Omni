@@ -1,4 +1,14 @@
-const registerPlugin = (name) => (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins[name]) || {};
+const registerPlugin = (name) => {
+  // Use Capacitor's real registerPlugin if available
+  if (window.Capacitor && window.Capacitor.registerPlugin) {
+    return window.Capacitor.registerPlugin(name);
+  }
+  // Fallback: try Plugins object
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins[name]) {
+    return window.Capacitor.Plugins[name];
+  }
+  return {};
+};
 
 // Set the marker so the shared store.js knows Capacitor native bridges are available
 if (typeof window !== 'undefined') {

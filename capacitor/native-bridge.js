@@ -255,6 +255,10 @@
       const InAppPurchase = _iapAdapter;
       if (!productId || !Object.values(IAP_PRODUCTS).includes(productId)) throw new Error('Invalid product');
 
+      // Get product info first (same as subscription flow)
+      const { products } = await InAppPurchase.getProducts({ productIds: [productId] });
+      if (!products.length) throw new Error('Product not found in store');
+
       const result = await InAppPurchase.purchase({ productId });
 
       const syncId = localStorage.getItem('omni_sync_id') || '';
