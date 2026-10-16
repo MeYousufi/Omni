@@ -150,14 +150,7 @@
           }
           tx.finish();
         });
-        store.when().cancelled(tx => {
-          const pid = tx.products[0]?.id;
-          if (pid && _pending[pid]) {
-            _pending[pid].reject(new Error('Purchase cancelled'));
-            delete _pending[pid];
-          }
-        });
-        store.when().error(err => {
+        store.error(err => {
           Object.keys(_pending).forEach(pid => {
             _pending[pid].reject(new Error(err.message || 'Purchase failed'));
             delete _pending[pid];
