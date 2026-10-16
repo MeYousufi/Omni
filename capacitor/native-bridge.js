@@ -126,9 +126,10 @@
     const _pending = {}; // productId -> {resolve, reject}
     
     function ensureStore(){
-      const CdvPurchase = Capacitor.Plugins.CdvPurchase;
-      if (!CdvPurchase || !CdvPurchase.store) throw new Error('IAP plugin not available');
-      const store = CdvPurchase.store;
+      const plugin = window.CdvPurchasePlugin;
+      if (!plugin || !plugin.store) throw new Error('IAP plugin not available');
+      const CdvPurchase = plugin.CdvPurchase;
+      const store = plugin.store;
       if (!_initialized) {
         // Register all products
         const allIds = Object.values(IAP_PRODUCTS);
@@ -171,7 +172,7 @@
     return {
       async getProducts({productIds}) {
         ensureStore();
-        const store = Capacitor.Plugins.CdvPurchase.store;
+        const store = window.CdvPurchasePlugin.store;
         await store.update();
         const products = productIds.map(id => {
           const p = store.get(id);
