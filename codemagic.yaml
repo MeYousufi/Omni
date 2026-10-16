@@ -83,9 +83,9 @@ workflows:
           ICON_SRC="."
           ICON_DST="ios/App/App/Assets.xcassets/AppIcon.appiconset"
           if [ -d "$ICON_DST" ]; then
-            cp "$ICON_SRC"/capacitor/Icon-*.png "$ICON_DST"/ && echo "Custom icons installed" || echo "Icon copy failed"
-            if [ -f "$ICON_SRC/capacitor/AppIcon-Contents.json" ]; then
-              cp "$ICON_SRC/capacitor/AppIcon-Contents.json" "$ICON_DST/Contents.json" && echo "Contents.json installed" || echo "Contents.json copy failed"
+            cp "$ICON_SRC"/Icon-*.png "$ICON_DST"/ && echo "Custom icons installed" || echo "Icon copy failed"
+            if [ -f "$ICON_SRC/AppIcon-Contents.json" ]; then
+              cp "$ICON_SRC/AppIcon-Contents.json" "$ICON_DST/Contents.json" && echo "Contents.json installed" || echo "Contents.json copy failed"
             fi
           else
             echo "Icon destination missing — using default Capacitor icons"
