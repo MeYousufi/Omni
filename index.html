@@ -4986,10 +4986,16 @@ window.addEventListener("online",()=>{
 <!-- Native bridge: loaded only in Capacitor native app -->
 <script>
 if(window.Capacitor&&window.Capacitor.isNativePlatform()){
-  var s=document.createElement("script");
-  s.src="native-bridge.js";
-  s.onerror=function(){console.warn("[OMNI] native-bridge.js not found")};
-  document.head.appendChild(s);
+  var p=document.createElement("script");
+  p.src="cdv-purchase-umd.js";
+  p.onerror=function(){console.warn("[OMNI] cdv-purchase-umd.js not found")};
+  p.onload=function(){
+    var s=document.createElement("script");
+    s.src="native-bridge.js";
+    s.onerror=function(){console.warn("[OMNI] native-bridge.js not found")};
+    document.head.appendChild(s);
+  };
+  document.head.appendChild(p);
 }
 </script>
 
