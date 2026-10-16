@@ -119,10 +119,107 @@
   };
   window.OMNI_IAP_PRODUCTS = IAP_PRODUCTS;
 
+  // ============ IAP ADAPTER ============
+  // Maps our bridge API to capacitor-plugin-cdv-purchase (CdvPurchase.store)
+  const _iapAdapter = (function(){
+    let _initialized = false;
+    const _pending = {}; // productId -> {resolve, reject}
+    
+    function ensureStore(){
+      const CdvPurchase = Capacitor.Plugins.CdvPurchase;
+      if (!CdvPurchase || !CdvPurchase.store) throw new Error('IAP plugin not available');
+      const store = CdvPurchase.store;
+      if (!_initialized) {
+        // Register all products
+        const allIds = Object.values(IAP_PRODUCTS);
+        allIds.forEach(id => {
+          const type = id.includes('.design.') ? CdvPurchase.ProductType.NON_CONSUMABLE : CdvPurchase.ProductType.PAID_SUBSCRIPTION;
+          store.register({ id, type, platform: CdvPurchase.Platform.APPLE_APPSTORE });
+        });
+        // Handle approved transactions
+        store.when().approved(tx => {
+          const pid = tx.products[0]?.id;
+          if (pid && _pending[pid]) {
+            _pending[pid].resolve({
+              receipt: tx.transactionId || '',
+              transactionId: tx.transactionId || '',
+              productId: pid,
+            });
+            delete _pending[pid];
+          }
+          tx.finish();
+        });
+        store.when().cancelled(tx => {
+          const pid = tx.products[0]?.id;
+          if (pid && _pending[pid]) {
+            _pending[pid].reject(new Error('Purchase cancelled'));
+            delete _pending[pid];
+          }
+        });
+        store.when().error(err => {
+          Object.keys(_pending).forEach(pid => {
+            _pending[pid].reject(new Error(err.message || 'Purchase failed'));
+            delete _pending[pid];
+          });
+        });
+        store.initialize();
+        _initialized = true;
+      }
+      return store;
+    }
+    
+    return {
+      async getProducts({productIds}) {
+        ensureStore();
+        const store = Capacitor.Plugins.CdvPurchase.store;
+        await store.update();
+        const products = productIds.map(id => {
+          const p = store.get(id);
+          return p ? { productId: id, title: p.title, price: p.price } : null;
+        }).filter(Boolean);
+        return { products };
+      },
+      async purchase({productId}) {
+        const store = ensureStore();
+        return new Promise((resolve, reject) => {
+          _pending[productId] = { resolve, reject };
+          store.order(productId).catch(err => {
+            delete _pending[productId];
+            reject(err);
+          });
+          // Timeout after 5 minutes
+          setTimeout(() => {
+            if (_pending[productId]) {
+              delete _pending[productId];
+              reject(new Error('Purchase timed out'));
+            }
+          }, 300000);
+        });
+      },
+      async finishTransaction({productId}) {
+        // Already finished in approved handler
+        return {ok: true};
+      },
+      async restorePurchases() {
+        const store = ensureStore();
+        await store.restorePurchases();
+        const purchases = [];
+        const allIds = Object.values(IAP_PRODUCTS);
+        allIds.forEach(id => {
+          const p = store.get(id);
+          if (p && p.owned) {
+            purchases.push({ productId: id, receipt: '', transactionId: '' });
+          }
+        });
+        return { purchases };
+      },
+    };
+  })();
+
   // Purchase a subscription (Pro/Premium)
   window.omniPurchaseSubscription = async function(tier){
     try {
-      const { InAppPurchase } = Capacitor.Plugins;
+      const InAppPurchase = _iapAdapter;
       const productId = IAP_PRODUCTS[tier];
       if (!productId) throw new Error('Invalid tier');
 
@@ -161,7 +258,7 @@
   // Purchase a premium design (non-consumable, one-time)
   window.omniPurchaseDesign = async function(productId){
     try {
-      const { InAppPurchase } = Capacitor.Plugins;
+      const InAppPurchase = _iapAdapter;
       if (!productId || !Object.values(IAP_PRODUCTS).includes(productId)) throw new Error('Invalid product');
 
       const result = await InAppPurchase.purchase({ productId });
@@ -191,7 +288,7 @@
   // Restore previous purchases
   window.omniRestorePurchases = async function(){
     try {
-      const { InAppPurchase } = Capacitor.Plugins;
+      const InAppPurchase = _iapAdapter;
       const { purchases } = await InAppPurchase.restorePurchases();
 
       const syncId = localStorage.getItem('omni_sync_id') || '';
