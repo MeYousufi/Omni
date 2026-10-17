@@ -297,3 +297,94 @@ workflows:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
 
+  android-playstore:
+    name: OMNI Android Play Store
+    instance_type: linux_x2
+    max_build_duration: 60
+    environment:
+      groups:
+        - GOOGLE_PLAY
+      vars:
+        PACKAGE_NAME: "com.omnitap.app"
+        GOOGLE_PLAY_TRACK: internal
+      node: 22
+      java: 17
+    scripts:
+      - name: Install npm dependencies
+        script: |
+          cd capacitor
+          npm install --legacy-peer-deps
+      - name: Copy web assets to www/
+        script: |
+          cd capacitor
+          mkdir -p www
+          # Core app files from repo root
+          cp ../index.html www/ 2>/dev/null || echo "no index.html"
+          cp ../manifest.json www/ 2>/dev/null || echo "no manifest.json"
+          cp ../sw.js www/ 2>/dev/null || echo "no sw.js"
+          # Legal pages
+          cp ../privacy.html www/ 2>/dev/null || echo "no privacy.html"
+          cp ../terms.html www/ 2>/dev/null || echo "no terms.html"
+          # Icons
+          cp ../icon-192.png www/ 2>/dev/null || echo "no icon-192.png"
+          cp ../icon-512.png www/ 2>/dev/null || echo "no icon-512.png"
+          cp ../apple-touch-icon.png www/ 2>/dev/null || echo "no apple-touch-icon.png"
+          # Native bridge (lives in capacitor/ folder)
+          cp native-bridge.js www/ 2>/dev/null || echo "no native-bridge.js"
+          cp cdv-purchase-umd.js www/ 2>/dev/null || echo "no cdv-purchase-umd.js"
+          echo "=== www/ contents ==="
+          ls -la www/
+      - name: Add Android platform and sync
+        script: |
+          cd capacitor
+          echo "=== Capacitor version ==="
+          npx cap --version
+          echo "=== Adding Android platform ==="
+          npx cap add android
+          echo "=== cap add exit code: $?"
+          echo "=== android directory contents ==="
+          ls -la android/ 2>/dev/null || echo "NO android DIRECTORY"
+          echo "=== Syncing ==="
+          npx cap sync android
+          echo "=== Sync exit code: $?"
+      - name: Install custom app icons
+        script: |
+          cd capacitor
+          RES_DST="android/app/src/main/res"
+          if [ -d "$RES_DST" ]; then
+            cp -r android-res/* "$RES_DST"/
+            echo "Custom Android icons installed:"
+            find "$RES_DST" -path "*mipmap*" -name "ic_launcher*" | sort | head -25
+          else
+            echo "ERROR: Android res directory missing at $RES_DST"
+            exit 1
+          fi
+      - name: Set version code and name
+        script: |
+          # versionCode must increase with every Play Store upload; use Codemagic build number
+          BUILD_GRADLE="capacitor/android/app/build.gradle"
+          sed -i "s/versionCode .*/versionCode $BUILD_NUMBER/" "$BUILD_GRADLE"
+          sed -i 's/versionName .*/versionName "1.0"/' "$BUILD_GRADLE"
+          echo "=== versionCode / versionName ==="
+          grep -n "versionCode \|versionName " "$BUILD_GRADLE" | head -4
+      - name: Set up keystore
+        script: |
+          # CM_KEYSTORE is the base64-encoded release keystore (PKCS12), stored in the GOOGLE_PLAY env group
+          echo "$CM_KEYSTORE" | base64 --decode > /tmp/omni-release.keystore
+          echo "Keystore decoded: $(wc -c < /tmp/omni-release.keystore) bytes"
+      - name: Build Android App Bundle
+        script: |
+          cd capacitor/android
+          ./gradlew bundleRelease \
+            -Pandroid.injected.signing.store.file=/tmp/omni-release.keystore \
+            -Pandroid.injected.signing.store.password="$CM_KEYSTORE_PASSWORD" \
+            -Pandroid.injected.signing.key.alias="$CM_KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$CM_KEY_PASSWORD"
+          echo "=== AAB outputs ==="
+          find app/build/outputs/bundle/release -name "*.aab" 2>/dev/null
+    artifacts:
+      - capacitor/android/app/build/outputs/bundle/release/*.aab
+    publishing:
+      google_play:
+        credentials: $GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal

@@ -3,7 +3,7 @@
     "allowMixedContent": false
   },
   "appId": "com.omnitap.app",
-  "appName": "OMNI",
+  "appName": "OMNI - Tap to Share",
   "ios": {
     "contentInset": "automatic",
     "preferredContentMode": "mobile"
