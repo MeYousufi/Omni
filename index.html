@@ -793,7 +793,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       </style>
       <h3 class="sec">Plans & pricing</h3>
       <p class="muted" style="font-size:12px">Adjust live — changes apply app-wide on next open.</p>
-      <div class="togglerow"><span>Pro price ($/mo)</span><input id="setProPrice" type="number" min="0.99" max="999" step="0.01" style="width:90px" aria-label="Pro monthly price"></div>
       <div class="togglerow"><span>Premium price ($/mo)</span><input id="setPremPrice" type="number" min="0.99" max="999" step="0.01" style="width:90px" aria-label="Premium monthly price"></div>
 
 
@@ -803,7 +802,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
       <p class="muted" style="font-size:12px">Grant a plan on this device (testing only, no charge).</p>
       <div style="display:flex;gap:8px">
         <button class="small gray" id="grantFreeBtn" style="flex:1">Free</button>
-        <button class="small" id="grantProBtn" style="flex:1">Pro</button>
         <button class="small" id="grantPremBtn" style="flex:1">Premium</button>
       </div>
       <div class="togglerow"><span>Lock screen photo<br><span class="muted" style="font-size:12px">Profile photo behind the PIN pad</span></span><label class="switch"><input type="checkbox" id="tgLockPhoto" aria-label="Toggle lock screen photo"><span class="sl"></span></label></div>
@@ -817,11 +815,6 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
           <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Free</div>
           <div style="font-size:28px;font-weight:800;margin:4px 0" id="planFreeCount">—</div>
           <div style="height:6px;background:#1e2536;border-radius:8px;overflow:hidden"><div id="planFreeBar" style="height:100%;background:#2dd4bf;width:0%;border-radius:8px;transition:width .5s"></div></div>
-        </div>
-        <div style="flex:1;background:#141926;border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center">
-          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Pro</div>
-          <div style="font-size:28px;font-weight:800;margin:4px 0" id="planProCount">—</div>
-          <div style="height:6px;background:#1e2536;border-radius:8px;overflow:hidden"><div id="planProBar" style="height:100%;background:#2dd4bf;width:0%;border-radius:8px;transition:width .5s"></div></div>
         </div>
         <div style="flex:1;background:#141926;border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center">
           <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Premium</div>
@@ -886,7 +879,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <summary><span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4"/><path d="M5 12v8h14v-8"/><path d="M12 8v12"/><path d="M12 8s-4.5 0-5.5-2.5C5.7 3.7 8 3 9 4.5 10 6 12 8 12 8z"/><path d="M12 8s4.5 0 5.5-2.5C18.3 3.7 16 3 15 4.5 14 6 12 8 12 8z"/></svg></span><span>Invite friends</span></summary>
 <div class="box" id="inviteBox" hidden>
     <h3 class="sec" style="margin-top:0">Invite friends</h3>
-    <p class="muted">Share your invite link — unlock premium designs as friends join: <b>7 invites → Midnight</b>, <b>15 → Gold Foil</b>, <b>30 → Neon</b>. Plus access to 7 cards. Your friend earns a free Pro trial.</p>
+    <p class="muted">Share your invite link — unlock premium designs as friends join: <b>7 invites → Midnight</b>, <b>15 → Gold Foil</b>, <b>30 → Neon</b>. Plus access to 7 cards. Your friend earns a free Premium trial.</p>
     <div class="statrow"><span>Successful invites</span><b id="inviteCount">0</b></div>
     <div style="display:flex;gap:8px;margin-top:10px">
       <input id="inviteLink" readonly style="flex:1;margin:0" aria-label="Your invite code">
@@ -904,7 +897,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <summary><span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2.5 2.5 0 0 0 0 5v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2.5 2.5 0 0 0 0-5z"/><path d="M13 5v2"/><path d="M13 11v2"/><path d="M13 17v2"/></svg></span><span>Redeem referral code</span></summary>
 <div class="box" id="redeemBox">
     <h3 class="sec" style="margin-top:0">Redeem referral code</h3>
-    <p class="muted">New here? Enter a friend's invite code — you'll earn 7 cards plus 7 days of Pro trial.</p>
+    <p class="muted">New here? Enter a friend's invite code — you'll earn 7 cards plus 7 days of Premium trial.</p>
     <div style="display:flex;gap:8px;margin-top:8px">
       <input id="redeemInput" placeholder="Enter code" style="flex:1;margin:0;text-transform:uppercase" aria-label="Referral code" autocomplete="off">
       <button class="small" id="redeemBtn" style="flex:none">Redeem</button>
@@ -913,9 +906,9 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
   </div>
   </details>
   <details class="dashgroup" id="dgSig">
-    <summary><span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/><path d="M14 15h4"/><path d="M14 18h2"/></svg></span><span>Email signature <span class="advbadge">PRO</span></span></summary>
+    <summary><span class="plicon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/><path d="M14 15h4"/><path d="M14 18h2"/></svg></span><span>Email signature <span class="advbadge">PREMIUM</span></span></summary>
 <div class="box" id="sigBox">
-    <h3 class="sec" style="margin-top:0">Email signature <span class="advbadge">PRO</span></h3>
+    <h3 class="sec" style="margin-top:0">Email signature <span class="advbadge">PREMIUM</span></h3>
     <p class="muted">Turn your profile into an email signature.</p>
     <button class="small gray" id="sigGen" style="width:100%">Make my signature</button>
     <div id="sigPreview" hidden style="margin-top:12px;padding:12px;background:#fff;border-radius:16px;color:#000;"></div>
@@ -976,8 +969,8 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     </div>
     <h3 class="sec" style="margin-top:0">FAQ</h3>
     <details style="margin:8px 0"><summary style="font-size:14px">How do I share my card?</summary><p class="muted" style="font-size:13px">Tap "Share my card" on the home screen, or open a card and use the Share button. The other person gets your contact details instantly.</p></details>
-    <details style="margin:8px 0"><summary style="font-size:14px">How do invites work?</summary><p class="muted" style="font-size:13px">Share your invite code from Dashboard → Invite friends. Your friend gets 7 days of Pro free, and you unlock premium designs: 7 invites for Midnight, 15 for Gold Foil, 30 for Neon.</p></details>
-    <details style="margin:8px 0"><summary style="font-size:14px">How do I get premium designs?</summary><p class="muted" style="font-size:13px">Buy them directly under Dashboard → Premium designs (Midnight $0.99, Gold Foil $1.99, Neon $2.99), invite friends to unlock them free, or get them all included with Pro or Premium.</p></details>
+    <details style="margin:8px 0"><summary style="font-size:14px">How do invites work?</summary><p class="muted" style="font-size:13px">Share your invite code from Dashboard → Invite friends. Your friend gets 7 days of Premium free, and you unlock premium designs: 7 invites for Midnight, 15 for Gold Foil, 30 for Neon.</p></details>
+    <details style="margin:8px 0"><summary style="font-size:14px">How do I get premium designs?</summary><p class="muted" style="font-size:13px">Buy them directly under Dashboard → Premium designs (Midnight $0.99, Gold Foil $1.99, Neon $2.99), invite friends to unlock them free, or get them all included with Premium.</p></details>
     <details style="margin:8px 0"><summary style="font-size:14px">Is my data private?</summary><p class="muted" style="font-size:13px">Yes. Everything is encrypted on your phone with your PIN before it's stored or synced. We can't read your data.</p></details>
     <details style="margin:8px 0"><summary style="font-size:14px">I forgot my PIN — what do I do?</summary><p class="muted" style="font-size:13px">Tap "Forgot PIN?" on the lock screen and enter your account password to reset it. Your cards are preserved. If you also forgot your password, use "Forgot password?" to get a reset code by email.</p></details>
     <details style="margin:8px 0"><summary style="font-size:14px">How do I cancel my subscription?</summary><p class="muted" style="font-size:13px">Subscriptions are managed by Apple/Google. On iPhone: Settings → your name → Subscriptions → OMNI → Cancel. On Android: Play Store → Profile → Payments & subscriptions → Subscriptions → OMNI → Cancel.</p></details>
@@ -1010,7 +1003,7 @@ input.bad,textarea.bad{border-color:#a05050;box-shadow:0 0 0 3px rgba(200,80,80,
     <h3 class="sec" style="margin-top:12px">Terms of Service</h3>
     <p class="muted" style="font-size:13px"><b>Last updated: October 11, 2026</b></p>
     <p class="muted" style="font-size:13px">OMNI is provided as-is. You're responsible for keeping your PIN safe — if you forget it and have no backup or recovery key, your data can't be recovered.</p>
-    <p class="muted" style="font-size:13px"><b>Subscriptions:</b> Pro ($4.99/month) and Premium ($6.99/month) are billed via the app store on your device. Subscriptions auto-renew unless cancelled at least 24 hours before the current period ends. Manage or cancel in your App Store/Play Store account settings. Design purchases are one-time and non-refundable except as required by law.</p>
+    <p class="muted" style="font-size:13px"><b>Subscriptions:</b> Premium ($6/month) is billed via the app store on your device. Subscriptions auto-renew unless cancelled at least 24 hours before the current period ends. Manage or cancel in your App Store/Play Store account settings. Design purchases are one-time and non-refundable except as required by law.</p>
     <p class="muted" style="font-size:13px"><b>Acceptable use:</b> Don't use OMNI for spam, harassment, fraud, or illegal activity. We may suspend accounts that violate this.</p>
     <p class="muted" style="font-size:13px"><b>Refunds:</b> Subscription refunds are handled by Apple/Google under their store policies. One-time design purchases are non-refundable except as required by law. Contact hello@omni-tap.com for billing questions.</p>
     <p class="muted" style="font-size:13px"><b>Changes to terms:</b> We may update these terms. Material changes will be communicated in the app before taking effect. Continued use after changes means you accept the new terms.</p>
@@ -1481,11 +1474,12 @@ async function syncSubscriptionStatus(){
     if(!syncId)return;
     const r=await fetch(STATS_URL+"/api/subscription/status?syncId="+encodeURIComponent(syncId));
     const j=await r.json();
-    if(j.tier&&j.tier!==userPlan.tier){
-      userPlan.tier=j.tier;
+    const inTier=j.tier==="pro"?"premium":j.tier; /* Pro tier removed Nov 2026 */
+    if(inTier&&inTier!==userPlan.tier){
+      userPlan.tier=inTier;
       userPlan.status=j.status||"active";
       await saveAll();renderPlanBox();
-      if(j.tier!=="free")toast(`Plan updated: ${PLAN_DEFS[j.tier].name} ✓`);
+      if(inTier!=="free")toast(`Plan updated: ${PLAN_DEFS[inTier].name} ✓`);
     }
     // Sync token balance from server
     if(typeof j.tokens==="number"&&j.tokens!==(userPlan.tokens||0)){
@@ -1946,7 +1940,7 @@ async function claimInvite(code){
     if(j&&j.ok){
       try{localStorage.setItem("omni_invite_claimed","1");}catch(e){}
       try{localStorage.setItem("omni_invite_claimed_by",code);}catch(e){}
-      // Invitee reward: 7-day Pro trial (one per account, free tier only)
+      // Invitee reward: 7-day Premium trial (one per account, free tier only)
       let trial=false;
       try{
         if(!localStorage.getItem("omni_trial_used")&&userPlan.tier==="free"&&!userPlan.trialEndsAt){
@@ -1957,7 +1951,7 @@ async function claimInvite(code){
       }catch(e){}
       await saveAll();
       ping("invite_claimed");
-      setTimeout(()=>toast(trial?"7 days of Pro — on us!":"Welcome!"),1200);
+      setTimeout(()=>toast(trial?"7 days of Premium — on us!":"Welcome!"),1200);
       // Re-register with inviter attribution
       registerInviteCode(myInviteCode());
     }else if(j&&j.error==="code_invalid_account_deleted"){
@@ -2018,7 +2012,7 @@ async function copyInviteLink(){
 $("copyInvite").onclick=copyInviteLink;
 $("shareInviteBtn").onclick=async()=>{
   const l=inviteLink();
-  try{if(navigator.share){await navigator.share({title:"OMNI",text:"Get OMNI — you get 7 days of Pro free!",url:l});return;}}catch(e){}
+  try{if(navigator.share){await navigator.share({title:"OMNI",text:"Get OMNI — you get 7 days of Premium free!",url:l});return;}}catch(e){}
   copyInviteLink();
 };
 /* ---------- redeem referral code ---------- */
@@ -2035,7 +2029,7 @@ $("redeemBtn").onclick=async()=>{
   await claimInvite(code);
   try{
     if(localStorage.getItem("omni_invite_claimed")){
-      msg.textContent="✓ Redeemed — enjoy 7 days of Pro!";
+      msg.textContent="✓ Redeemed — enjoy 7 days of Premium!";
       $("redeemInput").value="";
       renderPlanBox();renderCreditBoxes();
     }else{
@@ -2096,7 +2090,6 @@ function renderCreditBoxes(){
 }
 function fillPricing(){
   const set=(id,val)=>{try{const el=$(id);if(el)el.value=val;}catch(e){}};
-  set("setProPrice",proPrice());
   set("setPremPrice",premiumPrice());
   set("setTokensPerInvite",tokensPerInvite());
   set("setTplAurora",templateCost("aurora"));
@@ -2107,8 +2100,7 @@ $("savePricingBtn").onclick=async()=>{
   const msg=$("pricingMsg");
   const num=(id,def)=>{const v=parseFloat(($(id)||{}).value);return Number.isFinite(v)&&v>0?v:def;};
   const vals={
-    proPrice:num("setProPrice",4.99),
-    premiumPrice:num("setPremPrice",6.99),
+    premiumPrice:num("setPremPrice",6),
     tokensPerInvite:Math.round(num("setTokensPerInvite",100)),
     tpl_aurora:Math.round(num("setTplAurora",700)),
     tpl_obsidian:Math.round(num("setTplObsidian",1500)),
@@ -2171,7 +2163,6 @@ document.addEventListener("DOMContentLoaded",()=>{
 });
 $("ownerUnlockBtn").onclick=async()=>{await ownerAuth();};
 $("grantFreeBtn").onclick=()=>ownerGrantPlan("free");
-$("grantProBtn").onclick=()=>ownerGrantPlan("pro");
 $("grantPremBtn").onclick=()=>ownerGrantPlan("premium");
 /* owner flag toggles (legacy share toggles removed; pricing managed above) */
 try{
@@ -2315,10 +2306,9 @@ async function loadUserCount(){
     if(sub&&j.at)sub.textContent="accounts created · updated "+new Date(j.at).toLocaleTimeString();
     // Plan breakdown bars
     if(j.plans){
-      const p=j.plans, max=Math.max(1,p.free,p.pro,p.premium);
+      const p=j.plans, max=Math.max(1,p.free,p.premium);
       const set=(id,bar,val)=>{const e=$(id);if(e)e.textContent=val;const b=$(bar);if(b)b.style.width=(val/max*100)+"%";};
       set("planFreeCount","planFreeBar",p.free||0);
-      set("planProCount","planProBar",p.pro||0);
       set("planPremiumCount","planPremiumBar",p.premium||0);
     }
   }catch(e){}
@@ -2565,8 +2555,7 @@ let userProfile={pic:null,picPos:"50% 50%",name:"",phone:"",email:"",cover:"",co
 /* ---------- subscription plans ---------- */
 const PLAN_DEFS={
   free:{name:"Free",price:0},
-  pro:{name:"Pro",price:4.99},
-  premium:{name:"Premium",price:6.99}
+  premium:{name:"Premium",price:6}
 };
 /* owner-adjustable pricing (worker flags, with local defaults) */
 function flagNum(k,def){
@@ -2574,8 +2563,7 @@ function flagNum(k,def){
   const n=typeof v==="number"?v:parseFloat(v);
   return Number.isFinite(n)&&n>0?n:def;
 }
-function proPrice(){return flagNum("proPrice",4.99);}
-function premiumPrice(){return flagNum("premiumPrice",6.99);}
+function premiumPrice(){return flagNum("premiumPrice",6);}
 function tokensPerInvite(){return Math.round(flagNum("tokensPerInvite",100));}
 function templateCost(id){
   const defaults={aurora:700,obsidian:1500,royale:3000};
@@ -2584,7 +2572,8 @@ function templateCost(id){
 let userPlan={tier:"free",trialEndsAt:0,tokens:0,sharedOnce:false,templates:[]};
 function effectiveTier(){
   if(userPlan.tier==="premium")return "premium";
-  if(userPlan.trialEndsAt&&userPlan.trialEndsAt>Date.now())return "pro";
+  if(userPlan.trialEndsAt&&userPlan.trialEndsAt>Date.now())return "premium";
+  if(userPlan.tier==="pro")return "free"; /* legacy: Pro tier removed Nov 2026 */
   return userPlan.tier||"free";
 }
 function isTrialing(){return userPlan.trialEndsAt>Date.now();}
@@ -2600,21 +2589,19 @@ function freeWatermarkHTML(){
 function cardLimit(){
   const t=effectiveTier();
   if(t==="premium")return Infinity;
-  if(t==="pro")return 12;
   return userPlan.sharedOnce?7:3;
 }
-function tokenBalance(){return effectiveTier()==="pro"||effectiveTier()==="premium"?Infinity:(userPlan.tokens||0);}
+function tokenBalance(){return effectiveTier()==="premium"?Infinity:(userPlan.tokens||0);}
 function hasFeature(f){
   const t=effectiveTier();
   if(t==="premium")return true;
-  if(t==="pro")return f!=="analytics"&&f!=="branding"&&f!=="priority";
   return false;
 }
 function checkTrialExpired(){
   if(userPlan.trialEndsAt&&userPlan.trialEndsAt<=Date.now()){
     userPlan.trialEndsAt=0;
     saveAll().catch(()=>{});
-    toast("Your Pro trial ended — you're on Free now");
+    toast("Your Premium trial ended — you're on Free now");
     return true;
   }
   return false;
@@ -2622,13 +2609,11 @@ function checkTrialExpired(){
 /* ---------- plans UI ---------- */
 function planCardHTML(tier){
   const d=PLAN_DEFS[tier], cur=effectiveTier()===tier;
-  const price=tier==="pro"?proPrice():tier==="premium"?premiumPrice():0;
+  const price=tier==="premium"?premiumPrice():0;
   const priceStr=price?("$"+Number(price).toFixed(2)+"/mo"):"Free";
   const feats=tier==="free"
     ? ["Unlimited shares","3 cards (7 after first invite)","Profile picture + logo"]
-    : tier==="pro"
-    ? ["Unlimited shares","12 cards","Everything allowed","All premium templates","Email signature"]
-    : ["Unlimited shares","Unlimited cards","Advanced analytics","Custom branding","Priority support"];
+    : ["Unlimited sharing","Unlimited cards","Unlimited tokens","All premium templates","Email signature","Advanced analytics","Custom branding","Priority support"];
   return `<div style="border:1px solid ${cur?"#0a84ff":"var(--line)"};border-radius:16px;padding:14px;background:${cur?"#0a84ff18":"transparent"}">
     <div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:17px">${d.name}</b><b style="font-size:17px">${priceStr}</b></div>
     <div style="font-size:13px;color:var(--muted);margin:8px 0">${feats.map(f=>"✓ "+f).join("<br>")}</div>
@@ -2640,7 +2625,7 @@ function planCardHTML(tier){
 function showUpgrade(title,sub){
   $("upgradeTitle").textContent=title||"Upgrade your plan";
   $("upgradeSub").textContent=sub||"";
-  $("planCards2").innerHTML=["free","pro","premium"].map(planCardHTML).join("");
+  $("planCards2").innerHTML=["free","premium"].map(planCardHTML).join("");
   $("upgradeModal").hidden=false;
 }
 $("upgradeClose").onclick=()=>{$("upgradeModal").hidden=true;};
@@ -2676,16 +2661,15 @@ function renderPlanBox(){
     // benefits list
     const ben={
       free:["✓ Unlimited sharing","✓ 3 cards (7 after first invite)","✓ Profile picture & logo"],
-      pro:["✓ Unlimited sharing","✓ 12 cards","✓ All premium designs","✓ Email signature"],
-      premium:["✓ Unlimited sharing","✓ Unlimited cards","✓ All premium designs","✓ Advanced analytics","✓ Custom branding","✓ Priority support"]
+      premium:["✓ Unlimited sharing","✓ Unlimited cards","✓ Unlimited tokens","✓ All premium templates","✓ Email signature","✓ Advanced analytics","✓ Custom branding","✓ Priority support"]
     }[t]||[];
     $("planBenefits").innerHTML=ben.join("<br>");
     const pt=$("planTrial");
-    if(isTrialing()){pt.hidden=false;pt.textContent=`Pro trial ends in ${trialDaysLeft()} day(s) — upgrade to keep Pro features.`;}
+    if(isTrialing()){pt.hidden=false;pt.textContent=`Premium trial ends in ${trialDaysLeft()} day(s) — upgrade to keep Premium features.`;}
     else pt.hidden=true;
-    // Hide Email signature for free users (Pro/Premium only)
+    // Hide Email signature for free users (Premium only)
     const dgSig=$("dgSig");
-    if(dgSig) dgSig.style.display=(t==="pro"||t==="premium")?"":"none";
+    if(dgSig) dgSig.style.display=(t==="premium")?"":"none";
   }catch(e){}
 }
 /* Stripe subscriptions — worker endpoint pending; falls back gracefully */
@@ -2762,7 +2746,7 @@ function renderDesignShop(){
 async function buyTemplate(id){
   const t=templateDef(id);if(!t)return;
   const tb=tokenBalance();
-  // Pro/Premium get all designs free
+  // Premium gets all designs free
   if(tb===Infinity){
     if(!userPlan.templates)userPlan.templates=[];
     if(!userPlan.templates.includes(id))userPlan.templates.push(id);
@@ -3073,7 +3057,7 @@ $("fabPlus").onclick=()=>{
   const lim=cardLimit();
   const real=profiles.filter(p=>!p._draft).length;
   if(real>=lim){
-    showUpgrade(`You've reached your ${lim} card limit`,`Upgrade to ${effectiveTier()==="free"?"Pro":"Premium"} for ${effectiveTier()==="free"?"12 cards":"unlimited cards"}.`);
+    showUpgrade(`You've reached your ${lim} card limit`,"Upgrade to Premium for unlimited cards.");
     return;
   }
   const p={id:Date.now(),label:"",name:"",org:"",phones:"",emails:"",urls:"",address:"",notes:"",pic:"",picPos:"50% 50%",cover:"",coverPos:"50% 50%",coverColor:"",color:"#2dd4bf",_draft:true};
@@ -3304,7 +3288,7 @@ function renderCover(){
   $("coverReposBtn").hidden=!(p&&p.cover);
 }
 $("coverBtn").onclick=()=>{
-  if(isFreeUser()){showUpgrade("Cover photos are Pro","Upgrade to add custom cover photos to your cards. Free cards show the OMNI watermark instead.");return;}
+  if(isFreeUser()){showUpgrade("Cover photos are Premium","Upgrade to add custom cover photos to your cards. Free cards show the OMNI watermark instead.");return;}
   $("coverInput").click();
 };
 $("coverInput").onchange=e=>{
@@ -3934,7 +3918,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
   const sg = $("sigGen");
   if(sg) sg.onclick = ()=>{
     if(!hasFeature("signature")){
-      showUpgrade("Email signature is Pro","Branded signatures come with Pro and Premium.");
+      showUpgrade("Email signature is Premium","Branded signatures come with Premium.");
       return;
     }
     const pv = $("sigPreview"), cp = $("sigCopy");
